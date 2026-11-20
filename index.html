@@ -95,8 +95,8 @@ main{padding:6px 16px 0}
 .bsub{margin-top:2px;font-size:12.5px;font-weight:500;color:var(--sub);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bamt{flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.bill.paid .bmain,.bill.paid .bamt{opacity:.42}
-.bill.paid .bamt{text-decoration:line-through}
+.bill.paid .bmain{opacity:.5}
+.bill.paid .bamt{color:#B0B8C1}
 .paidtoggle{width:100%;border:0;background:none;padding:12px 20px 14px;font-size:12.5px;
   font-weight:600;color:var(--sub);border-top:1px solid var(--line);text-align:center}
 
@@ -167,6 +167,7 @@ main{padding:6px 16px 0}
   padding:14px 22px;background:var(--blue);color:#fff;font-size:15px;font-weight:700;
   box-shadow:0 8px 22px rgba(49,130,246,.32);letter-spacing:-.02em}
 .fab svg{width:18px;height:18px}
+.fab.hide{display:none}
 
 /* ---------- tab bar ---------- */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;max-width:520px;margin:0 auto;
@@ -841,10 +842,11 @@ function renderList(){
   }
   $('listEmpty').hidden = true;
 
-  var sums = {};
+  var sums = {}, counts = {};
   tx.forEach(function(t){
     var k = t.date;
     sums[k] = (sums[k] || 0) + (t.kind === 'income' ? 0 : (+t.amount || 0));
+    counts[k] = (counts[k] || 0) + 1;
   });
 
   var html = '', last = '';
@@ -852,7 +854,7 @@ function renderList(){
     if (t.date !== last){
       if (last) html += '</div>';
       html += '<div class="daygroup"><div class="dayhd"><span>' + dateLabel(t.date) + '</span><b>' +
-        (sums[t.date] ? '-' + won(sums[t.date]) : '') + '</b></div>';
+        (sums[t.date] && counts[t.date] > 1 ? '-' + won(sums[t.date]) : '') + '</b></div>';
       last = t.date;
     }
     html += txnRowHTML(t);
@@ -927,6 +929,8 @@ function showView(v){
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t){
     t.classList.toggle('on', t.getAttribute('data-view') === v);
   });
+  var fab = document.querySelector('.fab');
+  if (fab) fab.classList.toggle('hide', v === 'plan');
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
