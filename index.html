@@ -1136,9 +1136,9 @@ function renderPlan(){
   $('plFixed').textContent = won(fixed);
   $('plSavings').textContent = won(savingsTotal());
   $('ratioFixed').style.width = fp + '%';
-  $('ratioVar').style.width = (100 - fp) + '%';
+  $('ratioVar').style.width = (denom ? 100 - fp : 0) + '%';
   $('lgFixed').textContent = fp + '%';
-  $('lgVar').textContent = (100 - fp) + '%';
+  $('lgVar').textContent = (denom ? 100 - fp : 0) + '%';
 
   var goal = +state.plan.saveGoal || 0;
   var saveAmt = Math.max(0, s.left);
