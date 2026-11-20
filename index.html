@@ -264,6 +264,78 @@ details.rules pre{background:#F7F9FA;border-radius:12px;padding:12px;overflow-x:
 .endpoint{background:#F2F4F6;border-radius:12px;padding:12px;font-size:11px;line-height:1.55;
   color:var(--mid);word-break:break-all;font-family:ui-monospace,Menlo,monospace;margin-bottom:8px}
 
+/* ---------- capture import ---------- */
+.shotbtn{display:flex;align-items:center;gap:11px;width:100%;border:0;text-align:left;
+  background:var(--blue-bg);border-radius:16px;padding:13px 14px;margin-bottom:14px}
+.shotbtn .ico{width:38px;height:38px;border-radius:12px;background:#fff;display:grid;
+  place-items:center;font-size:19px;flex:none}
+.shotbtn b{display:block;font-size:14.5px;font-weight:700;color:var(--blue-deep);letter-spacing:-.02em}
+.shotbtn small{display:block;font-size:12px;font-weight:600;color:#4B8DE8;margin-top:1px}
+.shotbtn .go{margin-left:auto;flex:none;color:var(--blue);font-size:19px;font-weight:700;padding-right:2px}
+.orline{display:flex;align-items:center;gap:10px;margin:0 0 14px;
+  color:#B0B8C1;font-size:11.5px;font-weight:600}
+.orline:before,.orline:after{content:"";flex:1;height:1px;background:var(--line)}
+.shotdrop{display:block;width:100%;border:0;background:#F2F4F6;border-radius:16px;
+  padding:24px 18px;text-align:center;color:var(--mid)}
+.shotdrop .cam{font-size:28px;line-height:1.2}
+.shotdrop b{display:block;margin-top:6px;font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+.shotdrop small{display:block;margin-top:3px;font-size:12px;font-weight:500;color:var(--sub)}
+.shotthumb{position:relative;border-radius:16px;overflow:hidden;background:#EDF1F5;margin-bottom:10px}
+.shotthumb img{display:block;width:100%;max-height:220px;object-fit:cover;object-position:top}
+.shotbar{position:absolute;left:0;right:0;bottom:0;display:flex;gap:6px;padding:8px;
+  background:linear-gradient(to top,rgba(17,24,39,.6),rgba(17,24,39,0))}
+.shotbar button{flex:1;border:0;border-radius:10px;background:rgba(255,255,255,.94);
+  padding:9px;font-size:12.5px;font-weight:700;color:var(--ink)}
+.load{display:flex;align-items:center;justify-content:center;gap:9px;padding:16px 4px;
+  font-size:13.5px;font-weight:600;color:var(--mid)}
+.spin{width:17px;height:17px;flex:none;border-radius:50%;border:2.5px solid #DDE1E6;
+  border-top-color:var(--blue);animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.keybox{background:#FFF8E8;border:1px solid #FFE7B0;border-radius:16px;padding:15px}
+.keybox b{display:block;font-size:14px;font-weight:700;margin-bottom:5px}
+.keybox p{margin:0 0 12px;font-size:12.5px;font-weight:500;color:#8A6A17;line-height:1.6}
+.keybox .btn{padding:12px;font-size:14px}
+.shotsum{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 0 8px}
+.shotsum b{font-size:14px;font-weight:700;letter-spacing:-.02em}
+.shotsum span{font-size:12.5px;font-weight:600;color:var(--sub);text-align:right}
+.srow{border:1px solid #EDF0F3;border-radius:16px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.srow.off{background:#FAFBFC}
+.srow.off .s1,.srow.off .s2{opacity:.45}
+.srow .s1{display:flex;align-items:center;gap:9px}
+.srow .schk{width:24px;height:24px;flex:none;border-radius:50%;border:1.5px solid #DDE1E6;
+  background:#fff;color:transparent;display:grid;place-items:center;padding:0}
+.srow.on .schk{background:var(--blue);border-color:var(--blue);color:#fff}
+.srow .schk svg{width:13px;height:13px}
+.srow .sm{flex:1;min-width:0}
+.srow .sm input{width:100%;border:0;background:none;padding:0;font-size:14.5px;
+  font-weight:700;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis}
+.srow .sa{width:86px;flex:none;border:0;background:none;padding:0;text-align:right;
+  font-size:15px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.srow .sa.inc{color:var(--blue)}
+.srow .sa.wide{width:112px;font-size:14px}
+.lbx{display:inline-flex;align-items:center;gap:4px;background:#F2F4F6;border-radius:9px;
+  padding:5px 7px;font-size:11.5px;font-weight:700;color:var(--sub);letter-spacing:-.01em}
+.lbx input{border:0;background:none;padding:0;width:76px;text-align:right;
+  font-size:11.5px;font-weight:700;color:var(--mid);font-variant-numeric:tabular-nums}
+.lbx input.w2{width:30px;text-align:center}
+.lbx input.w3{width:38px;text-align:center}
+.lbx input::placeholder{color:#B0B8C1}
+.srow .s2{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px;padding-left:33px}
+.mini{border:0;background:#F2F4F6;color:var(--mid);border-radius:9px;
+  padding:6px 8px;font-size:11.5px;font-weight:700;letter-spacing:-.01em;max-width:100%}
+.mini.on{background:var(--blue-bg);color:var(--blue-deep)}
+.mini.warn.on{background:var(--red-bg);color:var(--red)}
+input.mini{font-weight:600;padding:5px 7px}
+.sfoot{position:sticky;bottom:-2px;background:#fff;padding:10px 0 2px;margin-top:4px}
+.srow.off{background:#FAFBFC}
+.srow.off .s1{opacity:.55}
+.srow.off .s2{opacity:.55}
+.dupbadge{display:inline-flex;align-items:center;gap:3px;border-radius:8px;background:#FFF1DC;
+  color:#B26A00;padding:4px 7px;font-size:11px;font-weight:700;line-height:1.3}
+.srow.dup{border-color:#FFDFAE;background:#FFFCF6}
+.srow.dup .s1,.srow.dup .s2{opacity:1}
+.srow.dup.off .s2 .mini{opacity:.75}
+
 /* toast */
 .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(10px);
   bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:60;
@@ -415,6 +487,12 @@ details.rules pre{background:#F7F9FA;border-radius:12px;padding:12px;overflow-x:
   <div class="sheet">
     <div class="grip"></div>
     <div class="shd"><h3 id="qTitle">기록하기</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
+    <button class="shotbtn" id="qShot" data-act="shot" type="button">
+      <span class="ico">📷</span>
+      <span><b>캡처 사진으로 자동 입력</b><small>은행·카드 내역 캡처를 읽어 한 번에 담아요</small></span>
+      <span class="go">›</span>
+    </button>
+    <div class="orline" id="qOrLine">또는 직접 입력</div>
     <div class="seg" id="qKind" style="margin-bottom:16px">
       <button data-act="kind" data-kind="expense" class="on">지출</button>
       <button data-act="kind" data-kind="income">수입</button>
@@ -449,6 +527,39 @@ details.rules pre{background:#F7F9FA;border-radius:12px;padding:12px;overflow-x:
     </div>
     <button class="btn primary" id="qSave">저장</button>
     <button class="delbtn" id="qDelete" data-act="delTxn" hidden>이 기록 삭제</button>
+  </div>
+</div>
+
+<!-- ============ SHEET: capture import ============ -->
+<div class="sw" id="shShot">
+  <div class="bd-layer" data-close></div>
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="shd"><h3>캡처로 자동 입력</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
+    <div class="seg" id="shotMode" style="margin-bottom:14px">
+      <button data-act="shotmode" data-v="txn" class="on">거래 내역</button>
+      <button data-act="shotmode" data-v="bill">고정비·카드</button>
+      <button data-act="shotmode" data-v="acc">예적금</button>
+    </div>
+    <input type="file" id="shotFile" accept="image/*" hidden>
+    <div id="shotPick">
+      <button class="shotdrop" data-act="shotpick" type="button">
+        <div class="cam">🖼️</div>
+        <b id="shotDropTitle">캡처 사진 선택</b>
+        <small id="shotDropSub">은행·카드 앱의 내역 화면을 그대로 올려 주세요</small>
+      </button>
+      <div class="hint" id="shotDropHint" style="margin:10px 2px 0">글자가 선명한 캡처일수록 정확해요. 한 화면에 여러 건이 있어도 괜찮아요.</div>
+    </div>
+    <div id="shotWork" hidden>
+      <div class="shotthumb"><img id="shotImg" alt="캡처 미리보기">
+        <div class="shotbar">
+          <button data-act="shotpick" type="button">다른 사진</button>
+          <button data-act="shotretry" type="button">다시 읽기</button>
+        </div>
+      </div>
+    </div>
+    <div id="shotState"></div>
+    <div id="shotReview"></div>
   </div>
 </div>
 
@@ -604,6 +715,20 @@ details.rules pre{background:#F7F9FA;border-radius:12px;padding:12px;overflow-x:
     <div class="status" id="sStatus">로컬 데모 모드 · 이 기기에만 저장 중</div>
     <button class="btn primary" id="sConnect">Firebase 연결</button>
     <button class="btn ghost" id="sDisconnect" hidden>연결 해제</button>
+
+    <div class="divider"></div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:6px">AI 캡처 인식 (Gemini API 키)</div>
+    <div class="hint">은행·카드 내역 캡처에서 날짜·가맹점·금액·수입/지출을 자동으로 뽑아줍니다. 키는 이 기기에만 저장됩니다.</div>
+    <div class="field">
+      <label>Gemini API 키</label>
+      <input class="ipt" id="sGem" type="password" autocomplete="off" spellcheck="false" placeholder="AIza...">
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn primary" id="sGemSave" style="padding:12px;font-size:14px">키 저장</button>
+      <button class="btn ghost" id="sGemClear" style="padding:12px;font-size:14px">지우기</button>
+    </div>
+    <div class="status ok" id="sGemStatus" hidden></div>
+    <div class="hint" style="margin:10px 0 0">키는 <b>aistudio.google.com/apikey</b> 에서 무료로 받을 수 있어요. 저장한 키는 이 기기 브라우저에만 남고, 공개 저장소나 Firebase로 보내지 않습니다.</div>
 
     <div class="divider"></div>
     <div style="font-size:14px;font-weight:700;margin-bottom:6px">카드 알림 자동 수집</div>
@@ -834,6 +959,7 @@ function blankState(){
     incomes:[], accounts:[], bills:[], txns:[], paid:{},
     settings:{
       fbRaw: st.fbRaw || '', houseId: st.houseId || '', pin: st.pin || '',
+      geminiKey: st.geminiKey || '',
       connected: !!st.connected, currentUser: u, lastOwner: u
     }
   };
@@ -846,6 +972,7 @@ function normalize(s){
   s.paid = s.paid || {};
   s.plan = s.plan || { saveGoal:0, loan:0, assets:0 };
   s.settings = s.settings || {};
+  if (s.settings.geminiKey === undefined) s.settings.geminiKey = '';
   if (!s.settings.currentUser) s.settings.currentUser = s.settings.lastOwner || '현기';
   if (!s.settings.lastOwner) s.settings.lastOwner = s.settings.currentUser;
   if (!s.incomes){
@@ -1110,6 +1237,7 @@ function renderPlan(){
   });
   if (!sorted.length) billsHtml = '<div class="empty">등록된 고정비가 없어요.</div>';
   billsHtml += '<button class="addr" data-act="addBill">+ 고정비 추가</button>';
+  billsHtml += '<button class="addr" data-act="shotbill" style="font-weight:600;color:#4B8DE8">📷 대출·카드 청구서 캡처로 불러오기</button>';
   $('billList').innerHTML = billsHtml;
   $('billTotalLbl').textContent = billTotal() ? ('월 ' + won(billTotal())) : '';
 
@@ -1126,6 +1254,7 @@ function renderPlan(){
       '<div class="bamt">' + won(a.balance) + '</div></div>';
   });
   accHtml += '<button class="addr" data-act="addAcc">+ 예적금 추가</button>';
+  accHtml += '<button class="addr" data-act="shotacc" style="font-weight:600;color:#4B8DE8">📷 예적금 현황 캡처로 불러오기</button>';
   $('accList').innerHTML = accHtml;
   $('accTotal').textContent = '잔액 ' + won(savingsTotal());
 
@@ -1263,6 +1392,8 @@ function openQuick(txn){
   $('qAmount').value = txn ? fmt(txn.amount) : '';
   $('qMemo').value = txn ? (txn.memo || '') : '';
   $('qDate').value = txn ? txn.date : defaultDateForView();
+  $('qShot').hidden = !!txn;
+  $('qOrLine').hidden = !!txn;
   $('qDelete').hidden = !txn;
   $('qPrivate').checked = q.private;
   renderQuickCats();
@@ -1529,6 +1660,856 @@ function addCardTxn(){
   toast('카드 알림을 기록했어요 · ' + won(p.amount));
 }
 
+/* ---------------- 캡처 사진 자동 입력 (거래·고정비·예적금) ---------------- */
+var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+var shot = { mode:'txn', items:[], bills:[], accs:[], busy:false, dataUrl:'', demo:false };
+var CHK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>';
+
+var SHOT_DROP = {
+  txn:  { title:'캡처 사진 선택', sub:'은행·카드 앱의 내역 화면을 그대로 올려 주세요',
+          hint:'글자가 선명한 캡처일수록 정확해요. 한 화면에 여러 건이 있어도 괜찮아요.' },
+  bill: { title:'고정비 캡처 선택', sub:'토스·은행 앱의 대출·카드 청구 화면을 올려 주세요',
+          hint:'대출 잔액과 월 상환액, 카드 결제 예정 금액을 읽어 고정비에 담아요.' },
+  acc:  { title:'예적금 캡처 선택', sub:'은행 앱의 예금·적금 현황 화면을 올려 주세요',
+          hint:'상품명·잔액·월 납입액·만기일을 읽어 예적금 목록에 담아요.' }
+};
+
+function gemKey(){ return String((state.settings && state.settings.geminiKey) || '').trim(); }
+function money(v){
+  var n = Math.round(+String(v == null ? 0 : v).replace(/[^\d.-]/g, ''));
+  if (isNaN(n)) return 0;
+  return Math.abs(n);
+}
+
+/* ---------- 프롬프트 ---------- */
+function ocrPrompt(){
+  return [
+    "너는 한국 은행·카드 앱의 '이용 내역' 캡처 이미지에서 거래를 뽑아 가계부 기록으로 바꾸는 도우미다.",
+    '이미지에 보이는 거래 내역을 빠짐없이 추출해 아래 JSON 객체 하나만 출력해라. 설명·인사말·코드블록 없이 JSON 만 출력한다.',
+    '{"transactions":[{"date":"' + todayStr() + '","type":"expense","amount":14800,"merchant":"스타벅스","category":"식비","memo":""}]}',
+    '규칙:',
+    '- date: 거래일을 YYYY-MM-DD 로. 연도가 없으면 오늘(' + todayStr() + ')을 기준으로 가장 그럴듯한 해를 쓴다.',
+    '- type: 출금·승인·결제·사용은 "expense", 입금·충전·수입·급여는 "income".',
+    '- amount: 원 단위 정수. 쉼표·통화기호·소수점 없이. 음수로 보여도 절댓값으로 적는다.',
+    '- merchant: 가맹점·거래처·적요. 알 수 없으면 "알 수 없음".',
+    '- category: 다음 중 하나만 — 식비, 생활, 교통, 주거, 통신, 보험, 카드, 대출, 의료, 교육, 여가, 경조사, 급여, 부수입, 이자, 기타.',
+    '- memo: 할부·메모 등 참고할 점만 짧게, 없으면 "".',
+    '- 취소된 거래·승인 취소 알림은 넣지 않는다. 합계·잔액·이자율 같은 요약 행은 거래가 아니다.',
+    '- 같은 거래가 두 번 보이는 중복 행은 하나만 넣는다.',
+    '- 읽을 수 있는 거래가 없으면 {"transactions":[]} 만 출력한다.'
+  ].join('\n');
+}
+
+function billPrompt(){
+  return [
+    "너는 한국 은행·카드·토스 앱 화면 캡처에서 '고정비'(대출, 카드 청구 예정 금액, 보험, 통신, 관리비)를 뽑아 가계부 고정비 목록으로 바꾸는 도우미다.",
+    '보이는 고정비를 빠짐없이 추출해 아래 JSON 객체 하나만 출력해라. 설명·인사말·코드블록 없이 JSON 만 출력한다.',
+    '{"bills":[{"name":"국민은행 주택담보대출","category":"대출","amount":1150000,"billingDay":25,"balance":268000000,"rate":4.15,"memo":""},' +
+      '{"name":"신한카드 결제","category":"카드","amount":1340000,"billingDay":14,"balance":0,"rate":0,"memo":"이번 달 청구 예정"}]}',
+    '규칙:',
+    '- name: 은행·상품·카드 이름을 합쳐 짧고 알아보기 쉽게 24자 이내. 예: "국민은행 주택담보대출", "신한카드 결제".',
+    '- category: 다음 중 하나만 — 대출, 카드, 보험, 통신, 주거, 기타.',
+    '- amount: 매달 실제로 나가는 금액(원) 정수. 카드면 이번 달 청구·결제 예정 금액, 대출이면 월 상환액(원리금) 또는 이자.',
+    '- billingDay: 결제일·납부일(1~31). 없거나 모르면 0.',
+    '- balance: 대출의 남은 잔액(원) 정수. 대출이 아니면 0.',
+    '- rate: 연이율 숫자(예: 4.15). 모르면 0.',
+    '- 취소·완납된 항목, 포인트·한도·누적 사용액 같은 요약 수치는 넣지 않는다.',
+    '- 보이는 고정비가 없으면 {"bills":[]} 만 출력한다.'
+  ].join('\n');
+}
+
+function accPrompt(){
+  return [
+    "너는 한국 은행 앱 화면 캡처에서 '예적금'(예금·적금·청약) 현황을 뽑아 가계부 예적금 목록으로 바꾸는 도우미다.",
+    '보이는 계좌를 빠짐없이 추출해 아래 JSON 객체 하나만 출력해라. 설명·인사말·코드블록 없이 JSON 만 출력한다.',
+    '{"accounts":[{"name":"청년도약계좌","type":"적금","balance":8400000,"monthly":700000,"maturity":"2028-12-31"}]}',
+    '규칙:',
+    '- name: 상품명 24자 이내. 예: "청년도약계좌", "주택청약 종합저축".',
+    '- type: "적금" 또는 "예금" 중 하나. 청약·부금은 "적금".',
+    '- balance: 현재 잔액(원) 정수.',
+    '- monthly: 매달 자동이체·납입액(원) 정수. 없거나 모르면 0.',
+    '- maturity: 만기일 YYYY-MM-DD. 없거나 모르면 "".',
+    '- 금리·우대조건 안내 문구나 합계 행은 계좌가 아니다.',
+    '- 보이는 예적금이 없으면 {"accounts":[]} 만 출력한다.'
+  ].join('\n');
+}
+
+function shotPrompt(mode){
+  if (mode === 'bill') return billPrompt();
+  if (mode === 'acc') return accPrompt();
+  return ocrPrompt();
+}
+
+/* ---------- Gemini 호출 ---------- */
+function geminiText(j){
+  var parts = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
+  if (!parts || !parts.length) return '';
+  return parts.map(function(p){ return (p && p.text) || ''; }).join('').trim();
+}
+
+function ocrImage(dataUrl, key, mode){
+  var base64 = String(dataUrl).split(',')[1] || '';
+  var mime = (String(dataUrl).match(/^data:([^;]+);/) || [])[1] || 'image/jpeg';
+  if (!base64) return Promise.reject(new Error('사진을 읽지 못했어요'));
+  var body = {
+    contents: [{ parts: [{ text: shotPrompt(mode) }, { inline_data: { mime_type: mime, data: base64 } }] }],
+    generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
+  };
+  var lastErr = null;
+  function attempt(i){
+    if (i >= GEMINI_MODELS.length) return Promise.reject(lastErr || new Error('사진을 읽지 못했어요'));
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODELS[i] +
+      ':generateContent?key=' + encodeURIComponent(key);
+    return fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(j){
+          if (res.ok){
+            var items = parseOcrJSON(geminiText(j), mode);
+            if (items && items.length) return items;
+            lastErr = new Error('사진에서 내역을 찾지 못했어요');
+            return attempt(i + 1);
+          }
+          var msg = (j && j.error && j.error.message) || '';
+          if (res.status === 400 && /API key not valid|API_KEY_INVALID|invalid api key/i.test(msg)){
+            throw new Error('API 키가 올바르지 않아요. 설정에서 다시 확인해 주세요.');
+          }
+          if (res.status === 403) throw new Error('API 키 권한을 확인해 주세요.');
+          if (res.status === 429) throw new Error('요청이 잠시 몰렸어요. 조금 뒤 다시 시도해 주세요.');
+          lastErr = new Error(msg || ('오류 ' + res.status));
+          return attempt(i + 1);
+        });
+      }, function(){ throw new Error('인터넷 연결을 확인해 주세요'); });
+  }
+  return attempt(0);
+}
+
+function parseOcrJSON(txt, mode){
+  if (!txt) return null;
+  var t = String(txt).trim().replace(/^```[a-zA-Z]*\s*/, '').replace(/```$/, '').trim();
+  var obj = null;
+  var s = t.indexOf('{'), e = t.lastIndexOf('}');
+  if (s >= 0 && e > s){ try { obj = JSON.parse(t.slice(s, e + 1)); } catch(err){} }
+  if (!obj){
+    var a = t.indexOf('['), b = t.lastIndexOf(']');
+    if (a >= 0 && b > a){ try { obj = JSON.parse(t.slice(a, b + 1)); } catch(err2){} }
+  }
+  if (!obj) return null;
+  var keys = mode === 'bill' ? ['bills', 'loans', 'fixed', 'items', 'data']
+    : mode === 'acc' ? ['accounts', 'savings', 'deposits', 'items', 'data']
+    : ['transactions', 'txns', 'items', 'data', 'results'];
+  var list = null;
+  if (Array.isArray(obj)) list = obj;
+  else {
+    for (var i = 0; i < keys.length; i++){
+      if (Array.isArray(obj[keys[i]])){ list = obj[keys[i]]; break; }
+    }
+  }
+  if (!list) return null;
+  if (mode === 'bill') return normalizeBills(list);
+  if (mode === 'acc') return normalizeAccs(list);
+  return normalizeItems(list);
+}
+
+/* ---------- 값 정규화 ---------- */
+function normDate(v, fb){
+  var s = String(v == null ? '' : v).trim();
+  var m = s.match(/^(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})/);
+  var y, mo, d;
+  if (m){ y = +m[1]; mo = +m[2]; d = +m[3]; }
+  else {
+    var m2 = s.match(/^(\d{1,2})\s*[-./월]\s*(\d{1,2})/);
+    if (!m2) return fb;
+    var now = todayD();
+    y = now.getFullYear(); mo = +m2[1]; d = +m2[2];
+    var probe = new Date(y, mo - 1, d);
+    if (probe.getTime() - now.getTime() > 86400000 * 20) y -= 1;
+  }
+  if (!(mo >= 1 && mo <= 12) || !(d >= 1 && d <= 31)) return fb;
+  var dt = new Date(y, mo - 1, d);
+  if (dt.getMonth() !== mo - 1 || dt.getDate() !== d) return fb;
+  return y + '-' + pad(mo) + '-' + pad(d);
+}
+
+var CAT_ALIAS = [
+  [/급여|월급|상여|보너스|salary|payroll/i, '급여'],
+  [/이자|interest/i, '이자'],
+  [/부수입|부업|용돈|환급|캐시백|refund|cashback/i, '부수입'],
+  [/식비|식대|음식|식사|카페|커피|외식|배달|food|dining|cafe/i, '식비'],
+  [/생활|마트|편의점|쇼핑|생필품|grocery|mart|shopping/i, '생활'],
+  [/교통|주유|택시|버스|지하철|주차|톨게이트|transport|fuel|taxi|transit/i, '교통'],
+  [/주거|월세|관리비|전세|rent|housing/i, '주거'],
+  [/통신|핸드폰|휴대폰|인터넷|요금제|telecom|mobile|internet/i, '통신'],
+  [/보험|insurance/i, '보험'],
+  [/대출|융자|loan|mortgage/i, '대출'],
+  [/의료|병원|약국|치과|한의원|medical|hospital|pharmacy/i, '의료'],
+  [/교육|학원|인강|교재|등록금|education|tuition|school/i, '교육'],
+  [/여가|영화|구독|문화|여행|숙박|netflix|culture|travel|leisure/i, '여가'],
+  [/경조사|축의|조의|선물|gift|wedding/i, '경조사'],
+  [/카드|card/i, '카드'],
+  [/기타|etc|other/i, '기타']
+];
+function hasCat(c, type){
+  var list = type === 'income' ? CATS_INC : CATS_EXP;
+  for (var i = 0; i < list.length; i++) if (list[i][0] === c) return true;
+  return false;
+}
+function mapCat(name, merchant, type){
+  var raw = String(name || '').trim();
+  if (raw && hasCat(raw, type)) return raw;
+  for (var i = 0; i < CAT_ALIAS.length; i++){
+    if (raw && CAT_ALIAS[i][0].test(raw)){
+      var c = CAT_ALIAS[i][1];
+      if (hasCat(c, type)) return c;
+    }
+  }
+  if (type === 'income') return '기타';
+  return guessCat(merchant || raw);
+}
+function billCatOf(raw, name){
+  var cat = String(raw || '').trim();
+  for (var i = 0; i < BILL_CATS.length; i++) if (BILL_CATS[i][0] === cat) return cat;
+  var s = cat + ' ' + String(name || '');
+  if (/대출|융자|loan|mortgage|전세자금|주택담보|할부/.test(s)) return '대출';
+  if (/카드|card/.test(s)) return '카드';
+  if (/보험|insurance/.test(s)) return '보험';
+  if (/통신|인터넷|휴대폰|요금제|kt|skt|lg|telecom/.test(s)) return '통신';
+  if (/관리비|월세|전세|주거|rent/.test(s)) return '주거';
+  return '기타';
+}
+
+function normalizeItems(list){
+  var out = [];
+  (list || []).forEach(function(raw){
+    if (!raw || typeof raw !== 'object') return;
+    var type = /inc|수입|입금|충전|급여/i.test(String(raw.type || raw.kind || '')) ? 'income' : 'expense';
+    var amount = money(raw.amount);
+    if (!amount) return;
+    var merchant = String(raw.merchant || raw.name || raw.memo || '').trim().slice(0, 40);
+    out.push({
+      date: normDate(raw.date, todayStr()),
+      type: type,
+      amount: amount,
+      merchant: merchant || '알 수 없음',
+      category: mapCat(raw.category, merchant, type),
+      memo: String(raw.memo || '').trim().slice(0, 40),
+      owner: me(),
+      private: false,
+      on: true,
+      autoOff: false,
+      dup: false
+    });
+  });
+  return out;
+}
+
+function normalizeBills(list){
+  var out = [];
+  (list || []).forEach(function(raw){
+    if (!raw || typeof raw !== 'object') return;
+    var name = String(raw.name || raw.merchant || raw.title || '').trim().slice(0, 24);
+    if (!name) return;
+    var amount = money(raw.amount || raw.monthlyPayment || raw.payment);
+    var balance = money(raw.balance);
+    if (!amount && !balance) return;
+    out.push({
+      name: name,
+      category: billCatOf(raw.category, name),
+      amount: amount,
+      billingDay: Math.min(31, Math.max(0, Math.round(+raw.billingDay || +raw.day || 0))),
+      balance: balance,
+      rate: Math.max(0, parseFloat(String(raw.rate || 0).replace(/[^\d.]/g, '')) || 0),
+      memo: String(raw.memo || '').trim().slice(0, 40),
+      owner: '공동',
+      on: true,
+      dup: false,
+      act: 'add',
+      matchId: '',
+      prevBalance: 0
+    });
+  });
+  return out;
+}
+
+function normalizeAccs(list){
+  var out = [];
+  (list || []).forEach(function(raw){
+    if (!raw || typeof raw !== 'object') return;
+    var name = String(raw.name || raw.title || '').trim().slice(0, 24);
+    if (!name) return;
+    var rawType = String(raw.type || raw.kind || '');
+    var type = (/예금|deposit/i.test(rawType) && !/적금/i.test(rawType)) ? '예금' : '적금';
+    out.push({
+      name: name,
+      type: type,
+      balance: money(raw.balance),
+      monthly: money(raw.monthly || raw.monthlyPayment || raw.payment),
+      maturity: normDate(raw.maturity || '', ''),
+      owner: '공동',
+      on: true,
+      dup: false,
+      act: 'add',
+      matchId: '',
+      prevBalance: 0
+    });
+  });
+  return out;
+}
+
+/* ---------- 중복 확인 ---------- */
+/* 거래: 같은 날 · 같은 금액 · 같은 수입/지출 */
+function dupOf(it){
+  var kind = it.type === 'income' ? 'income' : 'expense';
+  var amount = Math.round(+it.amount || 0);
+  var list = state.txns || [];
+  for (var i = 0; i < list.length; i++){
+    var t = list[i];
+    if ((t.kind === 'income' ? 'income' : 'expense') !== kind) continue;
+    if (String(t.date) !== String(it.date)) continue;
+    if (Math.round(+t.amount || 0) !== amount) continue;
+    return t;
+  }
+  return null;
+}
+function markDups(items){
+  (items || []).forEach(function(it){
+    var t = dupOf(it);
+    it.dup = !!t;
+    it.dupRef = t ? (t.memo || t.cat || '') : '';
+    it.autoOff = !!t;
+    if (t) it.on = false;
+  });
+  return items;
+}
+function refreshDup(it){
+  var wasAuto = !!it.autoOff;
+  var t = dupOf(it);
+  it.dup = !!t;
+  it.dupRef = t ? (t.memo || t.cat || '') : '';
+  if (it.dup && wasAuto) it.on = false;
+  if (!it.dup && wasAuto){ it.autoOff = false; it.on = true; }
+}
+
+/* 고정비·예적금: 이름이 같은 항목이 있으면 덮어쓸지 고르게 한다 */
+function normName(s){
+  return String(s || '').replace(/\(주\)|주식회사/g, '')
+    .replace(/[\s\-_·.,()]/g, '').toLowerCase();
+}
+function findByName(list, name){
+  var n = normName(name);
+  if (!n) return null;
+  for (var i = 0; i < (list || []).length; i++){
+    var m = normName(list[i].name);
+    if (!m) continue;
+    if (m === n) return list[i];
+    if (n.length >= 3 && m.length >= 3 && (m.indexOf(n) >= 0 || n.indexOf(m) >= 0)) return list[i];
+  }
+  return null;
+}
+function markBillDups(list){
+  (list || []).forEach(function(it){
+    var m = findByName(state.bills, it.name);
+    it.dup = !!m;
+    it.matchId = m ? m.id : '';
+    it.prevBalance = m ? (+m.balance || 0) : 0;
+    it.act = m ? 'update' : 'add';
+    it.on = true;
+  });
+  return list;
+}
+function refreshBillDup(it){
+  var m = findByName(state.bills, it.name);
+  var had = !!it.matchId;
+  it.dup = !!m;
+  it.matchId = m ? m.id : '';
+  it.prevBalance = m ? (+m.balance || 0) : 0;
+  if (m && !had) it.act = 'update';
+  if (!m) it.act = 'add';
+}
+function markAccDups(list){
+  (list || []).forEach(function(it){
+    var m = findByName(state.accounts, it.name);
+    it.dup = !!m;
+    it.matchId = m ? m.id : '';
+    it.prevBalance = m ? (+m.balance || 0) : 0;
+    it.act = m ? 'update' : 'add';
+    it.on = true;
+  });
+  return list;
+}
+function refreshAccDup(it){
+  var m = findByName(state.accounts, it.name);
+  var had = !!it.matchId;
+  it.dup = !!m;
+  it.matchId = m ? m.id : '';
+  it.prevBalance = m ? (+m.balance || 0) : 0;
+  if (m && !had) it.act = 'update';
+  if (!m) it.act = 'add';
+}
+
+/* ---------- 화면 ---------- */
+function setShotMode(mode){
+  shot.mode = (mode === 'bill' || mode === 'acc') ? mode : 'txn';
+  Array.prototype.forEach.call($('shotMode').children, function(b){
+    b.classList.toggle('on', b.getAttribute('data-v') === shot.mode);
+  });
+  var d = SHOT_DROP[shot.mode];
+  $('shotDropTitle').textContent = d.title;
+  $('shotDropSub').textContent = d.sub;
+  $('shotDropHint').textContent = d.hint;
+}
+
+function openShot(mode){
+  shot.items = []; shot.bills = []; shot.accs = [];
+  shot.busy = false; shot.dataUrl = ''; shot.demo = false;
+  setShotMode(mode);
+  $('shotPick').hidden = false;
+  $('shotWork').hidden = true;
+  $('shotState').innerHTML = '';
+  $('shotReview').innerHTML = '';
+  $('shotFile').value = '';
+  closeSheet('shQuick');
+  openSheet('shShot');
+}
+
+function onShotFile(file){
+  if (!file) return;
+  if (file.type && !/^image\//.test(file.type)){ toast('사진 파일만 올릴 수 있어요'); return; }
+  var fr = new FileReader();
+  fr.onload = function(){
+    var raw = String(fr.result || '');
+    if (!raw){ toast('사진을 읽지 못했어요'); return; }
+    shot.dataUrl = raw;
+    shot.demo = false;
+    shot.items = []; shot.bills = []; shot.accs = [];
+    $('shotImg').src = raw;
+    $('shotPick').hidden = true;
+    $('shotWork').hidden = false;
+    $('shotReview').innerHTML = '';
+    if (!gemKey()){ shotStateKey(); return; }
+    runShotOcr();
+  };
+  fr.onerror = function(){ toast('사진을 읽지 못했어요'); };
+  fr.readAsDataURL(file);
+}
+
+function shotStateKey(){
+  $('shotReview').innerHTML = '';
+  var demoLabel = shot.mode === 'bill' ? '샘플 고정비 캡처 체험'
+    : shot.mode === 'acc' ? '샘플 예적금 캡처 체험' : '샘플 캡처 인식 체험';
+  var demoAct = shot.mode === 'bill' ? 'shotbilldemo' : shot.mode === 'acc' ? 'shotaccdemo' : 'shotdemo';
+  $('shotState').innerHTML =
+    '<div class="keybox"><b>먼저 Gemini API 키를 넣어 주세요</b>' +
+    '<p>은행·카드 내역 캡처에서 날짜·가맹점·금액·수입/지출을 자동으로 뽑아줍니다. 키는 이 기기에만 저장됩니다.</p>' +
+    '<button class="btn primary" data-act="shotkey">설정에서 키 넣기</button>' +
+    '<button class="btn ghost" data-act="' + demoAct + '" style="margin-top:8px">' + demoLabel + '</button>' +
+    '<div style="display:flex;gap:6px;margin-top:10px">' +
+      '<button class="mini" data-act="shotdemo">거래 내역 예시</button>' +
+      '<button class="mini" data-act="shotbilldemo">토스 대출 예시</button>' +
+      '<button class="mini" data-act="shotaccdemo">예적금 예시</button>' +
+    '</div></div>';
+}
+
+/* ---------- 예시 데이터 ---------- */
+function sampleShotItems(){
+  var d = todayD();
+  function ds(n){ var x = addDays(d, -n); return ymStr(x) + '-' + pad(x.getDate()); }
+  return normalizeItems([
+    { date: ds(0), type: 'expense', amount: 14800, merchant: '스타벅스 대전둔산점', category: '식비' },
+    { date: ds(1), type: 'expense', amount: 32800, merchant: '이마트 대전터미널점', category: '생활' },
+    { date: ds(1), type: 'expense', amount: 12500, merchant: '카카오T 택시', category: '교통' },
+    { date: ds(2), type: 'income', amount: 180000, merchant: '계좌 입금', category: '부수입' }
+  ]);
+}
+function sampleBillItems(){
+  return normalizeBills([
+    { name: '국민은행 주택담보대출', category: '대출', amount: 1150000, billingDay: 25, balance: 268000000, rate: 4.15, memo: '변동금리' },
+    { name: '신한카드 결제', category: '카드', amount: 1340000, billingDay: 14, memo: '이번 달 청구 예정' },
+    { name: '자동차 할부', category: '대출', amount: 420000, billingDay: 28, balance: 8400000, rate: 5.9 }
+  ]);
+}
+function sampleAccItems(){
+  return normalizeAccs([
+    { name: '청년도약계좌', type: '적금', balance: 8400000, monthly: 700000, maturity: '2028-12-31' },
+    { name: '주택청약 종합저축', type: '적금', balance: 5600000, monthly: 200000 },
+    { name: '여행 적금', type: '적금', balance: 1500000, monthly: 300000, maturity: '2027-06-30' }
+  ]);
+}
+
+function loadShotDemo(mode){
+  shot.busy = false; shot.dataUrl = ''; shot.demo = true;
+  setShotMode(mode);
+  $('shotPick').hidden = true;
+  $('shotWork').hidden = true;
+  $('shotState').innerHTML = '<div class="hint" style="margin:0 0 8px">' +
+    (mode === 'bill' ? '예시 고정비 캡처' : mode === 'acc' ? '예시 예적금 캡처' : '예시 캡처') +
+    '로 읽은 결과예요. 실제 사진을 올리면 이렇게 보여요.</div>';
+  if (mode === 'bill') shot.bills = markBillDups(sampleBillItems());
+  else if (mode === 'acc') shot.accs = markAccDups(sampleAccItems());
+  else shot.items = markDups(sampleShotItems());
+  renderShotList();
+}
+
+/* ---------- 읽기 ---------- */
+function runShotOcr(){
+  if (shot.busy) return;
+  var key = gemKey();
+  if (!key){ shotStateKey(); return; }
+  if (!shot.dataUrl){ toast('먼저 캡처 사진을 골라 주세요'); return; }
+  var mode = shot.mode;
+  shot.busy = true;
+  $('shotReview').innerHTML = '';
+  $('shotState').innerHTML = '<div class="load"><span class="spin"></span>' +
+    (mode === 'bill' ? '고정비를 읽는 중…' : mode === 'acc' ? '예적금을 읽는 중…' : '사진을 읽는 중…') + '</div>' +
+    '<div class="hint" style="text-align:center;margin:0 0 6px">보통 3~8초 걸려요</div>';
+  shrink(shot.dataUrl, function(small){
+    ocrImage(small || shot.dataUrl, key, mode).then(function(items){
+      shot.busy = false;
+      if (shot.mode !== mode){ return; }
+      if (!items.length){
+        $('shotState').innerHTML = '<div class="status">사진에서 내역을 찾지 못했어요.<br>글자가 선명한 캡처로 다시 시도해 주세요.</div>';
+        return;
+      }
+      $('shotState').innerHTML = '';
+      if (mode === 'bill') shot.bills = markBillDups(items);
+      else if (mode === 'acc') shot.accs = markAccDups(items);
+      else shot.items = markDups(items);
+      renderShotList();
+      var dN = mode === 'bill' ? shot.bills.filter(function(x){ return x.dup; }).length
+        : mode === 'acc' ? shot.accs.filter(function(x){ return x.dup; }).length
+        : shot.items.filter(function(x){ return x.dup; }).length;
+      toast(items.length + '건을 찾았어요' + (dN ? ' · 중복 ' + dN + '건 확인' : ''));
+    }, function(err){
+      shot.busy = false;
+      $('shotState').innerHTML =
+        '<div class="status err">' + esc((err && err.message) || '사진을 읽지 못했어요') + '</div>' +
+        '<div class="hint">다른 사진으로 다시 시도하거나, 아래에서 키를 확인해 주세요.</div>' +
+        '<button class="btn ghost" data-act="shotkey" style="margin-top:6px">설정에서 키 확인</button>';
+    });
+  });
+}
+
+function shrink(dataUrl, cb){
+  var raw = String(dataUrl || '');
+  if (!raw){ cb(''); return; }
+  var done = false;
+  function fb(){ if (!done){ done = true; cb(raw); } }
+  try {
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var w = img.naturalWidth || img.width || 0, h = img.naturalHeight || img.height || 0;
+        if (!w || !h){ fb(); return; }
+        var sc = Math.min(1, 1400 / w, 2600 / h);
+        var cw = Math.max(1, Math.round(w * sc)), ch = Math.max(1, Math.round(h * sc));
+        var cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        var ctx = cv.getContext && cv.getContext('2d');
+        if (!ctx){ fb(); return; }
+        ctx.drawImage(img, 0, 0, cw, ch);
+        var out = cv.toDataURL('image/jpeg', 0.86);
+        if (!out || out.indexOf('data:image') !== 0){ fb(); return; }
+        done = true; cb(out);
+      } catch(e){ fb(); }
+    };
+    img.onerror = fb;
+    img.src = raw;
+  } catch(e){ fb(); }
+}
+
+/* ---------- 검토 목록 ---------- */
+function optHTML(list, cur){
+  return list.map(function(v){
+    return '<option value="' + esc(v) + '"' + (v === cur ? ' selected' : '') + '>' + esc(v) + '</option>';
+  }).join('');
+}
+
+function shotRowHTML(it, i){
+  var cats = (it.type === 'income' ? CATS_INC : CATS_EXP).map(function(c){ return c[0]; });
+  if (cats.indexOf(it.category) < 0) cats = cats.concat([it.category]);
+  var badge = it.dup ? '<span class="dupbadge">이미 기록됨 · 중복 의심</span>' : '';
+  return '<div class="srow' + (it.on ? ' on' : '') + (it.dup ? ' dup' : '') + '">' +
+    '<div class="s1">' +
+      '<button class="schk" data-act="shotsel" data-i="' + i + '" aria-label="' + (it.on ? '선택 해제' : '선택') + '">' + CHK_SVG + '</button>' +
+      '<span class="sm"><input data-i="' + i + '" data-f="merchant" value="' + esc(it.merchant) + '" placeholder="가맹점" maxlength="40" aria-label="가맹점"></span>' +
+      '<input class="sa' + (it.type === 'income' ? ' inc' : '') + '" data-i="' + i + '" data-f="amount" inputmode="numeric" value="' + fmt(it.amount) + '" aria-label="금액">' +
+    '</div>' +
+    '<div class="s2">' + badge +
+      '<button class="mini' + (it.type === 'expense' ? ' on' : '') + '" data-act="shottype" data-i="' + i + '" data-v="expense">지출</button>' +
+      '<button class="mini' + (it.type === 'income' ? ' on' : '') + '" data-act="shottype" data-i="' + i + '" data-v="income">수입</button>' +
+      '<select class="mini" data-i="' + i + '" data-f="owner" aria-label="누구">' + optHTML(OWNERS, it.owner) + '</select>' +
+      '<select class="mini" data-i="' + i + '" data-f="category" aria-label="분류">' + optHTML(cats, it.category) + '</select>' +
+      '<input class="mini" type="date" data-i="' + i + '" data-f="date" value="' + esc(it.date) + '" aria-label="날짜">' +
+      '<button class="mini warn' + (it.private ? ' on' : '') + '" data-act="shotpriv" data-i="' + i + '">🔒 나만 보기</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function shotBillHTML(it, i){
+  var cats = BILL_CATS.map(function(c){ return c[0]; });
+  var badge = it.dup
+    ? '<span class="dupbadge">이미 있는 고정비 · 중복 의심</span>' +
+      '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
+      (it.act === 'update' ? '기존 항목 업데이트' : '새로 추가') + '</button>'
+    : '';
+  var loanFields = it.category === '대출'
+    ? '<label class="lbx">잔액<input data-i="' + i + '" data-f="balance" inputmode="numeric" value="' +
+        (it.balance ? fmt(it.balance) : '') + '" placeholder="0" aria-label="대출 잔액"></label>' +
+      '<label class="lbx">금리<input class="w3" data-i="' + i + '" data-f="rate" inputmode="decimal" value="' +
+        (it.rate || '') + '" placeholder="%" aria-label="금리"></label>'
+    : '';
+  return '<div class="srow' + (it.on ? ' on' : '') + (it.dup ? ' dup' : '') + '">' +
+    '<div class="s1">' +
+      '<button class="schk" data-act="shotsel" data-i="' + i + '" aria-label="' + (it.on ? '선택 해제' : '선택') + '">' + CHK_SVG + '</button>' +
+      '<span class="sm"><input data-i="' + i + '" data-f="name" value="' + esc(it.name) + '" placeholder="고정비 이름" maxlength="24" aria-label="이름"></span>' +
+      '<input class="sa" data-i="' + i + '" data-f="amount" inputmode="numeric" value="' + fmt(it.amount) + '" aria-label="월 금액">' +
+    '</div>' +
+    '<div class="s2">' + badge +
+      '<select class="mini" data-i="' + i + '" data-f="category" aria-label="분류">' + optHTML(cats, it.category) + '</select>' +
+      '<label class="lbx">납부<input class="w2" data-i="' + i + '" data-f="billingDay" inputmode="numeric" value="' +
+        (it.billingDay || '') + '" placeholder="일" aria-label="납부일"></label>' +
+      loanFields +
+      '<select class="mini" data-i="' + i + '" data-f="owner" aria-label="누구">' + optHTML(OWNERS, it.owner) + '</select>' +
+    '</div>' +
+  '</div>';
+}
+
+function shotAccHTML(it, i){
+  var badge = it.dup
+    ? '<span class="dupbadge">이미 있는 예적금 · 중복 의심</span>' +
+      '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
+      (it.act === 'update' ? '기존 항목 업데이트' : '새로 추가') + '</button>'
+    : '';
+  return '<div class="srow' + (it.on ? ' on' : '') + (it.dup ? ' dup' : '') + '">' +
+    '<div class="s1">' +
+      '<button class="schk" data-act="shotsel" data-i="' + i + '" aria-label="' + (it.on ? '선택 해제' : '선택') + '">' + CHK_SVG + '</button>' +
+      '<span class="sm"><input data-i="' + i + '" data-f="name" value="' + esc(it.name) + '" placeholder="상품명" maxlength="24" aria-label="이름"></span>' +
+      '<input class="sa wide" data-i="' + i + '" data-f="balance" inputmode="numeric" value="' + fmt(it.balance) + '" aria-label="잔액">' +
+    '</div>' +
+    '<div class="s2">' + badge +
+      '<select class="mini" data-i="' + i + '" data-f="type" aria-label="종류">' + optHTML(['적금', '예금'], it.type) + '</select>' +
+      '<label class="lbx">월<input data-i="' + i + '" data-f="monthly" inputmode="numeric" value="' +
+        (it.monthly ? fmt(it.monthly) : '') + '" placeholder="0" aria-label="월 납입액"></label>' +
+      '<input class="mini" type="date" data-i="' + i + '" data-f="maturity" value="' + esc(it.maturity || '') + '" aria-label="만기일">' +
+      '<select class="mini" data-i="' + i + '" data-f="owner" aria-label="누구">' + optHTML(OWNERS, it.owner) + '</select>' +
+    '</div>' +
+  '</div>';
+}
+
+function billDeltaFor(list){
+  var d = 0;
+  (list || []).forEach(function(it){
+    if (it.category !== '대출') return;
+    var bal = Math.round(+it.balance || 0);
+    d += it.act === 'update' ? bal - Math.round(+it.prevBalance || 0) : bal;
+  });
+  return d;
+}
+function accPreview(list){
+  var base = savingsTotal();
+  (list || []).forEach(function(a){
+    var bal = Math.round(+a.balance || 0);
+    base += a.act === 'update' ? bal - Math.round(+a.prevBalance || 0) : bal;
+  });
+  return base;
+}
+
+function renderShotTxn(){
+  var box = $('shotReview');
+  if (!shot.items.length){ box.innerHTML = ''; return; }
+  var sel = shot.items.filter(function(x){ return x.on; });
+  var exp = 0, inc = 0, dupN = 0;
+  shot.items.forEach(function(x){ if (x.dup) dupN++; });
+  sel.forEach(function(x){ if (x.type === 'income') inc += (+x.amount || 0); else exp += (+x.amount || 0); });
+  var sum = '선택 ' + sel.length + '건';
+  if (exp) sum += ' · 지출 ' + won(exp);
+  if (inc) sum += ' · 수입 ' + won(inc);
+  var html = '<div class="shotsum"><b>읽은 내역 ' + shot.items.length + '건' +
+    (dupN ? ' · 중복 의심 ' + dupN + '건 제외' : '') + '</b><span>' + esc(sum) + '</span></div>';
+  html += shot.items.map(shotRowHTML).join('');
+  html += '<div class="sfoot"><button class="btn primary" data-act="shotadd"' +
+    (sel.length ? '' : ' disabled') + '>선택한 ' + sel.length + '건 가계부에 추가</button></div>';
+  box.innerHTML = html;
+}
+
+function renderShotBills(){
+  var box = $('shotReview');
+  if (!shot.bills.length){ box.innerHTML = ''; return; }
+  var sel = shot.bills.filter(function(x){ return x.on; });
+  var dupN = shot.bills.filter(function(x){ return x.dup; }).length;
+  var d = billDeltaFor(sel);
+  var sum = '선택 ' + sel.length + '건';
+  if (sel.length) sum += ' · 월 ' + won(total(sel, function(x){ return x.amount; }));
+  var html = '<div class="shotsum"><b>읽은 고정비 ' + shot.bills.length + '건' +
+    (dupN ? ' · 중복 의심 ' + dupN + '건' : '') + '</b><span>' + esc(sum) + '</span></div>';
+  html += shot.bills.map(shotBillHTML).join('');
+  var hint = '';
+  if (sel.some(function(x){ return x.category === '대출'; })){
+    hint = '<div class="hint" style="margin:0 0 8px">재무설계 대출 잔액 ' + won(+state.plan.loan || 0) +
+      ' → <b>' + won(Math.max(0, (+state.plan.loan || 0) + d)) + '</b></div>';
+  }
+  html += '<div class="sfoot">' + hint + '<button class="btn primary" data-act="shotadd"' +
+    (sel.length ? '' : ' disabled') + '>선택한 ' + sel.length + '건 고정비에 담기</button></div>';
+  box.innerHTML = html;
+}
+
+function renderShotAccs(){
+  var box = $('shotReview');
+  if (!shot.accs.length){ box.innerHTML = ''; return; }
+  var sel = shot.accs.filter(function(x){ return x.on; });
+  var dupN = shot.accs.filter(function(x){ return x.dup; }).length;
+  var html = '<div class="shotsum"><b>읽은 예적금 ' + shot.accs.length + '건' +
+    (dupN ? ' · 중복 의심 ' + dupN + '건' : '') + '</b><span>선택 ' + sel.length + '건</span></div>';
+  html += shot.accs.map(shotAccHTML).join('');
+  var hint = '';
+  if (sel.length){
+    hint = '<div class="hint" style="margin:0 0 8px">예적금 잔액 ' + won(savingsTotal()) +
+      ' → <b>' + won(Math.max(0, accPreview(sel))) + '</b></div>';
+  }
+  html += '<div class="sfoot">' + hint + '<button class="btn primary" data-act="shotadd"' +
+    (sel.length ? '' : ' disabled') + '>선택한 ' + sel.length + '건 예적금에 담기</button></div>';
+  box.innerHTML = html;
+}
+
+function renderShotList(){
+  if (shot.mode === 'bill') return renderShotBills();
+  if (shot.mode === 'acc') return renderShotAccs();
+  return renderShotTxn();
+}
+function shotRowAt(i){
+  if (shot.mode === 'bill') return shot.bills[i];
+  if (shot.mode === 'acc') return shot.accs[i];
+  return shot.items[i];
+}
+
+/* ---------- 담기 ---------- */
+function addShotTxn(){
+  var sel = shot.items.filter(function(x){ return x.on; });
+  if (!sel.length){ toast('담을 항목을 선택해 주세요'); return; }
+  var n = 0, ym = '';
+  sel.forEach(function(it){
+    var amt = Math.round(+it.amount || 0);
+    if (amt <= 0) return;
+    var owner = OWNERS.indexOf(it.owner) >= 0 ? it.owner : me();
+    if (it.private && owner === '공동') owner = me();
+    var ds = normDate(it.date, todayStr());
+    state.txns.push({
+      id: uid(), date: ds, amount: amt,
+      kind: it.type === 'income' ? 'income' : 'expense',
+      cat: it.category || '기타', owner: owner,
+      memo: String(it.merchant || '').slice(0, 40), private: !!it.private
+    });
+    if (owner !== '공동') state.settings.lastOwner = owner;
+    if (ds.slice(0, 7) > ym) ym = ds.slice(0, 7);
+    n++;
+  });
+  if (!n){ toast('금액이 있는 항목이 없어요'); return; }
+  if (ym) state.viewMonth = ym;
+  shot.items = [];
+  save();
+  closeSheet('shShot');
+  toast('캡처에서 ' + n + '건을 담았어요');
+}
+
+function addShotBills(){
+  var sel = shot.bills.filter(function(x){ return x.on; });
+  if (!sel.length){ toast('담을 고정비를 선택해 주세요'); return; }
+  var n = 0;
+  sel.forEach(function(it){
+    var monthly = Math.round(+it.amount || 0);
+    var bal = Math.round(+it.balance || 0);
+    var day = Math.min(31, Math.max(1, Math.round(+it.billingDay || 1)));
+    var cat = billCatOf(it.category, it.name);
+    var target = it.act === 'update' && it.matchId
+      ? state.bills.filter(function(b){ return b.id === it.matchId; })[0] : null;
+    if (target){
+      target.name = String(it.name || target.name).slice(0, 24);
+      target.cat = cat;
+      if (monthly) target.amount = monthly;
+      if (+it.billingDay) target.day = day;
+      if (cat === '대출') target.balance = bal;
+      if (+it.rate) target.rate = +it.rate;
+      if (it.memo) target.memo = String(it.memo).slice(0, 40);
+      if (OWNERS.indexOf(it.owner) >= 0) target.owner = it.owner;
+      target.active = target.active !== false;
+    } else {
+      state.bills.push({
+        id: uid(), name: String(it.name || '고정비').slice(0, 24), cat: cat,
+        amount: monthly, day: day, owner: OWNERS.indexOf(it.owner) >= 0 ? it.owner : '공동',
+        active: true, balance: cat === '대출' ? bal : 0,
+        rate: +it.rate || 0, memo: String(it.memo || '').slice(0, 40)
+      });
+    }
+    n++;
+  });
+  var d = billDeltaFor(sel);
+  if (d) state.plan.loan = Math.max(0, (+state.plan.loan || 0) + d);
+  shot.bills = [];
+  save();
+  closeSheet('shShot');
+  toast('고정비 ' + n + '건을 담았어요' + (d ? ' · 대출 잔액 반영' : ''));
+}
+
+function addShotAccs(){
+  var sel = shot.accs.filter(function(x){ return x.on; });
+  if (!sel.length){ toast('담을 예적금을 선택해 주세요'); return; }
+  var n = 0;
+  sel.forEach(function(it){
+    var type = it.type === '예금' ? '예금' : '적금';
+    var mat = it.maturity ? normDate(it.maturity, '') : '';
+    var bal = Math.round(+it.balance || 0);
+    var target = it.act === 'update' && it.matchId
+      ? state.accounts.filter(function(a){ return a.id === it.matchId; })[0] : null;
+    if (target){
+      target.name = String(it.name || target.name).slice(0, 24);
+      target.type = type;
+      target.balance = bal;
+      target.monthly = Math.round(+it.monthly || 0);
+      if (mat) target.maturity = mat;
+      if (OWNERS.indexOf(it.owner) >= 0) target.owner = it.owner;
+    } else {
+      state.accounts.push({
+        id: uid(), name: String(it.name || '예적금').slice(0, 24), type: type,
+        monthly: Math.round(+it.monthly || 0), balance: bal, maturity: mat,
+        owner: OWNERS.indexOf(it.owner) >= 0 ? it.owner : '공동'
+      });
+    }
+    n++;
+  });
+  shot.accs = [];
+  save();
+  closeSheet('shShot');
+  toast('예적금 ' + n + '건을 담았어요');
+}
+
+function addShot(){
+  if (shot.mode === 'bill') return addShotBills();
+  if (shot.mode === 'acc') return addShotAccs();
+  return addShotTxn();
+}
+
+/* ---------- 설정: 키 ---------- */
+function openGemSettings(){
+  closeSheet('shShot');
+  openSettings();
+  setTimeout(function(){ try { $('sGem').focus(); } catch(e){} }, 320);
+}
+
+function renderGemStatus(){
+  var el = $('sGemStatus');
+  if (!el) return;
+  var k = gemKey();
+  if (k){ el.hidden = false; el.textContent = '키 저장됨 · 끝 4자리 ' + k.slice(-4) + ' · 이 기기에만 보관'; }
+  else { el.hidden = true; el.textContent = ''; }
+}
+function saveGemKey(){
+  var v = String($('sGem').value || '').trim();
+  if (v && v.length < 20){ toast('키를 다시 확인해 주세요'); return; }
+  state.settings.geminiKey = v;
+  persistLocal();
+  renderGemStatus();
+  toast(v ? 'Gemini 키를 저장했어요 (이 기기에만)' : '키를 지웠어요');
+}
+
 /* ---------------- 설정 ---------------- */
 function openSettings(){
   var s = state.settings;
@@ -1540,6 +2521,8 @@ function openSettings(){
   $('sProject').value = cfg && cfg.projectId ? cfg.projectId : '';
   $('sAuth').value = cfg && cfg.authDomain ? cfg.authDomain : '';
   $('sAppId').value = cfg && cfg.appId ? cfg.appId : '';
+  $('sGem').value = state.settings.geminiKey || '';
+  renderGemStatus();
   renderSettingsStatus();
   openSheet('shSet');
 }
@@ -1598,6 +2581,7 @@ async function ensureFirebase(){
 function syncPayload(){
   var copy = JSON.parse(JSON.stringify(state));
   if (copy.settings) delete copy.settings.fbRaw;
+  if (copy.settings) delete copy.settings.geminiKey;  /* AI 키는 이 기기에만 */
   if (copy.settings) copy.settings.connected = true;
   return copy;
 }
@@ -1606,11 +2590,13 @@ function applyRemote(data){
   if (!data || !data.txns) return;
   applying = true;
   var keepRaw = state.settings.fbRaw, keepHouse = state.settings.houseId,
-      keepPin = state.settings.pin, keepUser = state.settings.currentUser;
+      keepPin = state.settings.pin, keepUser = state.settings.currentUser,
+      keepGem = state.settings.geminiKey;
   state = normalize(data);
   state.settings.fbRaw = keepRaw || '';
   state.settings.houseId = keepHouse || '';
   state.settings.pin = keepPin || '';
+  state.settings.geminiKey = keepGem || '';
   state.settings.currentUser = keepUser || state.settings.currentUser;
   state.settings.connected = true;
   persistLocal();
@@ -1718,7 +2704,9 @@ function disconnectFirebase(){
 }
 
 function exportJSON(){
-  var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  var copy = JSON.parse(JSON.stringify(state));
+  if (copy.settings) delete copy.settings.geminiKey;  /* 열쇠는 백업 파일에 넣지 않아요 */
+  var blob = new Blob([JSON.stringify(copy, null, 2)], {type:'application/json'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   var d = todayD();
@@ -1728,6 +2716,7 @@ function exportJSON(){
 }
 
 function importJSON(file){
+  var keepGem = state.settings.geminiKey || '';
   var fr = new FileReader();
   fr.onload = function(){
     try {
@@ -1735,6 +2724,7 @@ function importJSON(file){
       if (!obj || !Array.isArray(obj.txns)) throw new Error('가계부 파일이 아니에요');
       askConfirm('가져오기', '지금 이 기기의 기록을 백업 파일 내용으로 바꿀까요?', function(){
         state = normalize(obj);
+        state.settings.geminiKey = keepGem;
         save(); toast('백업을 불러왔어요');
       });
     } catch(e){ toast('가져오지 못했어요: ' + e.message); }
@@ -1785,6 +2775,57 @@ function bind(){
       case 'editPlan': openPlan(); break;
       case 'txn': openQuick(state.txns.filter(function(x){ return x.id === t.getAttribute('data-id'); })[0]); break;
       case 'showPaid': showPaid = !showPaid; renderHome(); break;
+      case 'shot': openShot('txn'); break;
+      case 'shotbill': openShot('bill'); break;
+      case 'shotacc': openShot('acc'); break;
+      case 'shotpick': try { $('shotFile').click(); } catch(e){} break;
+      case 'shotretry': runShotOcr(); break;
+      case 'shotdemo': loadShotDemo('txn'); break;
+      case 'shotbilldemo': loadShotDemo('bill'); break;
+      case 'shotaccdemo': loadShotDemo('acc'); break;
+      case 'shotkey': openGemSettings(); break;
+      case 'shotmode': {
+        if (shot.busy) break;
+        setShotMode(t.getAttribute('data-v'));
+        shot.items = []; shot.bills = []; shot.accs = []; shot.demo = false;
+        $('shotState').innerHTML = ''; $('shotReview').innerHTML = '';
+        if (shot.dataUrl){ if (gemKey()) runShotOcr(); else shotStateKey(); }
+        break;
+      }
+      case 'shotsel': {
+        var si = shotRowAt(+t.getAttribute('data-i'));
+        if (si){ si.on = !si.on; si.autoOff = false; renderShotList(); }
+        break;
+      }
+      case 'shotact': {
+        var sa2 = shotRowAt(+t.getAttribute('data-i'));
+        if (sa2 && sa2.dup){
+          sa2.act = sa2.act === 'update' ? 'add' : 'update';
+          renderShotList();
+        }
+        break;
+      }
+      case 'shottype': {
+        var st2 = shot.items[+t.getAttribute('data-i')];
+        if (st2 && shot.mode === 'txn'){
+          st2.type = t.getAttribute('data-v') === 'income' ? 'income' : 'expense';
+          var okc = (st2.type === 'income' ? CATS_INC : CATS_EXP).some(function(c){ return c[0] === st2.category; });
+          if (!okc) st2.category = st2.type === 'income' ? '기타' : guessCat(st2.merchant);
+          refreshDup(st2);
+          renderShotList();
+        }
+        break;
+      }
+      case 'shotpriv': {
+        var sp = shot.items[+t.getAttribute('data-i')];
+        if (sp && shot.mode === 'txn'){
+          sp.private = !sp.private;
+          if (sp.private && sp.owner === '공동') sp.owner = me();
+          renderShotList();
+        }
+        break;
+      }
+      case 'shotadd': addShot(); break;
       case 'kind':
         q.kind = t.getAttribute('data-kind');
         renderQuickCats();
@@ -1873,6 +2914,66 @@ function bind(){
   });
 
   $('sConnect').addEventListener('click', connectFirebase);
+  $('sGemSave').addEventListener('click', saveGemKey);
+  $('sGemClear').addEventListener('click', function(){ $('sGem').value = ''; saveGemKey(); });
+  $('shotFile').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    onShotFile(f);
+  });
+  $('shotReview').addEventListener('input', function(ev){
+    var el = ev.target;
+    if (!el || !el.getAttribute) return;
+    var i = +el.getAttribute('data-i'), f = el.getAttribute('data-f');
+    var it = shotRowAt(i);
+    if (!it || !f) return;
+    if (f === 'amount' || f === 'balance' || f === 'monthly'){
+      var dg = digits(el.value);
+      el.value = dg ? fmt(dg) : '';
+      it[f] = dg ? parseInt(dg, 10) : 0;
+    } else if (f === 'merchant' || f === 'name'){
+      it[f] = String(el.value || '');
+    } else if (f === 'billingDay'){
+      var db = digits(el.value).slice(0, 2);
+      el.value = db;
+      it.billingDay = db ? parseInt(db, 10) : 0;
+    } else if (f === 'rate'){
+      var rt = String(el.value || '').replace(/[^\d.]/g, '').slice(0, 5);
+      el.value = rt;
+      it.rate = rt ? parseFloat(rt) : 0;
+    }
+  });
+  $('shotReview').addEventListener('change', function(ev){
+    var el = ev.target;
+    if (!el || !el.getAttribute) return;
+    var i = +el.getAttribute('data-i'), f = el.getAttribute('data-f');
+    var it = shotRowAt(i);
+    if (!it || !f) return;
+    if (f === 'owner'){
+      it.owner = el.value;
+      if (it.private && it.owner === '공동') it.owner = me();
+    } else if (f === 'category'){
+      it.category = el.value;
+      if (shot.mode === 'txn') refreshDup(it);
+    } else if (f === 'type'){
+      it.type = el.value === '예금' ? '예금' : '적금';
+    } else if (f === 'date'){
+      it.date = normDate(el.value, it.date);
+      if (shot.mode === 'txn') refreshDup(it);
+    } else if (f === 'maturity'){
+      it.maturity = normDate(el.value, '');
+    } else if (f === 'name'){
+      if (shot.mode === 'bill') refreshBillDup(it);
+      else if (shot.mode === 'acc') refreshAccDup(it);
+    } else if (f === 'amount' || f === 'balance' || f === 'monthly'){
+      var dg2 = digits(el.value);
+      it[f] = dg2 ? parseInt(dg2, 10) : 0;
+      if (shot.mode === 'txn' && f === 'amount') refreshDup(it);
+    } else if (shot.mode === 'txn' && f === 'merchant'){
+      refreshDup(it);
+    }
+    renderShotList();
+  });
   $('sDisconnect').addEventListener('click', disconnectFirebase);
   $('sExport').addEventListener('click', exportJSON);
   $('sCopy').addEventListener('click', copyHook);
@@ -1901,11 +3002,12 @@ function bind(){
   $('sSample').addEventListener('click', function(){
     askConfirm('샘플 데이터로 초기화', '지금 기록을 모두 지우고 샘플 데이터로 되돌릴까요?', function(){
       var keep = {fbRaw:(state.settings.fbRaw||''), houseId:(state.settings.houseId||''),
-        pin:(state.settings.pin||''), currentUser:me()};
+        pin:(state.settings.pin||''), currentUser:me(), geminiKey:(state.settings.geminiKey||'')};
       state = normalize(sampleState());
       state.settings.fbRaw = keep.fbRaw;
       state.settings.houseId = keep.houseId;
       state.settings.pin = keep.pin;
+      state.settings.geminiKey = keep.geminiKey;
       state.settings.currentUser = keep.currentUser;
       state.settings.lastOwner = keep.currentUser;
       save(); openSettings(); toast('샘플 데이터로 초기화했어요');
