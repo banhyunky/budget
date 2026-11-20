@@ -31,7 +31,7 @@
 ```
 index.html      앱 전체 (HTML+CSS+JS)
 manifest.json   PWA 매니페스트
-sw.js           오프라인 캐시 서비스워커 (budget-v5)
+sw.js           오프라인 캐시 서비스워커 (budget-v6)
 icon-192.png    아이콘
 icon-512.png    아이콘
 make_icons.py   아이콘 생성 스크립트
