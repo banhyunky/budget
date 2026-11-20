@@ -715,8 +715,8 @@ function render(){
 }
 
 function renderHeader(){
-  var m = ymDate(curYM());
-  $('hdSub').textContent = m.getFullYear() + '년 ' + (m.getMonth() + 1) + '월 · 오늘';
+  var d = todayD();
+  $('hdSub').textContent = d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일';
   var pill = $('syncPill');
   if (fb.connected){ pill.hidden = false; pill.classList.add('on'); }
   else { pill.hidden = true; pill.classList.remove('on'); }
@@ -1429,11 +1429,13 @@ function shiftMonth(dir){
 function init(){
   state = loadState();
 
-  /* 날짜 입력 최대/최소 */
+  /* 날짜 입력 범위: 3년 전 ~ 1년 뒤 */
   var d = todayD();
   var minD = addDays(d, -365 * 3), maxD = addDays(d, 365);
-  $('qDate').setAttribute('max', ymStr(maxD) + '-31');
+  $('qDate').setAttribute('min', ymStr(minD) + '-' + pad(minD.getDate()));
+  $('qDate').setAttribute('max', ymStr(maxD) + '-' + pad(maxD.getDate()));
 
+  persistLocal();   /* 첫 방문 샘플이 매번 달라지지 않도록 고정 */
   render();
   bind();
   showView('home');
