@@ -2800,6 +2800,7 @@ function bind(){
         shot.items = []; shot.bills = []; shot.accs = []; shot.demo = false;
         $('shotState').innerHTML = ''; $('shotReview').innerHTML = '';
         if (shot.dataUrl){ if (gemKey()) runShotOcr(); else shotStateKey(); }
+        else { $('shotPick').hidden = false; $('shotWork').hidden = true; }
         break;
       }
       case 'shotsel': {
