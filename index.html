@@ -2013,9 +2013,26 @@ function findByName(list, name){
   }
   return null;
 }
+function findBillMatch(it){
+  var m = findByName(state.bills, it.name);
+  if (m) return m;
+  var amount = Math.round(+it.amount || 0);
+  if (!amount) return null;
+  var day = Math.round(+it.billingDay || 0);
+  var list = state.bills || [];
+  for (var i = 0; i < list.length; i++){
+    var b = list[i];
+    if (b.active === false) continue;
+    if (billCatOf(b.cat, b.name) !== it.category) continue;
+    if (Math.round(+b.amount || 0) !== amount) continue;
+    if ((+b.day || 0) !== day) continue;
+    return b;
+  }
+  return null;
+}
 function markBillDups(list){
   (list || []).forEach(function(it){
-    var m = findByName(state.bills, it.name);
+    var m = findBillMatch(it);
     it.dup = !!m;
     it.matchId = m ? m.id : '';
     it.prevBalance = m ? (+m.balance || 0) : 0;
@@ -2026,7 +2043,7 @@ function markBillDups(list){
   return list;
 }
 function refreshBillDup(it){
-  var m = findByName(state.bills, it.name);
+  var m = findBillMatch(it);
   var had = !!it.matchId;
   it.dup = !!m;
   it.matchId = m ? m.id : '';
@@ -2141,7 +2158,7 @@ function sampleShotItems(){
 function sampleBillItems(){
   return normalizeBills([
     { name: '국민은행 주택담보대출', category: '대출', amount: 1150000, billingDay: 25, balance: 268000000, rate: 4.15, memo: '변동금리' },
-    { name: '신한카드 결제', category: '카드', amount: 1340000, billingDay: 14, memo: '이번 달 청구 예정' },
+    { name: '신한카드 결제', category: '카드', amount: 1290000, billingDay: 14, memo: '이번 달 청구 예정' },
     { name: '자동차 할부', category: '대출', amount: 420000, billingDay: 28, balance: 8400000, rate: 5.9 }
   ]);
 }
