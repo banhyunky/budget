@@ -2020,6 +2020,7 @@ function markBillDups(list){
     it.matchId = m ? m.id : '';
     it.prevBalance = m ? (+m.balance || 0) : 0;
     it.act = m ? 'update' : 'add';
+    if (m && OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;  /* 기존 담당자 유지 */
     it.on = true;
   });
   return list;
@@ -2030,7 +2031,10 @@ function refreshBillDup(it){
   it.dup = !!m;
   it.matchId = m ? m.id : '';
   it.prevBalance = m ? (+m.balance || 0) : 0;
-  if (m && !had) it.act = 'update';
+  if (m && !had){
+    it.act = 'update';
+    if (OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
+  }
   if (!m) it.act = 'add';
 }
 function markAccDups(list){
@@ -2040,6 +2044,7 @@ function markAccDups(list){
     it.matchId = m ? m.id : '';
     it.prevBalance = m ? (+m.balance || 0) : 0;
     it.act = m ? 'update' : 'add';
+    if (m && OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
     it.on = true;
   });
   return list;
@@ -2050,7 +2055,10 @@ function refreshAccDup(it){
   it.dup = !!m;
   it.matchId = m ? m.id : '';
   it.prevBalance = m ? (+m.balance || 0) : 0;
-  if (m && !had) it.act = 'update';
+  if (m && !had){
+    it.act = 'update';
+    if (OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
+  }
   if (!m) it.act = 'add';
 }
 
