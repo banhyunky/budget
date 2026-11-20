@@ -1456,6 +1456,7 @@ function parseCardMsg(raw){
 }
 
 function openCard(){
+  closeSheet('shSet');
   $('cdText').value = '[신한카드] 승인 14,800원 스타벅스 11/21 12:34';
   cardCatTouched = false;
   $('cdPrivate').checked = false;
