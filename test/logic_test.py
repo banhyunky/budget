@@ -31,7 +31,16 @@ globalThis.__T = {
   normalizeCards: normalizeCards, normalizeBills: normalizeBills, parseOcrJSON: parseOcrJSON, markCardDups: markCardDups, markBillDups: markBillDups, addShotBills: addShotBills, loadShotDemo: loadShotDemo,
   addShotCards: addShotCards, saveCardBill: saveCardBill, openCardBill: openCardBill,
   shot: shot, setShot: function(v){ shot = v; }, save: save,
-  renderHome: renderHome, renderPlan: renderPlan
+  renderHome: renderHome, renderPlan: renderPlan,
+  shortWon: shortWon, shortNum: shortNum, prevYMs: prevYMs, dowOf: dowOf,
+  coachPace: coachPace, coachPaceHTML: coachPaceHTML, loanRank: loanRank, loanQuickWin: loanQuickWin,
+  ruleHeadline: ruleHeadline, coachSig: coachSig, coachCacheRead: coachCacheRead,
+  coachCacheWrite: coachCacheWrite, coachCacheFresh: coachCacheFresh, coachSummary: coachSummary,
+  coachPrompt: coachPrompt, parseCoachJSON: parseCoachJSON, coachCleanText: coachCleanText,
+  runCoachAI: runCoachAI, renderCoachBar: renderCoachBar, renderCoach: renderCoach, openCoach: openCoach,
+  coachLoanHTML: coachLoanHTML, coachAIHTML: coachAIHTML,
+  chart6Months: chart6Months, monthShare: monthShare, barsSVG: barsSVG, shareSVG: shareSVG,
+  loanRankCardHTML: loanRankCardHTML, renderCharts: renderCharts, COACH_KEY: 'money-coach-v1'
 };
 '''
 idx = js.rstrip().rfind('})();')
@@ -541,6 +550,300 @@ check('잔액만 있고 분류가 기타인 예전 캡처도 대출로',
       ev("__T.isLoanFixed({id:'w',name:'은행대출',cat:'기타',amount:100,day:1,owner:'공동',active:true,balance:1000})") == True)
 check('잔액 0 인 보험은 대출이 아니라 보험·생활',
       ev("__T.isLoanFixed({id:'v',name:'암보험',cat:'보험',amount:63000,day:12,owner:'공동',active:true,balance:0})") == False)
+
+print('\n[21] AI 코치 · 대출 상환 우선순위 (금리 / 현금흐름)')
+import json as _json
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [
+    {id:'L1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true, balance:268000000, rate:3.8},
+    {id:'L2', name:'부산은행 신용대출', cat:'대출', amount:846000, day:12, owner:'공동', active:true, balance:50297289, rate:7.68},
+    {id:'L3', name:'햇살론', cat:'대출', amount:148000, day:20, owner:'현기', active:true, balance:1250024, rate:8.83},
+    {id:'L4', name:'자동차 할부', cat:'대출', amount:420000, day:28, owner:'현기', active:true, balance:8400000, rate:0},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+rate_order = [x[0] for x in _json.loads(ev("JSON.stringify(__T.loanRank('rate').map(function(l){return [l.name,l.rate];}))"))]
+check('금리 순: 8.83 → 7.68 → 3.8 → 0',
+      rate_order == ['햇살론', '부산은행 신용대출', '주택담보대출', '자동차 할부'], str(rate_order))
+check('대출 4건만 (카드 제외)', ev("__T.loanRank('rate').length") == 4)
+cash_order = [x[0] for x in _json.loads(ev("JSON.stringify(__T.loanRank('cash').map(function(l){return [l.name,l.per10m];}))"))]
+check('현금흐름 순: 1,000만원당 월 상환액 큰 순',
+      cash_order == ['햇살론', '자동차 할부', '부산은행 신용대출', '주택담보대출'], str(cash_order))
+check('잔액 1,000만원당 월 상환액 계산 (햇살론)',
+      ev("__T.loanRank('cash')[0].per10m") == round(148000 / 1250024 * 10000000),
+      str(ev("__T.loanRank('cash')[0].per10m")))
+check('완납 시 월 절감액 = 월 상환액',
+      ev("__T.loanRank('rate')[0].monthly") == 148000)
+check('금리 8% 이상 소액 대출이 빠른 승리로 잡힘',
+      ev("__T.loanQuickWin().name") == '햇살론', str(ev("__T.loanQuickWin().name")))
+check('금리 8% 이상이 없으면 빠른 승리 없음',
+      ev("(function(){var st=__T.blankState(); st.bills=[{id:'x',name:'저금리',cat:'대출',amount:100000,day:5,owner:'공동',active:true,balance:1000000,rate:3.5}]; __T.state=__T.normalize(st); return __T.loanQuickWin() === null;})()") == True)
+check('짧은 금액 표기 (311,195,858 → 3.1억)', ev("__T.shortWon(311195858)") == '3.1억', ev("__T.shortWon(311195858)"))
+check('짧은 금액 표기 (148,000 → 14.8만)', ev("__T.shortWon(148000)") == '14.8만')
+check('짧은 금액 표기 (8,500 → 8,500)', ev("__T.shortWon(8500)") == '8,500')
+
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [
+    {id:'L1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true, balance:268000000, rate:3.8},
+    {id:'L2', name:'부산은행 신용대출', cat:'대출', amount:846000, day:12, owner:'공동', active:true, balance:50297289, rate:7.68},
+    {id:'L3', name:'햇살론', cat:'대출', amount:148000, day:20, owner:'현기', active:true, balance:1250024, rate:8.83},
+    {id:'L4', name:'자동차 할부', cat:'대출', amount:420000, day:28, owner:'현기', active:true, balance:8400000, rate:0},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+head = ev("__T.ruleHeadline('2026-11')")
+check('홈 한 줄: 고금리 소액 대출 빠른 승리',
+      '8.83%' in head and '햇살론' in head and '14.8만' in head, str(head))
+
+print('\n[22] 이번 달 지출 페이스')
+pace = _json.loads(ev("JSON.stringify((function(){var p=__T.coachPace('2026-11');return {left:p.left,leftDays:p.leftDays,perDay:p.perDay,dailyNow:p.dailyNow,diff:p.diff,dayOf:p.dayOf,dim:p.daysIn};})())"))
+check('남은 날 = 오늘 포함 말일까지', pace['leftDays'] == pace['dim'] - pace['dayOf'] + 1, str(pace))
+check('남은 여유 = 수입 − 미납 고정비·카드', pace['left'] == 5300000 - 3874000, str(pace))
+check('하루 쓸 수 있는 돈 = 남은 여유 ÷ 남은 날',
+      pace['perDay'] == int(pace['left'] / pace['leftDays']), str(pace))
+check('지금 하루 평균 지출은 쓴 돈 기준', ev("__T.coachPace('2026-11').dailyNow") == 0, str(pace))
+html_pace = ev("__T.coachPaceHTML('2026-11')")
+check('페이스 카드에 남은 날·하루 금액', '하루' in html_pace and '남은' in html_pace, html_pace[:200])
+check('페이스 카드에 사용률·곧 나갈 돈', '이번 달 사용' in html_pace and '고정비' in html_pace, html_pace[:400])
+
+print('\n[23] 6개월 지출 흐름 데이터')
+d6 = _json.loads(ev("JSON.stringify(__T.chart6Months('2026-11'))"))
+check('6개월치', len(d6) == 6, str(len(d6)))
+check('오래된 달부터 6월→11월', [x['ym'] for x in d6] ==
+      ['2026-06', '2026-07', '2026-08', '2026-09', '2026-10', '2026-11'], str([x['ym'] for x in d6]))
+check('라벨은 월만', d6[-1]['label'] == '11월', str(d6[-1]['label']))
+check('고정비는 매달 같은 값 (대출+보험생활)', [x['fixed'] for x in d6] == [2534000] * 6, str([x['fixed'] for x in d6]))
+check('변동·카드: 11월 1,340,000 / 10월 0',
+      d6[5]['flexible'] == 1340000 and d6[4]['flexible'] == 0, str([x['flexible'] for x in d6]))
+check('합계 = 고정비 + 변동·카드', d6[5]['total'] == 2534000 + 1340000, str(d6[5]))
+d_over = _json.loads(ev("JSON.stringify(__T.chart6Months('2026-02'))"))
+check('해를 넘어가도 6개월 (2025-09 → 2026-02)',
+      [x['ym'] for x in d_over] == ['2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02'],
+      str([x['ym'] for x in d_over]))
+svg6 = ev("__T.barsSVG(__T.chart6Months('2026-11'), '2026-11')")
+check('막대 그래프 SVG 로 그려짐', svg6.startswith('<svg') and '</svg>' in svg6 and svg6.count('<rect') >= 6)
+check('그래프에 6개월 라벨', all((m + '월') in svg6 for m in ['6', '7', '8', '9', '10', '11']))
+check('강조한 달(11월) 금액 표시', '387만' in svg6, svg6[-400:])
+
+print('\n[24] 이번 달 지출 비중')
+sh = _json.loads(ev("JSON.stringify(__T.monthShare('2026-11'))"))
+check('대출 상환 = 고정 대출 합계', sh['loan'] == 2534000, str(sh))
+check('보험·생활 = 0', sh['living'] == 0, str(sh))
+check('변동·카드 = 카드 + 변동', sh['flex'] == 1340000, str(sh))
+check('비중 합이 100%', abs(sh['loanPct'] + sh['livingPct'] + sh['flexPct'] - 100) <= 0.2, str(sh))
+check('대출 비중 65.4%', sh['loanPct'] == 65.4, str(sh['loanPct']))
+shsvg = ev("__T.shareSVG(__T.monthShare('2026-11'))")
+check('가로 누적 바 SVG (2조각)', shsvg.startswith('<svg') and shsvg.count('<rect') == 2, shsvg[:300])
+check('기록이 없으면 빈 비중',
+ev("(function(){var st=__T.blankState(); __T.state=__T.normalize(st); var s=__T.monthShare('2026-11'); return s.total===0 && s.loanPct===0 && __T.shareSVG(s)==='';})()") == True)
+
+print('\n[25] 제미나이 진단 JSON 파서')
+def coach_parse(text):
+    return _json.loads(ev("JSON.stringify(__T.parseCoachJSON(%s))" % _json.dumps(text)))
+
+sample = ('설명입니다.\n```json\n{"headline":"카드값 134만원, 25일 전에 100만원으로",'
+          '"patterns":["고정비 비중 73%","카드값이 변동의 100%"],'
+          '"loanAdvice":"8.83% 햇살론부터",'
+          '"actions":["카드값 100만원으로 줄이기","햇살론 20만원 추가 상환","통신비 5만원 줄이기","네번째"]}\n```')
+co = coach_parse(sample)
+check('코드블록·여분 문장을 받아 줌', co is not None, str(co))
+if co:
+    check('headline 추출', co['headline'] == '카드값 134만원, 25일 전에 100만원으로', str(co))
+    check('패턴 2개', len(co['patterns']) == 2, str(co['patterns']))
+    check('대출 조언 추출', co['loanAdvice'] == '8.83% 햇살론부터')
+    check('행동은 3개까지만', len(co['actions']) == 3, str(co['actions']))
+co2 = coach_parse('{"coach":{"headline":"한 줄","patterns":["p1"],"loanAdvice":"l","actions":["a"]}}')
+check('coach 로 한 겹 싸여도 읽음', bool(co2) and co2['headline'] == '한 줄' and co2['actions'] == ['a'], str(co2))
+co3 = coach_parse('{"patterns":"· 이자 8.83% 먼저\n· 카드값 줄이기"}')
+check('패턴이 문자열 한 덩어리여도 나눔', bool(co3) and len(co3['patterns']) == 2, str(co3))
+check('headline 이 없으면 패턴 첫 줄로', bool(co3) and co3['headline'] == co3['patterns'][0], str(co3))
+check('JSON 이 아니면 null', coach_parse('그냥 문장') is None)
+check('빈 응답이면 null', coach_parse('') is None)
+
+print('\n[26] 홈 한 줄 배너 (규칙 → AI 캐시)')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [
+    {id:'L3', name:'햇살론', cat:'대출', amount:148000, day:20, owner:'현기', active:true, balance:1250024, rate:8.83},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+ev("localStorage.removeItem(__T.COACH_KEY)")
+ev("__T.renderHome()")
+bar = ev("document.getElementById('coachBarTxt').textContent")
+check('캐시 없으면 규칙 한 줄', bar == ev("__T.ruleHeadline('2026-11')"), str(bar))
+check('배너에 금액·행동이 들어감', '갚으면' in bar and '원' in bar, str(bar))
+check('AI 배지는 숨김', ev("document.getElementById('coachBarAI').hidden") == True)
+ev("__T.coachCacheWrite('2026-11', __T.coachSig('2026-11'), {headline:'카드값 134만원, 25일 전에 100만원으로', patterns:['p'], loanAdvice:'l', actions:['a']}, 500)")
+ev("__T.renderHome()")
+check('저장된 AI 진단이 있으면 그 문장',
+ev("document.getElementById('coachBarTxt').textContent") == '카드값 134만원, 25일 전에 100만원으로',
+      str(ev("document.getElementById('coachBarTxt').textContent")))
+check('AI 배지 표시', ev("document.getElementById('coachBarAI').hidden") == False)
+check('캐시 신선도 판정', ev("__T.coachCacheFresh(__T.coachCacheRead())") == True)
+ev("__T.coachCacheWrite('2026-11', 'old-signature', {headline:'옛 진단', patterns:[], loanAdvice:'', actions:[]}, 100)")
+ev("__T.renderHome()")
+check('기록이 바뀌면 배너는 다시 규칙 문장',
+ev("document.getElementById('coachBarTxt').textContent") == ev("__T.ruleHeadline('2026-11')"))
+check('옛 캐시는 신선하지 않음', ev("__T.coachCacheFresh(__T.coachCacheRead())") == False)
+ev("localStorage.removeItem(__T.COACH_KEY)")
+
+print('\n[27] AI 코치 시트 렌더')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [
+    {id:'L1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true, balance:268000000, rate:3.8},
+    {id:'L2', name:'부산은행 신용대출', cat:'대출', amount:846000, day:12, owner:'공동', active:true, balance:50297289, rate:7.68},
+    {id:'L3', name:'햇살론', cat:'대출', amount:148000, day:20, owner:'현기', active:true, balance:1250024, rate:8.83},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  st.settings.geminiKey = '';
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    ev("__T.openCoach()")
+    body = ev("document.getElementById('coachBody').innerHTML")
+    check('시트: 지출 페이스', '이번 달 지출 페이스' in body)
+    check('시트: 대출 우선순위', '대출 상환 우선순위' in body and '햇살론' in body and '8.83%' in body, body[:400])
+    check('시트: 금리 순 · 현금흐름 순 두 목록', '금리 높은 순' in body and '현금이 가장 트이는 순' in body)
+    check('시트: 대출 합계 줄', '대출 3건' in body and '매달' in body, body[-600:])
+    check('시트: AI 정밀 진단', 'AI 정밀 진단' in body)
+    check('키 없으면 설정 안내', '제미나이 키가 아직 없어요' in body and 'shotkey' in body)
+    check('키 없을 때는 진단 버튼 없음', 'coachai' not in body)
+
+    ev("__T.state.settings.geminiKey = 'AIzaTESTKEY1234567890'")
+    ev("__T.renderCoach()")
+    body2 = ev("document.getElementById('coachBody').innerHTML")
+    check('키가 있으면 진단 버튼', 'AI 정밀 진단 받기' in body2 and 'coachai' in body2)
+    check('키가 있으면 개인정보 안내', '나만 보기' in body2)
+
+    ev("__T.coachCacheWrite('2026-11', __T.coachSig('2026-11'), {headline:'카드값 134만원부터', patterns:['고정비 73%'], loanAdvice:'햇살론부터', actions:['카드값 줄이기']}, 480)")
+    ev("__T.renderCoach()")
+    body3 = ev("document.getElementById('coachBody').innerHTML")
+    check('저장된 진단 표시', '카드값 134만원부터' in body3 and '읽은 패턴' in body3 and '이번 주 할 일' in body3, body3[-500:])
+    check('다시 분석 버튼', '다시 분석' in body3)
+    check('분석 시각·속도 표기', '분 전 분석' in body3 or '방금 분석' in body3, body3[-500:])
+    check('최신 표시', '최신' in body3)
+    ev("localStorage.removeItem(__T.COACH_KEY)")
+except Exception as e:
+    check('코치 시트 렌더', False, str(e))
+
+print('\n[28] 설계 탭 그래프 렌더')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-11';
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [
+    {id:'L3', name:'햇살론', cat:'대출', amount:148000, day:20, owner:'현기', active:true, balance:1250024, rate:8.83},
+    {id:'L4', name:'자동차 할부', cat:'대출', amount:420000, day:28, owner:'현기', active:true, balance:8400000, rate:0},
+    {id:'I1', name:'실손보험', cat:'보험', amount:92000, day:22, owner:'공동', active:true},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    ev("__T.renderPlan()")
+    c6 = ev("document.getElementById('chart6').innerHTML")
+    check('6개월 그래프가 설계 탭에 들어감', '<svg' in c6 and '11월' in c6)
+    check('그래프에 고정비 색', '#3182F6' in c6 and '#FF8A3D' in c6)
+    cs = ev("document.getElementById('chartShare').innerHTML")
+    check('비중 바 렌더', '<svg' in cs and '<rect' in cs)
+    lg = ev("document.getElementById('shareLegend').innerHTML")
+    check('범례: 대출/보험·생활/변동·카드', '대출 상환' in lg and '보험·생활' in lg and '변동·카드' in lg, lg[:300])
+    check('범례에 금액과 %', '568,000원' in lg and '1,340,000원' in lg and '%' in lg, lg[:400])
+    card = ev("document.getElementById('loanRankCard').innerHTML")
+    check('대출 우선순위 카드', '대출 정리 우선순위' in card and '햇살론' in card, card[:400])
+    check('카드에 Top 2~3 만', card.count('rkrow') == 2, str(card.count('rkrow')))
+    check('카드에 현금흐름 한 줄', '현금이 가장 트이는 건' in card, card[-300:])
+    check('지출 흐름 헤더(이번 달)', ev("document.getElementById('chartHead').textContent") == '이번 달')
+    check('비중 제목(이번 달)', ev("document.getElementById('shareTitle').textContent") == '이번 달 지출 비중')
+    ev("__T.state.viewMonth = '2026-09'; __T.renderPlan()")
+    check('지난 달을 보고 있으면 그 달을 강조', ev("document.getElementById('chartHead').textContent") == '2026년 9월')
+    check('지난 달 비중 제목', ev("document.getElementById('shareTitle').textContent") == '9월 지출 비중')
+    ev("__T.state.viewMonth = '2026-11'")
+except Exception as e:
+    check('설계 탭 그래프 렌더', False, str(e))
+
+print('\n[29] 대출 금리 입력 (시트)')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.bills = [];
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    ev("__T.openBill(null, '대출')")
+    check('대출: 금리 칸 보임', ev("document.getElementById('bRateField').hidden") == False)
+    ev("document.getElementById('bName').value = '햇살론'")
+    ev("document.getElementById('bAmount').value = '148,000'")
+    ev("document.getElementById('bDay').value = '20'")
+    ev("document.getElementById('bBal').value = '1,250,024'")
+    ev("document.getElementById('bRate').value = '8.83'")
+    ev("__T.saveBill()")
+    check('금리 저장', abs(ev("__T.state.bills[0].rate") - 8.83) < 0.001, str(ev("__T.state.bills[0].rate")))
+    check('금리 저장 후 순위 계산에 반영', ev("__T.loanRank('rate')[0].rate") == 8.83)
+    ev("__T.openBill(null, '보험')")
+    check('보험: 금리 칸 숨김', ev("document.getElementById('bRateField').hidden") == True)
+    html_loan = ev("__T.planBillRowHTML(__T.state.bills[0], '2026-11')")
+    check('대출 줄에 잔액·금리 표시', '남은 잔액 1,250,024원' in html_loan and '금리 8.83%' in html_loan, html_loan[:300])
+except Exception as e:
+    check('대출 금리 입력', False, str(e))
+
+print('\n[30] 코치 요약(제미나이로 보낼 내용) · 나만 보기 가리기')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [{id:'L3', name:'햇살론', cat:'대출', amount:148000, day:20, owner:'현기', active:true, balance:1250024, rate:8.83}];
+  st.txns = [
+    {id:'t1', date:'2026-11-18', amount:120000, kind:'expense', cat:'식비', owner:'공동', memo:'이마트 장보기'},
+    {id:'t2', date:'2026-11-19', amount:32000, kind:'expense', cat:'식비', owner:'공동', memo:'배달 음식'},
+    {id:'t3', date:'2026-11-20', amount:45000, kind:'expense', cat:'여가', owner:'공동', memo:'영화 관람'},
+    {id:'t4', date:'2026-11-20', amount:12000, kind:'expense', cat:'기타', owner:'현기', memo:'개인 커피', private:true},
+    {id:'t5', date:'2026-11-21', amount:300000, kind:'income', cat:'부수입', owner:'현기', memo:'지인 소개'}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    sumj = _json.loads(ev("JSON.stringify(__T.coachSummary('2026-11'))"))
+    check('요약: 이번 달 이름', sumj['month'] == '2026년 11월', str(sumj.get('month')))
+    check('요약: 수입(고정 수입 + 기타 수입)', sumj['income'] == 5600000, str(sumj['income']))
+    check('요약: 고정비/카드/변동', sumj['fixed']['total'] == 148000 and sumj['cardBillThisMonth'] == 0 and sumj['variableSpend'] == 209000, str(sumj))
+    check('요약: 대출 금리·잔액 포함', sumj['loans'][0]['rate'] == 8.83 and sumj['loans'][0]['balance'] == 1250024)
+    cats = {c['cat']: c['amount'] for c in sumj['categories']}
+    check('요약: 카테고리 합계', cats.get('식비') == 152000 and cats.get('여가') == 45000, str(cats))
+    check('요약: 카테고리 합계 = 변동 지출', sum(c['amount'] for c in sumj['categories']) == sumj['variableSpend'], str(sumj['categories']))
+    mercs = [m['name'] for m in sumj['merchants']]
+    check('요약: 자주 쓴 곳', '이마트 장보기' in mercs, str(mercs))
+    check('나만 보기 내용은 보내지 않음', '개인 커피' not in mercs, str(mercs))
+    check('주중/주말 합계', sumj['weekdaySpend'] + sumj['weekendSpend'] == 120000 + 32000 + 45000 + 12000, str(sumj))
+    check('전달 달 비교', sumj['prevMonth']['month'] == '2026년 10월')
+    pr = ev("__T.coachPrompt(__T.coachSummary('2026-11'))")
+    check('프롬프트에 JSON 요청 형식', 'headline' in pr and 'loanAdvice' in pr and 'actions' in pr)
+    check('프롬프트에 요약 JSON 이 붙음', '"month":"2026년 11월"' in pr)
+except Exception as e:
+    check('코치 요약', False, str(e))
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)

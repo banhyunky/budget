@@ -367,6 +367,65 @@ input.mini{font-weight:600;padding:5px 7px}
 .srow.dup .s1,.srow.dup .s2{opacity:1}
 .srow.dup.off .s2 .mini{opacity:.75}
 
+/* ---------- AI 재무 코치 · 지출 흐름 그래프 ---------- */
+.coachbar{display:flex;align-items:center;gap:8px;width:100%;border:0;background:#fff;
+  border-radius:16px;padding:13px 15px;margin:0 0 12px;text-align:left;
+  box-shadow:0 1px 2px rgba(17,24,39,.04)}
+.coachbar .cb-ico{flex:none;font-size:15px;line-height:1}
+.coachbar .cb-ai{flex:none;font-size:10px;font-weight:800;letter-spacing:.01em;
+  color:#1B64DA;background:var(--blue-bg);border-radius:6px;padding:2px 5px}
+.coachbar .cb-tx{flex:1;min-width:0;font-size:13.5px;font-weight:700;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coachbar .cb-go{flex:none;font-size:16px;font-weight:700;color:#C4CBD3;padding-right:1px}
+.coachbar:active{background:#FAFBFC}
+
+.ctitle{font-size:12.5px;font-weight:700;color:var(--sub);margin:0 0 8px}
+.chartcard{padding:14px 15px}
+.clegend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:7px}
+.clegend.col{flex-direction:column;gap:5px}
+.clegend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
+.clegend b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.sharebar{border-radius:7px;overflow:hidden;background:#EDF1F5;line-height:0}
+.rankcard{display:block;width:100%;border:0;text-align:left;margin-bottom:12px}
+.rankcard:active{background:#FAFBFC}
+.rkrow{display:flex;align-items:center;gap:7px;padding:7px 0}
+.rkrow+.rkrow{border-top:1px solid var(--line)}
+.rkno{width:18px;height:18px;flex:none;border-radius:50%;background:var(--blue-bg);color:var(--blue-deep);
+  font-size:11px;font-weight:800;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.rknm{flex:1;min-width:0;font-size:13.5px;font-weight:700;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkmeta{flex:none;font-size:11.5px;font-weight:700;color:var(--sub);font-variant-numeric:tabular-nums}
+.rkamt{flex:none;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+.csec{margin-bottom:16px}
+.csec:last-child{margin-bottom:4px}
+.csec .ctitle{display:flex;align-items:center;gap:6px}
+.aitag{font-size:9.5px;font-weight:800;color:#1B64DA;background:var(--blue-bg);
+  border-radius:5px;padding:1px 5px;letter-spacing:.02em}
+.ailbl{font-size:11px;font-weight:800;color:#B0B8C1;letter-spacing:.01em;margin:10px 0 2px}
+.ailbl:first-child{margin-top:0}
+.pacebox{background:#F7F9FA;border-radius:14px;padding:13px 14px 12px}
+.pacemain{font-size:15px;font-weight:800;letter-spacing:-.03em;line-height:1.35}
+.pacemain em{font-style:normal;color:var(--blue)}
+.pacemain.neg{color:var(--red)}
+.pacebox .hero-meta{flex-wrap:wrap;gap:2px 10px}
+.pacesub{margin-top:3px;font-size:12.5px;font-weight:600;color:var(--sub)}
+.pacesub b{font-weight:700;color:var(--mid);font-variant-numeric:tabular-nums}
+.crow{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--line)}
+.crow:first-of-type{border-top:0;padding-top:2px}
+.cname{flex:1;min-width:0;font-size:13.5px;font-weight:700;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cname small{display:block;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cval{flex:none;text-align:right;font-size:13px;font-weight:700;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.cval small{display:block;font-size:10.5px;font-weight:600;color:var(--sub);margin-top:1px}
+.aihead{background:var(--blue-bg);border-radius:14px;padding:12px 14px;font-size:14px;
+  font-weight:800;line-height:1.45;letter-spacing:-.02em;color:#1B64DA}
+.aibody li{font-size:13px;line-height:1.6;color:var(--mid);margin-bottom:2px}
+.aibody ul,.aibody ol{margin:4px 0 0;padding-left:17px}
+.aibody p{margin:4px 0 0;font-size:13px;line-height:1.65;color:var(--mid)}
+
 /* toast */
 .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(10px);
   bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:60;
@@ -420,6 +479,13 @@ input.mini{font-weight:600;padding:5px 7px}
         </button>
       </div>
 
+      <button class="coachbar" id="coachBar" data-act="coach" aria-label="AI 재무 코치 열기">
+        <span class="cb-ico">💡</span>
+        <span class="cb-ai" id="coachBarAI" hidden>AI</span>
+        <span class="cb-tx" id="coachBarTxt">이번 달 지출을 살펴보고 있어요</span>
+        <span class="cb-go">›</span>
+      </button>
+
       <div class="card">
         <div style="font-size:15px;font-weight:700;margin:0 0 10px">우리 둘</div>
         <div id="ownerSplit"></div>
@@ -469,6 +535,22 @@ input.mini{font-weight:600;padding:5px 7px}
         <div class="sumrow"><span>💳 이번 달 카드 청구액</span><b id="sumCard">0원</b></div>
       </div>
       <div class="hint" style="margin:4px 4px 0">카드값은 매달 달라서 위 고정비 합계에 넣지 않고 따로 셉니다</div>
+
+      <div class="sechd"><h2>📈 지출 흐름</h2><span id="chartHead"></span></div>
+      <div class="card tight chartcard">
+        <div class="ctitle">최근 6개월 지출 흐름</div>
+        <div id="chart6"></div>
+        <div class="clegend">
+          <span><i style="background:#3182F6"></i>고정비(대출·보험생활)</span>
+          <span><i style="background:#FF8A3D"></i>변동·카드</span>
+        </div>
+      </div>
+      <div class="card tight chartcard">
+        <div class="ctitle" id="shareTitle">이번 달 지출 비중</div>
+        <div class="sharebar" id="chartShare"></div>
+        <div class="clegend col" id="shareLegend"></div>
+      </div>
+      <button class="card tight rankcard" id="loanRankCard" data-act="coach" aria-label="대출 정리 우선순위 자세히"></button>
 
       <div class="sechd"><h2>🏦 대출 상환</h2><span id="loanTotalLbl"></span></div>
       <div class="hint" style="margin:-2px 4px 8px">매달 원금·이자를 갚아 나가는 대출. 남은 잔액도 같이 보여 줘요</div>
@@ -651,6 +733,9 @@ input.mini{font-weight:600;padding:5px 7px}
     <div class="field" id="bBalField" hidden><label>남은 대출 잔액 (선택)</label>
       <input class="ipt" id="bBal" inputmode="numeric" placeholder="0">
       <div class="hint" style="margin:6px 0 0">대출 상환 맨 아래 ‘대출 총 잔액’에 더해져요</div></div>
+    <div class="field" id="bRateField" hidden><label>연 이자율 % (선택)</label>
+      <input class="ipt" id="bRate" inputmode="decimal" placeholder="4.15">
+      <div class="hint" style="margin:6px 0 0">넣으면 AI 재무 코치가 ‘어느 대출부터 갚을지’ 금리로 계산해 드려요</div></div>
     <div class="field"><label>누구</label>
       <div class="seg" id="bOwner">
         <button data-act="bowner" data-owner="현기" class="on">현기</button>
@@ -884,6 +969,16 @@ service cloud.firestore {
     <div id="cText" style="font-size:14.5px;color:#4E5968;line-height:1.6;margin-bottom:20px"></div>
     <button class="btn primary" id="cOk">확인</button>
     <button class="btn ghost" data-close>취소</button>
+  </div>
+</div>
+
+<!-- ============ SHEET: AI 재무 코치 ============ -->
+<div class="sw" id="shCoach">
+  <div class="bd-layer" data-close></div>
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="shd"><h3>AI 재무 코치</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
+    <div id="coachBody"></div>
   </div>
 </div>
 
@@ -1406,6 +1501,9 @@ function renderHome(){
   var recent = txnsOf(ym).slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }).slice(0,5);
   $('homeRecent').innerHTML = recent.length ? recent.map(txnRowHTML).join('') :
     '<div class="empty">아직 기록이 없어요.</div>';
+
+  /* 홈 한 줄 어드바이스: 저장된 AI 진단이 있으면 그 문장, 없으면 규칙 계산 (스크롤 늘리지 않게 한 줄만) */
+  renderCoachBar();
 }
 
 function billRowHTML(b, ym, paid){
@@ -1530,7 +1628,7 @@ function planBillRowHTML(b, ym){
     '<div class="bmain" data-act="bill" data-id="' + b.id + '">' +
       '<div class="btop"><b>' + esc(b.name) + '</b>' + badge + '</div>' +
       '<div class="bsub">' + esc(b.cat) + ' · ' + esc(b.owner) + ' · ' + billDayLabel(b, ym) + '</div>' +
-      (bal ? '<div class="bsub bal">남은 잔액 ' + won(bal) + '</div>' : '') +
+      (bal ? '<div class="bsub bal">남은 잔액 ' + won(bal) + (+b.rate ? ' · 금리 ' + shortNum(b.rate) + '%' : '') + '</div>' : '') +
     '</div>' +
     '<div class="bamt">' + won(b.amount) + '</div></div>';
 }
@@ -1652,6 +1750,9 @@ function renderPlan(){
   var loan = +state.plan.loan || 0, assets = +state.plan.assets || 0;
   $('plLoan').textContent = won(loan);
   $('plNet').textContent = won(assets + savingsTotal() - loan);
+
+  /* 설계 탭 그래프: 최근 6개월 흐름 · 이번 달 비중 · 대출 정리 우선순위 */
+  renderCharts();
 }
 
 function renderSettingsStatus(){
@@ -1830,6 +1931,7 @@ function openBill(b, cat){
   $('bCat').value = defCat;
   $('bAmount').value = b ? fmt(b.amount) : '';
   $('bBal').value = (b && Math.round(+b.balance || 0)) ? fmt(b.balance) : '';
+  $('bRate').value = (b && +b.rate) ? String(b.rate) : '';
   syncBillBalField();
   $('bDay').value = b ? b.day : '';
   $('bDayHint').textContent = dayHintText(b ? b.day : '');
@@ -1838,11 +1940,11 @@ function openBill(b, cat){
   openSheet('shBill');
 }
 
-/* 대출 잔액 칸은 분류가 '대출'일 때만 보인다 */
+/* 대출 잔액·금리 칸은 분류가 '대출'일 때만 보인다 */
 function syncBillBalField(){
-  var f = $('bBalField'), c = $('bCat');
-  if (!f || !c) return;
-  f.hidden = String(c.value || '') !== '대출';
+  var f = $('bBalField'), c = $('bCat'), r = $('bRateField');
+  if (f && c) f.hidden = String(c.value || '') !== '대출';
+  if (r && c) r.hidden = String(c.value || '') !== '대출';
 }
 
 function saveBill(){
@@ -1856,6 +1958,7 @@ function saveBill(){
   var cat = $('bCat').value;
   /* 보험·통신 등으로 바꾸면 잔액은 지운다 (잔액이 남아 있으면 대출로 보이기 때문) */
   var balance = cat === '대출' ? num($('bBal').value) : 0;
+  var rate = cat === '대출' ? Math.max(0, parseFloat(String($('bRate').value || '').replace(/[^\d.]/g, '')) || 0) : 0;
   /* 잔액이 바뀐 만큼 재무설계의 대출 잔액에도 반영 (캡처로 담을 때와 같은 방식) */
   var oldBal = bEditing ? Math.round(+bEditing.balance || 0) : 0;
   var balDelta = balance - oldBal;
@@ -1863,10 +1966,12 @@ function saveBill(){
     bEditing.name = name; bEditing.cat = cat; bEditing.amount = amount;
     bEditing.day = day; bEditing.owner = owner;
     if (cat === '대출' || bEditing.balance) bEditing.balance = balance;
+    if (cat === '대출' || rate) bEditing.rate = rate;
   } else {
     var nb = {id:uid(), name:name, cat:cat, amount:amount,
       day:day, owner:owner, active:true};
     if (cat === '대출') nb.balance = balance;
+    if (cat === '대출' && rate) nb.rate = rate;
     state.bills.push(nb);
   }
   if (balDelta) state.plan.loan = Math.max(0, (+state.plan.loan || 0) + balDelta);
@@ -3408,9 +3513,548 @@ function addShot(){
   return addShotTxn();
 }
 
+/* ================= AI 재무 코치 ================= */
+/* 홈 한 줄 배너 · 바텀시트 · 설계 탭 그래프가 모두 여기 계산을 함께 쓴다.
+   1) 규칙 계산은 즉시(0ms), 2) 제미나이 정밀 진단은 버튼을 눌렀을 때만 부르고 결과는 이 기기에 저장한다. */
+var COACH_KEY = 'money-coach-v1';
+var coachBusy = false, coachState = 'idle', coachErr = '';
+
+/* 금액 짧게: 1,120,000 → 112만 · 311,195,858 → 3.1억 */
+function shortWon(n){
+  n = Math.round(Math.abs(+n || 0));
+  if (n >= 100000000){ var e = n / 100000000; return (e >= 10 ? Math.round(e) : Math.round(e * 10) / 10) + '억'; }
+  if (n >= 10000){ var m = n / 10000; return (m >= 100 ? Math.round(m) : Math.round(m * 10) / 10) + '만'; }
+  return fmt(n);
+}
+function shortNum(v){
+  var n = Math.round((+v || 0) * 100) / 100;
+  return String(n);
+}
+function cutStr(s, n){
+  s = String(s == null ? '' : s);
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+function dowOf(ds){
+  var p = String(ds || '').split('-');
+  if (p.length < 3) return -1;
+  return new Date(+p[0], +p[1] - 1, +p[2]).getDay();
+}
+/* n달 전 달 (해를 넘어가도 그대로, n=0 이면 같은 달) */
+function prevYMs(ym, n){
+  var d = ymDate(ym || curYM());
+  n = (n === undefined || n === null) ? 1 : Math.max(0, Math.round(+n || 0));
+  d.setDate(1);
+  d.setMonth(d.getMonth() - n);
+  return ymStr(d);
+}
+
+/* ---- 이번 달 지출 페이스 ---- */
+function coachPace(ym){
+  ym = ym || curYM();
+  var s = stats(ym), d = todayD(), dim = daysIn(ym);
+  var isCur = ym === curYM();
+  var dayOf = isCur ? d.getDate() : dim;
+  var leftDays = isCur ? (dim - dayOf + 1) : 0;          /* 오늘 포함 남은 날 */
+  var budget = Math.max(0, s.left);
+  var perDay = leftDays > 0 ? Math.floor(budget / leftDays) : 0;
+  var dailyNow = dayOf > 0 ? Math.round(s.expense / dayOf) : 0;
+  return {
+    ym: ym, isCur: isCur, dayOf: dayOf, daysIn: dim, leftDays: leftDays,
+    left: s.left, budget: budget, perDay: perDay, dailyNow: dailyNow,
+    diff: perDay - dailyNow, fixedLeft: s.unpaidFixed, cardLeft: s.unpaidCard,
+    pacePct: s.income > 0 ? Math.round((s.expense + s.unpaid) / s.income * 100) : 0
+  };
+}
+
+/* ---- 대출 상환 우선순위 ----
+   rate: 금리(이자) 높은 순 — 같은 돈을 갚을 때 이자가 가장 많이 줄어드는 순서
+   cash: 잔액 1,000만원당 월 상환액이 큰 순 — 갚았을 때 매달 현금이 가장 많이 트이는 순서 */
+function loanRank(mode){
+  var list = loanBills().filter(function(b){
+    return Math.round(+b.amount || 0) > 0 || Math.round(+b.balance || 0) > 0;
+  }).map(function(b){
+    var bal = Math.round(+b.balance || 0), mon = Math.round(+b.amount || 0), rate = +b.rate || 0;
+    return {
+      id: b.id, name: b.name, balance: bal, monthly: mon, rate: rate,
+      day: Math.round(+b.day || 0),
+      per10m: bal > 0 ? Math.round(mon / bal * 10000000) : 0,
+      yearlyInterest: bal > 0 && rate > 0 ? Math.round(bal * rate / 100) : 0
+    };
+  });
+  if (mode === 'cash'){
+    list.sort(function(a, b){
+      if (b.per10m !== a.per10m) return b.per10m - a.per10m;
+      return b.monthly - a.monthly;
+    });
+  } else {
+    list.sort(function(a, b){
+      if (b.rate !== a.rate) return b.rate - a.rate;
+      if (b.monthly !== a.monthly) return b.monthly - a.monthly;
+      return a.balance - b.balance;
+    });
+  }
+  return list;
+}
+/* 금리 8% 이상 중 잔액이 작아 지금 갚을 수 있는 대출 (빠른 승리) */
+function loanQuickWin(){
+  var hi = loanRank('rate').filter(function(l){
+    return l.rate >= 8 && l.balance > 0 && l.monthly > 0;
+  });
+  if (!hi.length) return null;
+  var small = hi.slice().sort(function(a, b){ return a.balance - b.balance; })[0];
+  return small.balance <= 5000000 ? small : hi[0];
+}
+/* 홈 한 줄 배너의 즉석 문장 (규칙 기반) */
+function ruleHeadline(ym){
+  ym = ym || curYM();
+  var s = stats(ym), p = coachPace(ym), w = loanQuickWin();
+  if (s.left < 0)
+    return '이번 달 ' + shortWon(-s.left) + '원 초과 · 카드 청구액부터 확인해요';
+  if (w)
+    return '금리 ' + shortNum(w.rate) + '% ' + cutStr(w.name, 9) + ' 갚으면 매달 ' + shortWon(w.monthly) + '원 줄어요';
+  if (p.isCur && p.leftDays > 0 && p.left > 0)
+    return '남은 ' + p.leftDays + '일 · 하루 ' + fmt(p.perDay) + '원까지 쓸 수 있어요';
+  var c = loanRank('cash')[0];
+  if (c && c.monthly > 0)
+    return cutStr(c.name, 9) + ' 완납하면 매달 ' + shortWon(c.monthly) + '원 가벼워져요';
+  if (!s.fixed && !s.card)
+    return '고정비·카드 청구액을 넣으면 맞춤 조언을 드려요';
+  return '고정비 ' + shortWon(s.fixed) + '원 · 카드 ' + shortWon(s.card) + '원 나가는 중';
+}
+
+/* ---- 제미나이 진단 결과 저장 ---- */
+function coachSig(ym){
+  ym = ym || curYM();
+  var s = stats(ym);
+  return [ym, s.income, s.fixed, s.loan, s.living, s.card, s.expense, s.variable,
+    s.loanBalance, loanBills().length, cardBills().length, txnsOf(ym).length].join('/');
+}
+function coachCacheRead(){
+  try {
+    var raw = localStorage.getItem(COACH_KEY);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    return (o && o.data) ? o : null;
+  } catch(e){ return null; }
+}
+function coachCacheWrite(ym, sig, data, ms){
+  try {
+    localStorage.setItem(COACH_KEY, JSON.stringify({ v:1, ym:ym, sig:sig, ts:Date.now(), ms:Math.round(ms || 0), data:data }));
+  } catch(e){}
+}
+function coachCacheFresh(c){
+  return !!(c && c.ym === curYM() && c.data && c.data.headline && c.sig === coachSig(c.ym));
+}
+
+/* ---- 제미나이에게 보낼 이번 달 요약 ---- */
+function coachSummary(ym){
+  ym = ym || curYM();
+  var s = stats(ym), p = coachPace(ym);
+  var cats = {}, mercs = {}, wd = 0, we = 0;
+  txnsOf(ym).forEach(function(t){
+    var a = Math.round(+t.amount || 0);
+    var w = dowOf(t.date);
+    if (t.kind === 'income' || t.billId) return;   /* 고정비 납부 기록은 위 요약에 이미 있음 */
+    var k = t.cat || '기타';
+    cats[k] = (cats[k] || 0) + a;
+    if (!t.private){                                /* 나만 보기 기록은 금액만 보내고 내용은 뺀다 */
+      var nm = String(t.memo || k).slice(0, 18);
+      if (!mercs[nm]) mercs[nm] = { n:0, a:0 };
+      mercs[nm].n++;
+      mercs[nm].a += a;
+    }
+    if (w === 0 || w === 6) we += a; else if (w > 0) wd += a;
+  });
+  var catList = Object.keys(cats).map(function(k){
+    return { cat:k, amount:cats[k] };
+  }).sort(function(a, b){ return b.amount - a.amount; }).slice(0, 5);
+  var merList = Object.keys(mercs).map(function(k){
+    return { name:k, count:mercs[k].n, amount:mercs[k].a };
+  }).sort(function(a, b){ return b.count - a.count || b.amount - a.amount; }).slice(0, 6);
+  var prev = prevYMs(ym, 1), ps = stats(prev);
+  return {
+    month: ymLabel(ym),
+    dayOfMonth: p.dayOf, daysInMonth: p.daysIn, daysLeft: p.leftDays,
+    income: s.income,
+    fixed: { loan: s.loan, living: s.living, total: s.fixed },
+    cardBillThisMonth: s.card,
+    spentSoFar: s.expense,
+    variableSpend: s.variable,
+    freeLeft: s.left,
+    unpaid: { fixed: s.unpaidFixed, card: s.unpaidCard },
+    loanCount: loanBills().length,
+    loanBalance: s.loanBalance,
+    loans: loanBills().map(function(b){
+      return { name:String(b.name || '').slice(0, 18), balance:Math.round(+b.balance || 0),
+        rate:+b.rate || 0, monthly:Math.round(+b.amount || 0), day:Math.round(+b.day || 0) };
+    }).slice(0, 12),
+    cards: cardBills().map(function(b){
+      return { name:String(b.name || '').slice(0, 18), amount:billAmountFor(b, ym), day:Math.round(+b.day || 0) };
+    }),
+    categories: catList,
+    merchants: merList,
+    weekdaySpend: wd, weekendSpend: we,
+    prevMonth: { month: ymLabel(prev), fixed: ps.fixed, card: ps.card,
+      variable: ps.variable, total: ps.fixed + ps.card + ps.variable, income: ps.income }
+  };
+}
+
+function coachPrompt(sum){
+  return [
+    "너는 한국 부부 가계부 앱 '머니로그'의 재무 코치다. 토스처럼 짧고 단호하게, 반드시 숫자를 근거로 말한다.",
+    '아래 가계 요약(JSON)을 읽고 아래 형식의 JSON 객체 하나만 출력해라. 설명·인사말·코드블록 없이 JSON 만.',
+    '{"headline":"...","patterns":["...","..."],"loanAdvice":"...","actions":["...","..."]}',
+    '규칙:',
+    '- headline: 홈 화면 한 줄 배너에 그대로 들어간다. 28자 이내, 구체적인 숫자나 행동을 담는다. 예: "카드값 134만원, 25일 전에 100만원으로 줄이면 안전"',
+    '- patterns: 이번 달 지출에서 보이는 구조적 패턴 2~3개. 각 45자 이내. 고정비 비중, 특정 분류 편중, 주중/주말 차이, 반복 결제처럼 줄일 수 있는 것만.',
+    '- loanAdvice: 대출 상환 순서 조언 1~2문장. 잔액·금리를 근거로 어느 대출부터 줄일지. 대출이 없으면 비상금·저축 조언.',
+    '- actions: 이번 주에 바로 할 수 있는 행동 3개. 각 30자 이내, 금액이나 날짜를 넣는다.',
+    '- 존댓말. 이모지·느낌표 남발 금지. 투자 종목 추천, 새 대출 권유, 보험 해지는 하지 않는다.',
+    '- 주어진 숫자만 근거로 하고 없는 사실을 만들지 않는다. 소득의 30%를 넘는 고정비는 반드시 짚는다.',
+    '가계 요약:', JSON.stringify(sum)
+  ].join('\n');
+}
+
+/* ---- 결과 파싱 (코드블록·군더더기·이름이 다른 키까지 받아 준다) ---- */
+function coachCleanText(v, max){
+  var s = String(v == null ? '' : v).replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+  s = s.replace(/^["'“”‘’\-•*·\[\]\s]+/, '').replace(/["'“”‘’\s]+$/, '');
+  if (max && s.length > max) s = s.slice(0, max).replace(/[\s,.]+$/, '') + '…';
+  return s;
+}
+function coachArr(v, max, len){
+  var out = [];
+  var list = Array.isArray(v) ? v : (typeof v === 'string' ? v.split(/\n|·/) : []);
+  list.forEach(function(x){
+    var s = coachCleanText(typeof x === 'object' && x ? (x.text || x.title || x.action || '') : x, max);
+    if (s) out.push(s);
+  });
+  return out.slice(0, len || 3);
+}
+function coachJsonTry(str){
+  try { return JSON.parse(str); } catch(e){}
+  /* 모델이 문자열 안에 날 줄바꿈을 넣어 보낸 경우도 받아 준다 */
+  try { return JSON.parse(String(str).replace(/[\r\n\t]+/g, ' ')); } catch(e2){}
+  return null;
+}
+function parseCoachJSON(txt){
+  if (!txt) return null;
+  var t = String(txt).trim().replace(/^```[a-zA-Z]*\s*/, '').replace(/```$/, '').trim();
+  var obj = null;
+  var s = t.indexOf('{'), e = t.lastIndexOf('}');
+  if (s >= 0 && e > s) obj = coachJsonTry(t.slice(s, e + 1));
+  if (!obj || typeof obj !== 'object') return null;
+  if (!obj.headline && obj.coach && typeof obj.coach === 'object') obj = obj.coach;
+  if (!obj.headline && obj.analysis && typeof obj.analysis === 'object') obj = obj.analysis;
+  var out = {
+    headline: coachCleanText(obj.headline || obj.title || obj.summary || obj.oneLine, 60),
+    patterns: coachArr(obj.patterns || obj.insights || obj.findings, 80, 3),
+    loanAdvice: coachCleanText(obj.loanAdvice || obj.loan_advice || obj.debtAdvice || obj.loan || obj.advice, 180),
+    actions: coachArr(obj.actions || obj.todo || obj.steps, 70, 3)
+  };
+  if (!out.headline && !out.patterns.length && !out.loanAdvice && !out.actions.length) return null;
+  if (!out.headline) out.headline = out.patterns[0] || out.actions[0] || '이번 달 기록을 한 번 더 정리해 볼까요';
+  return out;
+}
+
+/* ---- 제미나이 호출 (첫 모델 0.5초, 실패하면 예비 모델) ---- */
+function runCoachAI(){
+  if (coachBusy) return;
+  var key = gemKey();
+  coachErr = '';
+  if (!key){ coachState = 'nokey'; renderCoach(); return; }
+  var ym = curYM(), sig = coachSig(ym);
+  var body = {
+    contents: [{ parts: [{ text: coachPrompt(coachSummary(ym)) }] }],
+    generationConfig: { temperature: 0.25, responseMimeType: 'application/json' }
+  };
+  coachBusy = true; coachState = 'run';
+  renderCoach();
+  var t0 = Date.now(), lastErr = null;
+  function attempt(i){
+    if (i >= GEMINI_MODELS.length){
+      coachBusy = false; coachState = 'err';
+      coachErr = (lastErr && lastErr.message) || '분석하지 못했어요 · 잠시 뒤 다시 시도해 주세요';
+      renderCoach();
+      return;
+    }
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODELS[i] +
+      ':generateContent?key=' + encodeURIComponent(key);
+    return fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(j){
+          if (res.ok){
+            var parsed = parseCoachJSON(geminiText(j));
+            if (parsed){
+              coachCacheWrite(ym, sig, parsed, Date.now() - t0);
+              coachBusy = false; coachState = 'done';
+              renderCoach(); renderCoachBar();
+              toast('AI 진단을 받았어요');
+              return;
+            }
+            lastErr = new Error('분석 결과를 읽지 못했어요');
+            return attempt(i + 1);
+          }
+          var msg = (j && j.error && j.error.message) || '';
+          if (res.status === 400 && /API key not valid|API_KEY_INVALID|invalid api key/i.test(msg))
+            throw fatalErr('API 키가 올바르지 않아요. 설정에서 다시 확인해 주세요.');
+          if (res.status === 403) throw fatalErr('API 키 권한을 확인해 주세요.');
+          if (res.status === 429) throw fatalErr('요청이 잠시 몰렸어요. 조금 뒤 다시 시도해 주세요.');
+          lastErr = new Error(msg || ('오류 ' + res.status));
+          return attempt(i + 1);
+        });
+      }, function(){ throw new Error('인터넷 연결을 확인해 주세요'); });
+  }
+  var p = attempt(0);
+  if (p && p.catch) p.catch(function(e){
+    coachBusy = false; coachState = 'err';
+    coachErr = (e && e.message) ? e.message : '분석하지 못했어요 · 잠시 뒤 다시 시도해 주세요';
+    renderCoach();
+  });
+}
+
+/* ---- 화면: 홈 한 줄 배너 ---- */
+function renderCoachBar(){
+  var el = $('coachBarTxt');
+  if (!el) return;
+  var ym = curYM(), c = coachCacheRead();
+  var fresh = coachCacheFresh(c);
+  el.textContent = fresh ? c.data.headline : ruleHeadline(ym);
+  var badge = $('coachBarAI');
+  if (badge) badge.hidden = !fresh;
+}
+
+/* ---- 화면: 이번 달 페이스 ---- */
+function coachPaceHTML(ym){
+  var p = coachPace(ym);
+  var head, cls = '';
+  if (p.left < 0){ head = '이번 달 <em>' + shortWon(-p.left) + '원</em> 넘었어요'; cls = ' neg'; }
+  else if (!p.isCur) head = '지난 기록 · ' + p.daysIn + '일 중 마지막 날 기준';
+  else if (p.leftDays <= 1) head = '오늘이 이번 달 마지막 날 · 하루 <em>' + fmt(p.perDay) + '원</em>';
+  else head = '남은 ' + p.leftDays + '일 · 하루 <em>' + fmt(p.perDay) + '원</em>까지 쓸 수 있어요';
+  var sub;
+  if (!p.isCur) sub = '이번 달로 돌아가면 남은 날 기준으로 다시 계산해 드려요';
+  else if (p.leftDays <= 0) sub = '이번 달 지출은 마무리됐어요 · 새 달에 다시 계산해 드려요';
+  else if (p.diff >= 0) sub = '지금까지 하루 평균 <b>' + fmt(p.dailyNow) + '원</b> · 페이스보다 <b>' + fmt(p.diff) + '원</b> 여유';
+  else sub = '지금까지 하루 평균 <b>' + fmt(p.dailyNow) + '원</b> · 페이스보다 <b>' + fmt(-p.diff) + '원</b> 넘고 있어요';
+  var barClass = p.pacePct >= 100 ? 'over' : (p.pacePct >= 80 ? 'warn' : '');
+  var rest = [];
+  if (p.fixedLeft) rest.push('고정비 ' + won(p.fixedLeft));
+  if (p.cardLeft) rest.push('카드 ' + won(p.cardLeft));
+  return '<div class="pacebox">' +
+    '<div class="pacemain' + cls + '">' + head + '</div>' +
+    '<div class="pacesub">' + sub + '</div>' +
+    '<div class="progress sm"><i class="' + barClass + '" style="width:' + Math.min(100, p.pacePct) + '%"></i></div>' +
+    '<div class="hero-meta"><span>이번 달 사용 ' + p.pacePct + '%</span><span>' +
+      (rest.length ? '곧 나갈 ' + rest.join(' · ') : '남은 고정비 없음') + '</span></div>' +
+    '</div>';
+}
+
+/* ---- 화면: 대출 상환 우선순위 ---- */
+function coachLoanRowHTML(l, i, mode){
+  var meta = mode === 'cash'
+    ? '잔액 1,000만원당 월 ' + won(l.per10m)
+    : '잔액 ' + won(l.balance) + (l.rate ? ' · 금리 ' + shortNum(l.rate) + '%' : ' · 금리 미입력');
+  var val = l.monthly ? won(l.monthly) : '—';
+  return '<div class="crow"><span class="rkno">' + (i + 1) + '</span>' +
+    '<div class="cname">' + esc(l.name) + '<small>' + meta + '</small></div>' +
+    '<div class="cval">' + val + '<small>완납 시 월 절감</small></div></div>';
+}
+function coachLoanHTML(){
+  var rk = loanRank('rate'), cash = loanRank('cash');
+  if (!rk.length){
+    return '<div class="hint" style="margin:0">등록된 대출이 없어요. 대출을 넣으면 금리·잔액으로 갚는 순서를 계산해 드려요.</div>' +
+      '<button class="btn ghost" data-act="addBill" style="margin-top:10px">+ 대출 추가</button>';
+  }
+  var noRate = rk.every(function(l){ return !l.rate; });
+  var html = '<div class="ailbl">금리 높은 순 · 이자부터 줄이기</div>';
+  rk.slice(0, 3).forEach(function(l, i){ html += coachLoanRowHTML(l, i, 'rate'); });
+  html += '<div class="ailbl">갚으면 매달 현금이 가장 트이는 순</div>';
+  cash.slice(0, 3).forEach(function(l, i){ html += coachLoanRowHTML(l, i, 'cash'); });
+  var sum = 0, bal = 0, hi = 0;
+  rk.forEach(function(l){ sum += l.monthly; bal += l.balance; if (l.rate > hi) hi = l.rate; });
+  html += '<div class="hint" style="margin:8px 0 0">대출 ' + rk.length + '건 · 잔액 ' + won(bal) +
+    ' · 매달 ' + won(sum) + '을 갚고 있어요' + (hi ? ' (최고 금리 ' + shortNum(hi) + '%)' : '') + '</div>';
+  if (noRate)
+    html += '<div class="hint" style="margin:4px 0 0">금리가 비어 있어 잔액 대비 월 상환액으로 줄 세웠어요. 대출을 눌러 금리를 넣으면 이자 기준으로 더 정확해져요.</div>';
+  return html;
+}
+
+/* ---- 화면: 제미나이 정밀 진단 ---- */
+function coachWhen(ts){
+  if (!ts) return '';
+  var d = Math.max(0, Date.now() - ts), m = Math.floor(d / 60000);
+  if (m < 1) return '방금 분석';
+  if (m < 60) return m + '분 전 분석';
+  var h = Math.floor(m / 60);
+  if (h < 24) return h + '시간 전 분석';
+  return Math.floor(h / 24) + '일 전 분석';
+}
+function coachAIHTML(ym){
+  if (!gemKey()){
+    return '<div class="keybox"><b>제미나이 키가 아직 없어요</b>' +
+      '<p>설정에 Gemini API 키를 한 번 넣어 두면, 이번 달 기록을 읽고 패턴·대출 조언·할 일까지 정리해 드려요. 키는 이 폰에만 저장돼요.</p>' +
+      '<button class="btn primary" data-act="shotkey">설정에서 키 넣기</button></div>';
+  }
+  if (coachBusy)
+    return '<div class="load"><span class="spin"></span> AI가 이번 달 기록을 읽고 있어요…</div>';
+  var c = coachCacheRead(), same = !!(c && c.ym === ym), fresh = coachCacheFresh(c);
+  var html = '';
+  if (coachState === 'err' && coachErr)
+    html += '<div class="status err">' + esc(coachErr) + '</div>';
+  if (same){
+    html += '<div class="aihead">“' + esc(c.data.headline) + '”</div>';
+    html += '<div class="hint" style="margin:8px 0 0">' + coachWhen(c.ts) +
+      (c.ms ? ' · ' + (c.ms / 1000).toFixed(1) + '초' : '') +
+      (fresh ? ' · 최신' : ' · 기록이 바뀌었어요') + '</div>';
+    html += '<div class="aibody">';
+    if (c.data.patterns && c.data.patterns.length){
+      html += '<div class="ailbl">읽은 패턴</div><ul>' + c.data.patterns.map(function(x){
+        return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    }
+    if (c.data.loanAdvice){
+      html += '<div class="ailbl">대출 조언</div><p>' + esc(c.data.loanAdvice) + '</p>';
+    }
+    if (c.data.actions && c.data.actions.length){
+      html += '<div class="ailbl">이번 주 할 일</div><ol>' + c.data.actions.map(function(x){
+        return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>';
+    }
+    html += '</div>';
+    html += '<button class="btn line" data-act="coachai" style="margin-top:12px">' +
+      (fresh ? '다시 분석' : '바뀐 기록으로 다시 분석') + '</button>';
+    return html;
+  }
+  html += '<div class="hint" style="margin:0 0 10px">이번 달 수입·고정비·대출 금리·카테고리·자주 쓴 곳 요약만 제미나이에게 보내요. ' +
+    '결과는 이 폰에 저장돼 다시 열어도 API를 또 부르지 않아요. <b>나만 보기</b> 기록은 금액만 보내고 내용은 빼요.</div>';
+  html += '<button class="btn primary" data-act="coachai">✨ AI 정밀 진단 받기</button>';
+  return html;
+}
+
+/* ---- 화면: 바텀시트 전체 ---- */
+function renderCoach(){
+  var el = $('coachBody');
+  if (!el) return;
+  var ym = curYM();
+  el.innerHTML =
+    '<div class="csec"><div class="ctitle">이번 달 지출 페이스</div>' + coachPaceHTML(ym) + '</div>' +
+    '<div class="csec"><div class="ctitle">🏦 대출 상환 우선순위</div>' + coachLoanHTML() + '</div>' +
+    '<div class="csec"><div class="ctitle">✨ AI 정밀 진단 <span class="aitag">GEMINI</span></div>' + coachAIHTML(ym) + '</div>';
+}
+function openCoach(){
+  renderCoach();
+  openSheet('shCoach');
+}
+
+/* ================= 설계 탭: 지출 흐름 그래프 ================= */
+/* 최근 6개월: 월별 고정비(대출+보험·생활) vs 변동·카드 지출.
+   고정비는 지금 등록된 대출·보험·생활 금액이 매달 그대로 나간다고 보고 계산한다. */
+function chart6Months(ym){
+  ym = ym || curYM();
+  var out = [];
+  for (var i = 5; i >= 0; i--){
+    var m = prevYMs(ym, i), s = stats(m);
+    out.push({
+      ym: m, label: (+String(m).split('-')[1]) + '월',
+      fixed: s.fixed, flexible: s.card + s.variable,
+      total: s.fixed + s.card + s.variable
+    });
+  }
+  return out;
+}
+/* 이번 달 지출 비중: 대출 상환 / 보험·생활 / 변동·카드 */
+function monthShare(ym){
+  ym = ym || curYM();
+  var s = stats(ym);
+  var loan = s.loan, living = s.living, flex = s.card + s.variable;
+  var tot = loan + living + flex;
+  function pct(v){ return tot > 0 ? Math.round(v / tot * 1000) / 10 : 0; }
+  return { ym:ym, loan:loan, living:living, flex:flex, total:tot,
+    loanPct:pct(loan), livingPct:pct(living), flexPct:pct(flex) };
+}
+function barsSVG(data, hiYm){
+  var W = 320, H = 118, padT = 16, padB = 20;
+  var maxV = 1;
+  data.forEach(function(d){ if (d.total > maxV) maxV = d.total; });
+  var slot = W / (data.length || 1);
+  var bw = Math.max(14, Math.min(30, slot - 12));
+  var base = H - padB, hMax = base - padT;
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" role="img" aria-label="월별 지출 흐름">';
+  data.forEach(function(d, i){
+    var cx = slot * i + slot / 2, x = cx - bw / 2, hi = d.ym === hiYm;
+    var hTot = d.total > 0 ? Math.max(3, Math.round(hMax * d.total / maxV)) : 0;
+    var hFix = d.total > 0 ? Math.round(hTot * d.fixed / d.total) : 0;
+    var hFlex = hTot - hFix;
+    svg += '<g><title>' + d.ym + ' · 고정비 ' + won(d.fixed) + ' · 변동·카드 ' + won(d.flexible) + '</title>';
+    if (hTot > 0){
+      if (hFlex > 0) svg += '<rect x="' + x + '" y="' + (base - hTot) + '" width="' + bw + '" height="' + hFlex + '" rx="3" fill="' + (hi ? '#FF8A3D' : '#FFD2B0') + '"/>';
+      if (hFix > 0) svg += '<rect x="' + x + '" y="' + (base - hFix) + '" width="' + bw + '" height="' + hFix + '" rx="3" fill="' + (hi ? '#3182F6' : '#B5CDF0') + '"/>';
+      svg += '<text x="' + cx + '" y="' + (base - hTot - 5) + '" text-anchor="middle" font-size="9.5" font-weight="700" fill="' + (hi ? '#191F28' : '#B0B8C1') + '">' + shortWon(d.total) + '</text>';
+    } else {
+      svg += '<rect x="' + x + '" y="' + (base - 3) + '" width="' + bw + '" height="3" rx="1.5" fill="#EDF1F5"/>';
+    }
+    svg += '<text x="' + cx + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" font-weight="700" fill="' + (hi ? '#191F28' : '#B0B8C1') + '">' + d.label + '</text></g>';
+  });
+  return svg + '</svg>';
+}
+function shareSVG(sh){
+  if (!sh.total) return '';
+  var W = 320, x = 0;
+  var svg = '<svg viewBox="0 0 ' + W + ' 14" width="100%" height="14" preserveAspectRatio="none" role="img" aria-label="지출 비중">';
+  [[sh.loan, '#3182F6'], [sh.living, '#7DA8F5'], [sh.flex, '#FF8A3D']].forEach(function(seg){
+    var w = Math.round(W * seg[0] / sh.total);
+    if (w > 0) svg += '<rect x="' + x + '" y="0" width="' + w + '" height="14" fill="' + seg[1] + '"/>';
+    x += w;
+  });
+  return svg + '</svg>';
+}
+function loanRankCardHTML(){
+  var rk = loanRank('rate').slice(0, 3), cash = loanRank('cash')[0];
+  var html = '<div class="ctitle" style="display:flex;align-items:center;justify-content:space-between">' +
+    '<span>🏦 대출 정리 우선순위</span><span style="color:#3182F6;font-weight:700">자세히 ›</span></div>';
+  if (!rk.length)
+    return html + '<div class="hint" style="margin:2px 0 0">대출을 넣으면 금리·잔액으로 갚는 순서를 계산해 드려요.</div>';
+  rk.forEach(function(l, i){
+    html += '<div class="rkrow"><span class="rkno">' + (i + 1) + '</span>' +
+      '<span class="rknm">' + esc(l.name) + '</span>' +
+      '<span class="rkmeta">' + (l.rate ? shortNum(l.rate) + '%' : '금리—') + '</span>' +
+      '<span class="rkamt">' + shortWon(l.balance) + '</span></div>';
+  });
+  if (cash && cash.monthly)
+    html += '<div class="hint" style="margin:8px 0 0">갚으면 매달 현금이 가장 트이는 건 <b>' +
+      esc(cutStr(cash.name, 12)) + '</b> · 월 ' + won(cash.monthly) + '</div>';
+  return html;
+}
+function renderCharts(){
+  var ref = state.viewMonth || curYM();
+  var data = chart6Months(ref), sh = monthShare(ref);
+  var hi = curYM();
+  data.forEach(function(d){ if (d.ym === ref) hi = ref; });
+  var e1 = $('chart6');
+  if (e1) e1.innerHTML = barsSVG(data, hi);
+  var head = $('chartHead');
+  if (head) head.textContent = ref === curYM() ? '이번 달' : ymLabel(ref);
+  var e2 = $('chartShare');
+  if (e2) e2.innerHTML = shareSVG(sh);
+  var st = $('shareTitle');
+  if (st) st.textContent = (ref === curYM() ? '이번 달' : (+String(ref).split('-')[1]) + '월') + ' 지출 비중';
+  var lg = $('shareLegend');
+  if (lg){
+    if (!sh.total){
+      lg.innerHTML = '<span>이번 달 기록이 쌓이면 비중을 보여 드려요</span>';
+    } else {
+      lg.innerHTML =
+        '<span><i style="background:#3182F6"></i>🏦 대출 상환 <b>' + won(sh.loan) + '</b> · ' + sh.loanPct + '%</span>' +
+        '<span><i style="background:#7DA8F5"></i>🛡️ 보험·생활 <b>' + won(sh.living) + '</b> · ' + sh.livingPct + '%</span>' +
+        '<span><i style="background:#FF8A3D"></i>💳 변동·카드 <b>' + won(sh.flex) + '</b> · ' + sh.flexPct + '%</span>';
+    }
+  }
+  var card = $('loanRankCard');
+  if (card) card.innerHTML = loanRankCardHTML();
+}
+
 /* ---------- 설정: 키 ---------- */
 function openGemSettings(){
-  closeSheet('shShot');
+  closeAll();
   openSettings();
   setTimeout(function(){ try { $('sGem').focus(); } catch(e){} }, 320);
 }
@@ -3704,6 +4348,8 @@ function bind(){
     switch(act){
       case 'tab': showView(t.getAttribute('data-view')); break;
       case 'settings': openSettings(); break;
+      case 'coach': openCoach(); break;
+      case 'coachai': runCoachAI(); break;
       case 'who': openWho(); break;
       case 'setwho': setWho(t.getAttribute('data-who')); break;
       case 'quick': openQuick(null); break;
@@ -3964,6 +4610,7 @@ function bind(){
         state = normalize(blankState());
         showPaid = false;
         state.viewMonth = curYM();
+        try { localStorage.removeItem(COACH_KEY); } catch(e){}   /* 지운 기록의 AI 진단도 같이 지움 */
         save(); openSettings();
         toast('전체 데이터를 비웠어요 · 빈 가계부로 시작해요');
       }, true);
@@ -3974,6 +4621,7 @@ function bind(){
       var keep = {fbRaw:(state.settings.fbRaw||''), houseId:(state.settings.houseId||''),
         pin:(state.settings.pin||''), currentUser:me(), geminiKey:(state.settings.geminiKey||''),
         autoConnect:(state.settings.autoConnect !== false)};
+      try { localStorage.removeItem(COACH_KEY); } catch(e){}
       state = normalize(sampleState());
       state.settings.fbRaw = keep.fbRaw;
       state.settings.houseId = keep.houseId;
@@ -3997,6 +4645,7 @@ function shiftMonth(dir){
   state.viewMonth = ymStr(d);
   persistLocal();
   renderList();
+  renderCharts();   /* 설계 탭 그래프도 보고 있는 달을 따라간다 */
 }
 
 /* ---------------- 시작 ---------------- */
