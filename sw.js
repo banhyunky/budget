@@ -1,7 +1,7 @@
 // 화면 파일을 폰에 저장해 두고 인터넷이 없어도 열리게 하는 서비스워커 (가계 데이터는 건드리지 않음)
 // 전략: 항상 최신 파일을 먼저 받아오고(네트워크 우선), 인터넷이 안 될 때만 저장된 파일을 보여줌
 // 화면을 고쳐 올린 뒤에는 아래 V 숫자를 올리면 예전 캐시가 정리됩니다.
-const V = 'budget-v11';
+const V = 'budget-v12';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {

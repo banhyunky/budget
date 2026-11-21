@@ -286,6 +286,15 @@ details.rules pre{background:#F7F9FA;border-radius:12px;padding:12px;overflow-x:
   background:linear-gradient(to top,rgba(17,24,39,.6),rgba(17,24,39,0))}
 .shotbar button{flex:1;border:0;border-radius:10px;background:rgba(255,255,255,.94);
   padding:9px;font-size:12.5px;font-weight:700;color:var(--ink)}
+.shotthumbs{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding:1px 1px 3px;
+  -webkit-overflow-scrolling:touch}
+.shotthumbs img{width:46px;height:62px;flex:none;object-fit:cover;object-position:top;
+  border-radius:8px;border:1.5px solid #E3E6EA;background:#EDF1F5}
+.shotthumbs img.on{border-color:var(--blue);box-shadow:0 0 0 2px rgba(49,130,246,.16)}
+.shotthumbs .more{flex:none;display:grid;place-items:center;width:46px;height:62px;border-radius:8px;
+  background:#F2F4F6;color:var(--sub);font-size:12px;font-weight:700;border:1.5px solid #E3E6EA}
+.shotthumbs .more.on{color:var(--blue-deep);background:var(--blue-bg);border-color:var(--blue)}
+.shotmulti{display:block;margin-top:5px;font-size:11.5px;font-weight:700;color:#4B8DE8}
 .load{display:flex;align-items:center;justify-content:center;gap:9px;padding:16px 4px;
   font-size:13.5px;font-weight:600;color:var(--mid)}
 .spin{width:17px;height:17px;flex:none;border-radius:50%;border:2.5px solid #DDE1E6;
@@ -541,12 +550,13 @@ input.mini{font-weight:600;padding:5px 7px}
       <button data-act="shotmode" data-v="bill">고정비·카드</button>
       <button data-act="shotmode" data-v="acc">예적금</button>
     </div>
-    <input type="file" id="shotFile" accept="image/*" hidden>
+    <input type="file" id="shotFile" accept="image/*" multiple hidden>
     <div id="shotPick">
       <button class="shotdrop" data-act="shotpick" type="button">
         <div class="cam">🖼️</div>
         <b id="shotDropTitle">캡처 사진 선택</b>
         <small id="shotDropSub">은행·카드 앱의 내역 화면을 그대로 올려 주세요</small>
+        <small class="shotmulti">여러 장을 한꺼번에 고를 수 있어요</small>
       </button>
       <div class="hint" id="shotDropHint" style="margin:10px 2px 0">글자가 선명한 캡처일수록 정확해요. 한 화면에 여러 건이 있어도 괜찮아요.</div>
       <div id="shotSamples" hidden>
@@ -561,10 +571,11 @@ input.mini{font-weight:600;padding:5px 7px}
     <div id="shotWork" hidden>
       <div class="shotthumb"><img id="shotImg" alt="캡처 미리보기">
         <div class="shotbar">
-          <button data-act="shotpick" type="button">다른 사진</button>
+          <button data-act="shotpick" type="button">사진 다시 고르기</button>
           <button data-act="shotretry" type="button">다시 읽기</button>
         </div>
       </div>
+      <div class="shotthumbs" id="shotThumbs" hidden></div>
     </div>
     <div id="shotState"></div>
     <div id="shotReview"></div>
@@ -1723,16 +1734,17 @@ function addCardTxn(){
 
 /* ---------------- 캡처 사진 자동 입력 (거래·고정비·예적금) ---------------- */
 var GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash'];
-var shot = { mode:'txn', items:[], bills:[], accs:[], busy:false, dataUrl:'', demo:false };
+var SHOT_MAX = 10;   /* 한 번에 읽는 캡처 사진 장수 상한 */
+var shot = { mode:'txn', items:[], bills:[], accs:[], busy:false, dataUrl:'', raws:[], small:[], seq:0, cur:0, missed:[], gen:0, demo:false };
 var CHK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>';
 
 var SHOT_DROP = {
   txn:  { title:'캡처 사진 선택', sub:'은행·카드 앱의 내역 화면을 그대로 올려 주세요',
-          hint:'글자가 선명한 캡처일수록 정확해요. 한 화면에 여러 건이 있어도 괜찮아요.' },
+          hint:'글자가 선명할수록 정확해요. 여러 장을 고르면 겹치는 내역은 중복으로 걸러 드려요.' },
   bill: { title:'고정비 캡처 선택', sub:'토스·은행 앱의 대출·카드 청구 화면을 올려 주세요',
-          hint:'대출 잔액과 월 상환액, 카드 결제 예정 금액을 읽어 고정비에 담아요.' },
+          hint:'대출 잔액과 상환액, 카드 청구 예정 금액을 읽어 고정비에 담아요. 여러 장도 한꺼번에 돼요.' },
   acc:  { title:'예적금 캡처 선택', sub:'은행 앱의 예금·적금 현황 화면을 올려 주세요',
-          hint:'상품명·잔액·월 납입액·만기일을 읽어 예적금 목록에 담아요.' }
+          hint:'상품명·잔액·월 납입액·만기일을 읽어 예적금 목록에 담아요. 여러 장도 한꺼번에 돼요.' }
 };
 
 function gemKey(){ return String((state.settings && state.settings.geminiKey) || '').trim(); }
@@ -1802,6 +1814,12 @@ function shotPrompt(mode){
 }
 
 /* ---------- Gemini 호출 ---------- */
+function fatalErr(msg){
+  var e = new Error(msg);
+  e.fatal = true;
+  return e;
+}
+
 function geminiText(j){
   var parts = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
   if (!parts || !parts.length) return '';
@@ -1832,10 +1850,10 @@ function ocrImage(dataUrl, key, mode){
           }
           var msg = (j && j.error && j.error.message) || '';
           if (res.status === 400 && /API key not valid|API_KEY_INVALID|invalid api key/i.test(msg)){
-            throw new Error('API 키가 올바르지 않아요. 설정에서 다시 확인해 주세요.');
+            throw fatalErr('API 키가 올바르지 않아요. 설정에서 다시 확인해 주세요.');
           }
-          if (res.status === 403) throw new Error('API 키 권한을 확인해 주세요.');
-          if (res.status === 429) throw new Error('요청이 잠시 몰렸어요. 조금 뒤 다시 시도해 주세요.');
+          if (res.status === 403) throw fatalErr('API 키 권한을 확인해 주세요.');
+          if (res.status === 429) throw fatalErr('요청이 잠시 몰렸어요. 조금 뒤 다시 시도해 주세요.');
           lastErr = new Error(msg || ('오류 ' + res.status));
           return attempt(i + 1);
         });
@@ -2044,10 +2062,90 @@ function markDups(items){
 function refreshDup(it){
   var wasAuto = !!it.autoOff;
   var t = dupOf(it);
-  it.dup = !!t;
-  it.dupRef = t ? (t.memo || t.cat || '') : '';
+  var peer = shotDupPeer(it, 'txn');
+  it.dup = !!(t || peer);
+  it.dupSrc = t && peer ? 'both' : t ? 'state' : peer ? 'batch' : '';
+  it.dupRef = t ? (t.memo || t.cat || '') : peer ? (peer.merchant || '') : '';
   if (it.dup && wasAuto) it.on = false;
   if (!it.dup && wasAuto){ it.autoOff = false; it.on = true; }
+}
+
+/* 여러 장을 읽을 때: 같은 사진 묶음 안에서 겹치는 항목까지 중복으로 본다 */
+function dupKeyOf(it, mode){
+  if (!it) return '';
+  if (mode === 'bill' || mode === 'acc'){
+    var n = normName(it.name);
+    return n ? mode + '|' + n : '';
+  }
+  var amount = Math.round(+it.amount || 0);
+  if (amount <= 0) return '';
+  return 'txn|' + (it.type === 'income' ? 'income' : 'expense') + '|' +
+    String(it.date || '') + '|' + amount;
+}
+function shotDupPeer(it, mode){
+  var k = dupKeyOf(it, mode);
+  if (!k) return null;
+  var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
+  for (var i = 0; i < (list || []).length; i++){
+    var o = list[i];
+    if (o === it) continue;
+    if ((o._seq || 0) >= (it._seq || 0)) continue;
+    if (dupKeyOf(o, mode) === k) return o;
+  }
+  return null;
+}
+/* 겹침 판정: 이미 저장된 항목(state)과 앞 사진에서 읽은 항목(peer) 둘 다 본다 */
+function markOne(it, mode, peer){
+  var src = '';
+  if (mode === 'txn'){
+    var t = dupOf(it);
+    it.dup = !!(t || peer);
+    src = t && peer ? 'both' : t ? 'state' : peer ? 'batch' : '';
+    it.dupRef = t ? (t.memo || t.cat || '') : peer ? (peer.merchant || '') : '';
+    it.autoOff = !!it.dup;
+    it.on = !it.dup;
+  } else if (mode === 'bill'){
+    var m = findBillMatch(it);
+    it.dup = !!(m || peer);
+    src = m && peer ? 'both' : m ? 'state' : peer ? 'batch' : '';
+    it.matchId = m ? m.id : '';
+    it.prevBalance = m ? (+m.balance || 0) : 0;
+    it.act = m ? 'update' : 'add';
+    if (m && OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
+    it.on = m ? true : !peer;
+  } else {
+    var a = findByName(state.accounts, it.name);
+    it.dup = !!(a || peer);
+    src = a && peer ? 'both' : a ? 'state' : peer ? 'batch' : '';
+    it.matchId = a ? a.id : '';
+    it.prevBalance = a ? (+a.balance || 0) : 0;
+    it.act = a ? 'update' : 'add';
+    if (a && OWNERS.indexOf(a.owner) >= 0) it.owner = a.owner;
+    it.on = a ? true : !peer;
+  }
+  it.dupSrc = src;
+  return it;
+}
+function addShotItems(items, mode){
+  if (!items || !items.length) return 0;
+  var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
+  var seen = {};
+  (list || []).forEach(function(o){ var k = dupKeyOf(o, mode); if (k && !seen[k]) seen[k] = o; });
+  items.forEach(function(it){
+    var k = dupKeyOf(it, mode);
+    markOne(it, mode, k ? (seen[k] || null) : null);
+    it._seq = ++shot.seq;
+    if (k && !seen[k]) seen[k] = it;
+    list.push(it);
+  });
+  return items.length;
+}
+function countShot(mode){
+  return mode === 'bill' ? shot.bills.length : mode === 'acc' ? shot.accs.length : shot.items.length;
+}
+function shotDupCount(mode){
+  var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
+  return (list || []).filter(function(x){ return x.dup; }).length;
 }
 
 /* 고정비·예적금: 이름이 같은 항목이 있으면 덮어쓸지 고르게 한다 */
@@ -2147,37 +2245,97 @@ function setShotMode(mode){
 
 function openShot(mode){
   shot.items = []; shot.bills = []; shot.accs = [];
-  shot.busy = false; shot.dataUrl = ''; shot.demo = false;
+  shot.busy = false; shot.dataUrl = ''; shot.demo = false; shot.gen++;
+  shot.raws = []; shot.small = []; shot.seq = 0; shot.cur = 0; shot.missed = [];
   setShotMode(mode);
   $('shotPick').hidden = false;
   $('shotWork').hidden = true;
   $('shotSamples').hidden = !!gemKey();
   $('shotState').innerHTML = '';
   $('shotReview').innerHTML = '';
+  $('shotThumbs').hidden = true;
+  $('shotThumbs').innerHTML = '';
   $('shotFile').value = '';
   closeSheet('shQuick');
   openSheet('shShot');
 }
 
+/* ---------- 사진 고르기 (한 장도, 여러 장도) ---------- */
 function onShotFile(file){
-  if (!file) return;
-  if (file.type && !/^image\//.test(file.type)){ toast('사진 파일만 올릴 수 있어요'); return; }
-  var fr = new FileReader();
-  fr.onload = function(){
-    var raw = String(fr.result || '');
-    if (!raw){ toast('사진을 읽지 못했어요'); return; }
-    shot.dataUrl = raw;
-    shot.demo = false;
-    shot.items = []; shot.bills = []; shot.accs = [];
-    $('shotImg').src = raw;
-    $('shotPick').hidden = true;
-    $('shotWork').hidden = false;
-    $('shotReview').innerHTML = '';
+  if (file) onShotFiles([file]);
+}
+function onShotFiles(files){
+  var list = Array.prototype.slice.call(files || []).filter(function(f){
+    return f && (!f.type || /^image\//.test(f.type));
+  });
+  if (!list.length){ toast('사진 파일만 올릴 수 있어요'); return; }
+  var cut = 0;
+  if (list.length > SHOT_MAX){ cut = list.length - SHOT_MAX; list = list.slice(0, SHOT_MAX); }
+  shot.demo = false;
+  shot.items = []; shot.bills = []; shot.accs = [];
+  shot.raws = []; shot.small = []; shot.seq = 0; shot.cur = 0; shot.missed = [];
+  shot.busy = false; shot.gen++;
+  $('shotReview').innerHTML = '';
+  $('shotState').innerHTML = '';
+  $('shotPick').hidden = true;
+  $('shotWork').hidden = false;
+  if (cut) toast('한 번에 ' + SHOT_MAX + '장까지 읽어요 · ' + SHOT_MAX + '장만 담았어요');
+  readShotFiles(list, function(raws){
+    if (!raws.length){
+      toast('사진을 읽지 못했어요');
+      $('shotPick').hidden = false; $('shotWork').hidden = true;
+      return;
+    }
+    shot.raws = raws.map(function(r){ return r.dataUrl; });
+    shot.dataUrl = shot.raws[0];
+    $('shotImg').src = shot.raws[0];
+    renderShotThumbs();
     if (!gemKey()){ shotStateKey(); return; }
     runShotOcr();
-  };
-  fr.onerror = function(){ toast('사진을 읽지 못했어요'); };
-  fr.readAsDataURL(file);
+  });
+}
+/* 고른 사진을 순서대로 읽어 data URL 로 모은다 */
+function readShotFiles(files, cb){
+  var out = [], i = 0;
+  function next(){
+    if (i >= files.length) return cb(out);
+    var f = files[i++];
+    var fr = new FileReader();
+    fr.onload = function(){
+      var raw = String(fr.result || '');
+      if (raw) out.push({ dataUrl: raw, name: f.name || '' });
+      next();
+    };
+    fr.onerror = function(){ next(); };
+    try { fr.readAsDataURL(f); } catch(e){ next(); }
+  }
+  next();
+}
+function renderShotThumbs(){
+  var box = $('shotThumbs');
+  if (!box) return;
+  var n = (shot.raws || []).length;
+  if (n < 2){ box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  var html = '';
+  for (var i = 0; i < n; i++){
+    var u = (shot.small && shot.small[i]) || '';
+    html += u
+      ? '<img src="' + u + '" alt="' + (i + 1) + '번째 캡처"' + (i === shot.cur ? ' class="on"' : '') + '>'
+      : '<span class="more' + (i === shot.cur ? ' on' : '') + '">' + (i + 1) + '</span>';
+  }
+  box.innerHTML = html;
+}
+function prepareImage(i, cb){
+  if (!shot.small) shot.small = [];
+  if (shot.small[i]) return cb(shot.small[i]);
+  var gen = shot.gen, url = shot.raws[i];
+  shrink(url, function(sm){
+    if (shot.gen !== gen) return cb('');   /* 그사이 새 사진을 골랐으면 버린다 */
+    shot.small[i] = sm || url;
+    renderShotThumbs();
+    cb(shot.small[i]);
+  });
 }
 
 function shotStateKey(){
@@ -2224,10 +2382,13 @@ function sampleAccItems(){
 }
 
 function loadShotDemo(mode){
-  shot.busy = false; shot.dataUrl = ''; shot.demo = true;
+  shot.busy = false; shot.dataUrl = ''; shot.demo = true; shot.gen++;
+  shot.raws = []; shot.small = []; shot.seq = 0; shot.cur = 0; shot.missed = [];
   setShotMode(mode);
   $('shotPick').hidden = true;
   $('shotWork').hidden = true;
+  $('shotThumbs').hidden = true;
+  $('shotThumbs').innerHTML = '';
   $('shotState').innerHTML = '<div class="hint" style="margin:0 0 8px">' +
     (mode === 'bill' ? '예시 고정비 캡처' : mode === 'acc' ? '예시 예적금 캡처' : '예시 캡처') +
     '로 읽은 결과예요. 실제 사진을 올리면 이렇게 보여요.</div>';
@@ -2237,43 +2398,94 @@ function loadShotDemo(mode){
   renderShotList();
 }
 
-/* ---------- 읽기 ---------- */
+/* ---------- 읽기 (고른 사진을 한 장씩 차례로) ---------- */
+function shotProgress(i, total){
+  var label = shot.mode === 'bill' ? '고정비를 읽는 중…' : shot.mode === 'acc' ? '예적금을 읽는 중…' : '사진을 읽는 중…';
+  var cnt = total > 1 ? ' <b style="color:var(--blue-deep)">' + (i + 1) + '/' + total + '장</b>' : '';
+  $('shotState').innerHTML = '<div class="load"><span class="spin"></span>' + label + cnt + '</div>' +
+    '<div class="hint" style="text-align:center;margin:0 0 6px">' +
+    (total > 1 ? '장당 3~8초씩 걸려요 · 겹치는 화면은 중복으로 걸러요' : '보통 3~8초 걸려요') + '</div>';
+}
+function shotMissedNote(){
+  if (!shot.missed || !shot.missed.length) return '';
+  var idx = shot.missed.map(function(n){ return n + '번째'; }).join('·');
+  return '<div class="hint" style="margin:0 0 8px">' + idx +
+    ' 사진은 내역을 찾지 못했어요. 나머지 사진 결과는 그대로 담을 수 있어요.</div>';
+}
 function runShotOcr(){
   if (shot.busy) return;
   var key = gemKey();
   if (!key){ shotStateKey(); return; }
-  if (!shot.dataUrl){ toast('먼저 캡처 사진을 골라 주세요'); return; }
-  var mode = shot.mode;
+  var raws = (shot.raws && shot.raws.length) ? shot.raws : (shot.dataUrl ? [shot.dataUrl] : []);
+  if (!raws.length){ toast('먼저 캡처 사진을 골라 주세요'); return; }
+  if (!shot.raws.length) shot.raws = raws.slice();
+  var mode = shot.mode, total = raws.length;
+  var gen = ++shot.gen;
+  function dead(){ return shot.mode !== mode || shot.gen !== gen; }
   shot.busy = true;
+  shot.missed = [];
+  shot.items = []; shot.bills = []; shot.accs = []; shot.seq = 0; shot.cur = 0;
   $('shotReview').innerHTML = '';
-  $('shotState').innerHTML = '<div class="load"><span class="spin"></span>' +
-    (mode === 'bill' ? '고정비를 읽는 중…' : mode === 'acc' ? '예적금을 읽는 중…' : '사진을 읽는 중…') + '</div>' +
-    '<div class="hint" style="text-align:center;margin:0 0 6px">보통 3~8초 걸려요</div>';
-  shrink(shot.dataUrl, function(small){
-    ocrImage(small || shot.dataUrl, key, mode).then(function(items){
-      shot.busy = false;
-      if (shot.mode !== mode){ return; }
-      if (!items.length){
-        $('shotState').innerHTML = '<div class="status">사진에서 내역을 찾지 못했어요.<br>글자가 선명한 캡처로 다시 시도해 주세요.</div>';
-        return;
-      }
-      $('shotState').innerHTML = '';
-      if (mode === 'bill') shot.bills = markBillDups(items);
-      else if (mode === 'acc') shot.accs = markAccDups(items);
-      else shot.items = markDups(items);
-      renderShotList();
-      var dN = mode === 'bill' ? shot.bills.filter(function(x){ return x.dup; }).length
-        : mode === 'acc' ? shot.accs.filter(function(x){ return x.dup; }).length
-        : shot.items.filter(function(x){ return x.dup; }).length;
-      toast(items.length + '건을 찾았어요' + (dN ? ' · 중복 ' + dN + '건 확인' : ''));
-    }, function(err){
-      shot.busy = false;
-      $('shotState').innerHTML =
-        '<div class="status err">' + esc((err && err.message) || '사진을 읽지 못했어요') + '</div>' +
-        '<div class="hint">다른 사진으로 다시 시도하거나, 아래에서 키를 확인해 주세요.</div>' +
+  var fatal = null, failed = 0;
+  function finish(){
+    if (dead()) return;
+    shot.busy = false;
+    if (shot.mode !== mode) return;
+    shot.cur = 0;
+    renderShotThumbs();
+    try { $('shotImg').src = (shot.small && shot.small[0]) || shot.raws[0] || ''; } catch(e){}
+    if (fatal){
+      var keep = countShot(mode);
+      $('shotState').innerHTML = '<div class="status err">' + esc(fatal.message || '사진을 읽지 못했어요') + '</div>' +
+        '<div class="hint">' + (keep ? '이미 읽은 사진의 ' + keep + '건은 아래에 남겨 두었어요.'
+          : '다른 사진으로 다시 시도하거나, 아래에서 키를 확인해 주세요.') + '</div>' +
         '<button class="btn ghost" data-act="shotkey" style="margin-top:6px">설정에서 키 확인</button>';
+      renderShotList();
+      return;
+    }
+    var n = countShot(mode);
+    if (!n){
+      $('shotState').innerHTML = '<div class="status">사진에서 내역을 찾지 못했어요.<br>글자가 선명한 캡처로 다시 시도해 주세요.</div>' +
+        (total > 1 ? '<div class="hint" style="text-align:center">' + total + '장 모두에서 내역을 찾지 못했어요.</div>' : '');
+      return;
+    }
+    $('shotState').innerHTML = shotMissedNote();
+    renderShotList();
+    var dN = shotDupCount(mode);
+    toast(n + '건을 찾았어요' +
+      (total > 1 ? ' · 사진 ' + (total - failed) + '/' + total + '장' : '') +
+      (dN ? ' · 중복 ' + dN + '건 확인' : '') +
+      (failed ? ' · 못 읽은 ' + failed + '장' : ''));
+  }
+  function next(i){
+    if (dead()) return;
+    if (i >= total) return finish();
+    shot.cur = i;
+    renderShotThumbs();
+    shotProgress(i, total);
+    prepareImage(i, function(small){
+      if (dead()) return;
+      $('shotImg').src = small;
+      ocrImage(small, key, mode).then(function(items){
+        if (dead()) return;
+        if (!items || !items.length){
+          failed++;
+          shot.missed.push(i + 1);
+        } else {
+          addShotItems(items, mode);
+          renderShotList();
+        }
+        next(i + 1);
+      }, function(err){
+        if (dead()) return;
+        if (err && err.fatal){ fatal = err; return finish(); }
+        failed++;
+        shot.missed.push(i + 1);
+        next(i + 1);
+      });
     });
-  });
+  }
+  next(0);
 }
 
 function shrink(dataUrl, cb){
@@ -2311,10 +2523,17 @@ function optHTML(list, cur){
   }).join('');
 }
 
+function dupBadgeHTML(it, kind){
+  if (!it || !it.dup) return '';
+  if (it.dupSrc === 'batch') return '<span class="dupbadge">앞 사진과 겹침 · 빼 둘게요</span>';
+  if (it.dupSrc === 'both') return '<span class="dupbadge">이미 있는 항목 · 앞 사진과도 겹침</span>';
+  return '<span class="dupbadge">' + esc(kind) + '</span>';
+}
+
 function shotRowHTML(it, i){
   var cats = (it.type === 'income' ? CATS_INC : CATS_EXP).map(function(c){ return c[0]; });
   if (cats.indexOf(it.category) < 0) cats = cats.concat([it.category]);
-  var badge = it.dup ? '<span class="dupbadge">이미 기록됨 · 중복 의심</span>' : '';
+  var badge = dupBadgeHTML(it, '이미 기록됨 · 중복 의심');
   return '<div class="srow' + (it.on ? ' on' : '') + (it.dup ? ' dup' : '') + '">' +
     '<div class="s1">' +
       '<button class="schk" data-act="shotsel" data-i="' + i + '" aria-label="' + (it.on ? '선택 해제' : '선택') + '">' + CHK_SVG + '</button>' +
@@ -2335,9 +2554,9 @@ function shotRowHTML(it, i){
 function shotBillHTML(it, i){
   var cats = BILL_CATS.map(function(c){ return c[0]; });
   var badge = it.dup
-    ? '<span class="dupbadge">이미 있는 고정비 · 중복 의심</span>' +
-      '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
-      (it.act === 'update' ? '기존 항목 업데이트' : '새로 추가') + '</button>'
+    ? dupBadgeHTML(it, '이미 있는 고정비 · 중복 의심') +
+      (it.matchId ? '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
+      (it.act === 'update' ? '기존 항목 업데이트' : '새로 추가') + '</button>' : '')
     : '';
   var loanFields = it.category === '대출'
     ? '<label class="lbx">잔액<input data-i="' + i + '" data-f="balance" inputmode="numeric" value="' +
@@ -2363,9 +2582,9 @@ function shotBillHTML(it, i){
 
 function shotAccHTML(it, i){
   var badge = it.dup
-    ? '<span class="dupbadge">이미 있는 예적금 · 중복 의심</span>' +
-      '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
-      (it.act === 'update' ? '기존 항목 업데이트' : '새로 추가') + '</button>'
+    ? dupBadgeHTML(it, '이미 있는 예적금 · 중복 의심') +
+      (it.matchId ? '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
+      (it.act === 'update' ? '기존 항목 업데이트' : '새로 추가') + '</button>' : '')
     : '';
   return '<div class="srow' + (it.on ? ' on' : '') + (it.dup ? ' dup' : '') + '">' +
     '<div class="s1">' +
@@ -2903,6 +3122,7 @@ function bind(){
         if (shot.busy) break;
         setShotMode(t.getAttribute('data-v'));
         shot.items = []; shot.bills = []; shot.accs = []; shot.demo = false;
+        shot.seq = 0; shot.cur = 0; shot.missed = [];
         $('shotState').innerHTML = ''; $('shotReview').innerHTML = '';
         if (shot.dataUrl){ if (gemKey()) runShotOcr(); else shotStateKey(); }
         else { $('shotPick').hidden = false; $('shotWork').hidden = true; }
@@ -3033,9 +3253,9 @@ function bind(){
   $('sGemSave').addEventListener('click', saveGemKey);
   $('sGemClear').addEventListener('click', function(){ $('sGem').value = ''; saveGemKey(); });
   $('shotFile').addEventListener('change', function(){
-    var f = this.files && this.files[0];
+    var files = Array.prototype.slice.call(this.files || []);
     this.value = '';
-    onShotFile(f);
+    if (files.length) onShotFiles(files);
   });
   $('shotReview').addEventListener('input', function(ev){
     var el = ev.target;
