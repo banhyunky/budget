@@ -3578,6 +3578,7 @@ function loanRank(mode){
       id: b.id, name: b.name, balance: bal, monthly: mon, rate: rate,
       day: Math.round(+b.day || 0),
       per10m: bal > 0 ? Math.round(mon / bal * 10000000) : 0,
+      ratioPct: bal > 0 ? Math.round(mon / bal * 1000) / 10 : 0,
       yearlyInterest: bal > 0 && rate > 0 ? Math.round(bal * rate / 100) : 0
     };
   });
@@ -3854,7 +3855,8 @@ function coachPaceHTML(ym){
 function coachLoanRowHTML(l, i, mode){
   var balTxt = l.balance ? '잔액 ' + won(l.balance) : '잔액 미입력';
   var meta = mode === 'cash'
-    ? (l.balance ? '잔액 1,000만원당 월 ' + won(l.per10m) : '잔액 미입력' + (l.rate ? ' · 금리 ' + shortNum(l.rate) + '%' : ''))
+    ? (l.balance ? '잔액 대비 매달 ' + shortNum(l.ratioPct) + '% 갚는 중'
+                 : '잔액 미입력' + (l.rate ? ' · 금리 ' + shortNum(l.rate) + '%' : ''))
     : balTxt + (l.rate ? ' · 금리 ' + shortNum(l.rate) + '%' : ' · 금리 미입력');
   var val = l.monthly ? won(l.monthly) : '—';
   return '<div class="crow"><span class="rkno">' + (i + 1) + '</span>' +
@@ -3871,8 +3873,7 @@ function coachLoanHTML(){
   var html = '<div class="ailbl">금리 높은 순 · 이자부터 줄이기</div>';
   rk.slice(0, 3).forEach(function(l, i){ html += coachLoanRowHTML(l, i, 'rate'); });
   html += '<div class="ailbl">갚으면 매달 현금이 가장 트이는 순</div>';
-  cash.slice(0, 3).forEach(function(l, i){ html += coachLoanRowHTML(l, i, 'cash'); });
-  var sum = 0, bal = 0, hi = 0;
+  cash.slice(0, 3).forEach(function(l, i){ html += coachLoanRowHTML(l, i, 'cash'); });  var sum = 0, bal = 0, hi = 0;
   rk.forEach(function(l){ sum += l.monthly; bal += l.balance; if (l.rate > hi) hi = l.rate; });
   html += '<div class="hint" style="margin:8px 0 0">대출 ' + rk.length + '건 · ' +
     (bal ? '잔액 ' + won(bal) : '잔액 미입력') +
