@@ -1733,7 +1733,7 @@ function addCardTxn(){
 }
 
 /* ---------------- 캡처 사진 자동 입력 (거래·고정비·예적금) ---------------- */
-var GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash'];
+var GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
 var SHOT_MAX = 10;   /* 한 번에 읽는 캡처 사진 장수 상한 */
 var shot = { mode:'txn', items:[], bills:[], accs:[], busy:false, dataUrl:'', raws:[], small:[], seq:0, cur:0, missed:[], gen:0, demo:false };
 var CHK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>';
