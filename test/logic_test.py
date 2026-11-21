@@ -53,7 +53,7 @@ globalThis.__T = {
   timelineOf: timelineOf, tlRowHTML: tlRowHTML, renderTimelineSheet: renderTimelineSheet,
   setTlFilter: setTlFilter, payIncome: payIncome, signedWon: signedWon, mdLabel: mdLabel,
   isPastYM: isPastYM, renderHomeTimeline: renderHomeTimeline, openTimeline: openTimeline,
-  todayStr: todayStr, shiftTlMonth: shiftTlMonth
+  todayStr: todayStr, shiftTlMonth: shiftTlMonth, deleteTxn: deleteTxn
 };
 '''
 idx = js.rstrip().rfind('})();')
@@ -1185,6 +1185,29 @@ check('전체: 둘 다', '이마트' in _h and '실손보험' in _h and '현기 
 ev("__T.openTimeline('2026-11'); __T.setTlFilter('all'); __T.shiftTlMonth(1)")
 check('시트 달 이동 → 12월', ev("document.getElementById('tlMonthLabel').textContent") == '2026년 12월', ev("document.getElementById('tlMonthLabel').textContent"))
 check('12월 타임라인은 예정만 (완료 0)', ev("__T.timelineOf('2026-12').every(function(x){return x.status==='plan';})") == True)
+
+
+print('\n[41] 타임라인에서 만든 기록을 지우면 다시 예정으로')
+ev(r"""
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-11';
+  st.incomes = [{id:'i1', name:'현기 월급', amount:3200000, day:25, owner:'현기', active:true}];
+  st.bills = [{id:'b1', name:'실손보험', cat:'보험', amount:92000, day:20, owner:'공동', active:true}];
+  st.txns = []; st.paid = {}; st.received = {};
+  __T.state = __T.normalize(st);
+})();
+""")
+ev("__T.payIncome('i1')")
+_tid = ev("__T.state.txns.filter(function(t){return t.incomeId==='i1';})[0].id")
+ev("__T.deleteTxn('%s')" % _tid)
+check('입금 기록을 지우면 예정 수입으로 돌아옴', ev("__T.stats('2026-11').actIncome") == 0 and ev("__T.stats('2026-11').expIncome") == 3200000)
+check('received 표시도 풀림', ev("__T.isIncomeReceived('i1','2026-11')") == False)
+ev("__T.payBill('b1')")
+_bid = ev("__T.state.txns.filter(function(t){return t.billId==='b1';})[0].id")
+ev("__T.deleteTxn('%s')" % _bid)
+check('납부 기록을 지우면 예정 지출로 돌아옴', ev("__T.stats('2026-11').actExpense") == 0 and ev("__T.stats('2026-11').expExpense") == 92000)
+check('paid 표시도 풀림', ev("__T.isPaid('b1','2026-11')") == False)
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)

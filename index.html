@@ -2362,8 +2362,15 @@ function saveQuick(){
   if (q.id){
     var t = state.txns.filter(function(x){ return x.id === q.id; })[0];
     if (t){
+      var oldYm = String(t.date || '').slice(0, 7);
       t.amount = amt; t.kind = q.kind; t.cat = q.cat; t.owner = owner;
       t.date = ds; t.memo = $('qMemo').value.trim(); t.private = q.private;
+      /* 고정 수입에서 만든 입금 줄을 지출로 바꾸거나 다른 달로 옮기면 입금 표시도 같이 옮긴다 */
+      if (t.incomeId && (q.kind !== 'income' || oldYm !== ds.slice(0, 7))){
+        delete state.received[incomeKey(t.incomeId, oldYm)];
+        if (q.kind === 'income') state.received[incomeKey(t.incomeId, ds.slice(0, 7))] = true;
+        else t.incomeId = null;
+      }
     }
     state.settings.lastOwner = owner === '공동' ? state.settings.lastOwner : owner;
     save(); closeSheet('shQuick'); toast('수정했어요');
@@ -2378,7 +2385,14 @@ function saveQuick(){
 }
 
 function deleteTxn(id){
-  state.txns = state.txns.filter(function(t){ return t.id !== id; });
+  var t = state.txns.filter(function(x){ return x.id === id; })[0];
+  /* 고정 수입·고정비에서 만든 줄을 지우면 표시도 함께 풀어서 다시 '예정'으로 돌린다 */
+  if (t){
+    var ym = String(t.date || '').slice(0, 7);
+    if (t.incomeId) delete state.received[incomeKey(t.incomeId, ym)];
+    if (t.billId) state.paid[paidKey(t.billId, ym)] = false;
+  }
+  state.txns = state.txns.filter(function(x){ return x.id !== id; });
   save(); closeSheet('shQuick'); toast('삭제했어요');
 }
 
