@@ -102,6 +102,24 @@ main{padding:6px 16px 0}
 .paidtoggle{width:100%;border:0;background:none;padding:12px 20px 14px;font-size:12.5px;
   font-weight:600;color:var(--sub);border-top:1px solid var(--line);text-align:center}
 
+/* ---------- 카드 청구액 (매달 변동 · 고정비와 분리) ---------- */
+.hero-card{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;
+  margin-top:14px;padding:14px 0 0;border-top:1px solid var(--line);text-align:left}
+.hero-card .hc-ico{font-size:16px;line-height:1}
+.hero-card .hc-main{flex:1;min-width:0}
+.hero-card .hc-main b{display:block;font-size:13.5px;font-weight:700;letter-spacing:-.02em}
+.hero-card .hc-main small{display:block;margin-top:2px;font-size:11.5px;font-weight:500;color:var(--sub);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-card .hc-amt{flex:none;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hero-card .hc-amt.none{font-size:12.5px;color:var(--blue)}
+.cardsplit{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  padding:13px 20px 7px;margin-top:0;font-size:12px;font-weight:700;color:var(--sub);
+  border-top:1px solid var(--line);background:#FAFBFC}
+.cardsplit b{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.bamt.none{font-size:12.5px;font-weight:700;color:var(--blue)}
+.cardnote{padding:6px 20px 12px;font-size:11.5px;font-weight:500;color:var(--sub);line-height:1.55}
+.seg.four button{font-size:12.5px;padding:9px 2px;letter-spacing:-.03em}
+
 .acc{display:flex;align-items:center;gap:12px;padding:13px 20px;position:relative}
 .inc{display:flex;align-items:center;gap:12px;padding:13px 20px;position:relative}
 .acc-main{flex:1;min-width:0}
@@ -391,6 +409,11 @@ input.mini{font-weight:600;padding:5px 7px}
           <div><span>쓴 돈</span><b id="homeSpent">0원</b></div>
           <div><span>남은 고정비</span><b id="homeFixed">0원</b></div>
         </div>
+        <button class="hero-card" id="homeCardRow" data-act="tab" data-view="plan">
+          <span class="hc-ico">💳</span>
+          <span class="hc-main"><b>이번 달 카드 청구액</b><small id="homeCardSub">매달 바뀌는 카드값 · 고정비와 따로</small></span>
+          <span class="hc-amt" id="homeCardAmt">-</span>
+        </button>
       </div>
 
       <div class="card">
@@ -434,7 +457,12 @@ input.mini{font-weight:600;padding:5px 7px}
       <div class="card p0" id="incList"></div>
 
       <div class="sechd"><h2>고정비</h2><span id="billTotalLbl"></span></div>
+      <div class="hint" style="margin:-2px 4px 8px">매달 같은 금액이 나가는 대출·보험·통신·월세·구독</div>
       <div class="card p0" id="billList"></div>
+
+      <div class="sechd"><h2>💳 이번 달 카드 청구액</h2><span id="cardTotalLbl"></span></div>
+      <div class="hint" style="margin:-2px 4px 8px">매달 바뀌는 카드값은 고정비와 따로 관리돼요</div>
+      <div class="card p0" id="cardList"></div>
 
       <div class="sechd"><h2>예적금</h2><span id="accTotal"></span></div>
       <div class="card p0" id="accList"></div>
@@ -443,6 +471,7 @@ input.mini{font-weight:600;padding:5px 7px}
       <div class="card">
         <div class="plrow"><span>월 수입 (고정 수입 + 기타)</span><b id="plIncome">0원</b></div>
         <div class="plrow"><span>월 고정비 합계</span><b id="plFixed">0원</b></div>
+        <div class="plrow"><span>이번 달 카드 청구액</span><b id="plCard">0원</b></div>
         <div class="plrow"><span>예적금 잔액</span><b id="plSavings">0원</b></div>
         <div class="ratio"><i id="ratioFixed" style="background:#3182F6;width:0%"></i><i id="ratioVar" style="background:#C9D1DA;width:0%"></i></div>
         <div class="legend">
@@ -545,9 +574,10 @@ input.mini{font-weight:600;padding:5px 7px}
   <div class="sheet">
     <div class="grip"></div>
     <div class="shd"><h3>캡처로 자동 입력</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
-    <div class="seg" id="shotMode" style="margin-bottom:14px">
+    <div class="seg four" id="shotMode" style="margin-bottom:14px">
       <button data-act="shotmode" data-v="txn" class="on">거래 내역</button>
-      <button data-act="shotmode" data-v="bill">고정비·카드</button>
+      <button data-act="shotmode" data-v="bill">고정비</button>
+      <button data-act="shotmode" data-v="card">카드 청구</button>
       <button data-act="shotmode" data-v="acc">예적금</button>
     </div>
     <input type="file" id="shotFile" accept="image/*" multiple hidden>
@@ -564,6 +594,7 @@ input.mini{font-weight:600;padding:5px 7px}
         <div style="display:flex;flex-wrap:wrap;gap:6px">
           <button class="mini" data-act="shotdemo">샘플 캡처 인식 체험</button>
           <button class="mini" data-act="shotbilldemo">토스 대출 캡처 체험</button>
+          <button class="mini" data-act="shotcarddemo">카드 청구액 캡처 체험</button>
           <button class="mini" data-act="shotaccdemo">예적금 캡처 체험</button>
         </div>
       </div>
@@ -591,7 +622,7 @@ input.mini{font-weight:600;padding:5px 7px}
     <div class="field"><label>이름</label><input class="ipt" id="bName" placeholder="예: 주택담보대출" maxlength="24"></div>
     <div class="field"><label>분류</label>
       <select class="ipt" id="bCat">
-        <option value="대출">대출</option><option value="카드">카드</option><option value="보험">보험</option>
+        <option value="대출">대출</option><option value="보험">보험</option>
         <option value="통신">통신</option><option value="주거">주거</option><option value="기타">기타</option>
       </select>
     </div>
@@ -606,6 +637,28 @@ input.mini{font-weight:600;padding:5px 7px}
     </div>
     <button class="btn primary" id="bSave">저장</button>
     <button class="delbtn" id="bDelete" data-act="delBill" hidden>이 고정비 삭제</button>
+  </div>
+</div>
+
+<!-- ============ SHEET: card bill (매달 변동) ============ -->
+<div class="sw" id="shCardBill">
+  <div class="bd-layer" data-close></div>
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="shd"><h3 id="cTitle">카드 청구액 추가</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
+    <div class="hint" style="margin:-4px 0 12px">카드값은 매달 달라서 고정비와 따로 넣어요. 여기 넣은 금액은 <b>이번 달에만</b> 쓰이고, 다음 달은 새로 넣어요.</div>
+    <div class="field"><label>카드 이름</label><input class="ipt" id="cName" placeholder="예: 신한카드 결제" maxlength="24"></div>
+    <div class="field"><label>결제일 (1~31)</label><input class="ipt" id="cDay" inputmode="numeric" placeholder="14"></div>
+    <div class="field"><label id="cAmountLbl">이번 달 청구 금액</label><input class="ipt" id="cAmount" inputmode="numeric" placeholder="0"></div>
+    <div class="field"><label>누구</label>
+      <div class="seg" id="cOwner">
+        <button data-act="cowner" data-owner="현기" class="on">현기</button>
+        <button data-act="cowner" data-owner="장미">장미</button>
+        <button data-act="cowner" data-owner="공동">공동</button>
+      </div>
+    </div>
+    <button class="btn primary" id="cSave">저장</button>
+    <button class="delbtn" id="cDelete" data-act="delCardBill" hidden>이 카드 청구액 삭제</button>
   </div>
 </div>
 
@@ -854,7 +907,7 @@ var fb = { db:null, ref:null, unsub:null, connected:false };
 var applying = false, pushTimer = null, lastPushTs = 0, showPaid = false;
 var view = 'home', ownerFilter = '전체';
 var q = { id:null, kind:'expense', cat:'식비', owner:'현기', private:false };
-var bEditing = null, iEditing = null, aEditing = null, confirmCb = null;
+var bEditing = null, iEditing = null, aEditing = null, cEditing = null, confirmCb = null;
 var cardParsed = null, cardCat = '기타', cardCatTouched = false;
 
 /* ---------------- 유틸 ---------------- */
@@ -938,13 +991,16 @@ function iconOf(cat, kind){
 }
 function addDays(d, n){ var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
 function dday(ds){
-  var p = String(ds).split('-');
-  var target = new Date(+p[0], +p[1] - 1, +p[2]);
-  var now = new Date(); var t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  var diff = Math.round((target - t0) / 86400000);
+  var diff = dayDiff(ds);
   if (diff === 0) return { t:'오늘', hot:true };
   if (diff > 0) return { t:'D-' + diff, hot: diff <= 3 };
   return { t: Math.abs(diff) + '일 지남', hot:true };
+}
+function dayDiff(ds){
+  var p = String(ds).split('-');
+  var target = new Date(+p[0], +p[1] - 1, +p[2]);
+  var now = new Date(); var t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((target - t0) / 86400000);
 }
 function isMasked(t){
   return !!t.private && (t.owner || '공동') !== state.settings.currentUser;
@@ -956,9 +1012,10 @@ function sampleState(){
   var now = new Date(), ym = ymStr(now), di = now.getDate(), dim = daysIn(ym);
   function ds(n){ var d = Math.max(1, Math.min(n, dim)); return ym + '-' + pad(d); }
 
+  var cardBm = {}; cardBm[ym] = 1340000;
   var bills = [
     {id:'b1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true},
-    {id:'b2', name:'신용카드 결제', cat:'카드', amount:1340000, day:14, owner:'공동', active:true},
+    {id:'b2', name:'신용카드 결제', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:cardBm},
     {id:'b3', name:'자동차 할부', cat:'대출', amount:420000, day:28, owner:'현기', active:true},
     {id:'b4', name:'실손보험', cat:'보험', amount:92000, day:22, owner:'공동', active:true},
     {id:'b5', name:'자동차보험', cat:'보험', amount:118000, day:5, owner:'장미', active:true},
@@ -969,9 +1026,11 @@ function sampleState(){
   ];
   var paid = {}, txns = [];
   bills.forEach(function(b){
+    var amt = billAmountFor(b, ym);
+    if (!amt) return;
     if (b.day <= di - 1){
       paid[b.id + '|' + ym] = true;
-      txns.push({id:uid(), date:ds(b.day), amount:b.amount, kind:'expense',
+      txns.push({id:uid(), date:ds(b.day), amount:amt, kind:'expense',
         cat:b.cat, owner:b.owner, memo:b.name, billId:b.id});
     }
   });
@@ -1055,6 +1114,14 @@ function normalize(s){
   }
   if (!s.accounts) s.accounts = [];
   if (!s.viewMonth) s.viewMonth = curYM();
+  /* 예전 카드 고정비: 달마다 다른 금액을 담을 수 있게 이번 달 금액만 달별 기록으로 옮긴다 */
+  s.bills.forEach(function(b){
+    if (!b || b.cat !== '카드') return;
+    if (b.byMonth && typeof b.byMonth === 'object') return;
+    b.byMonth = {};
+    var amt = Math.round(+b.amount || 0);
+    if (amt > 0) b.byMonth[curYM()] = amt;
+  });
   s.txns.forEach(function(t){ if (t.private === undefined) t.private = false; });
   return s;
 }
@@ -1085,8 +1152,32 @@ function total(arr, f){
   return s;
 }
 function activeBills(){ return state.bills.filter(function(b){ return b.active !== false; }); }
+/* 카드 청구액은 매달 금액이 달라서 고정비와 따로 센다 */
+function isCardBill(b){ return !!b && String(b.cat || '') === '카드'; }
+function billById(id){ return (state.bills || []).filter(function(b){ return b.id === id; })[0] || null; }
+function billAmountFor(b, ym){
+  if (!b) return 0;
+  if (!isCardBill(b)) return Math.round(+b.amount || 0);
+  var bm = b.byMonth;
+  if (bm && typeof bm === 'object'){
+    var v = bm[ym];
+    return (v === undefined || v === null || v === '') ? 0 : (Math.round(+v) || 0);
+  }
+  /* 달별 금액이 아직 없는 예전 카드 항목은 이번 달만 기존 금액을 쓴다 */
+  return String(ym) === curYM() ? Math.round(+b.amount || 0) : 0;
+}
+function setCardMonth(b, ym, amount){
+  if (!b) return;
+  if (!b.byMonth || typeof b.byMonth !== 'object') b.byMonth = {};
+  var v = Math.round(+amount || 0);
+  if (v > 0) b.byMonth[ym] = v; else delete b.byMonth[ym];
+}
+function fixedBills(){ return activeBills().filter(function(b){ return !isCardBill(b); }); }
+function cardBills(){ return activeBills().filter(isCardBill); }
+function fixedBillTotal(){ return total(fixedBills(), function(b){ return b.amount; }); }
+function cardBillTotal(ym){ return total(cardBills(), function(b){ return billAmountFor(b, ym); }); }
 function activeIncomes(){ return state.incomes.filter(function(i){ return i.active !== false; }); }
-function billTotal(){ return total(activeBills(), function(b){ return b.amount; }); }
+function billTotal(){ return fixedBillTotal(); }
 function incomeTotal(){ return total(activeIncomes(), function(i){ return i.amount; }); }
 function savingsTotal(){ return total(state.accounts, function(a){ return a.balance; }); }
 function savingsMonthly(){ return total(state.accounts, function(a){ return a.monthly; }); }
@@ -1102,15 +1193,34 @@ function stats(ym){
   var base = incomeTotal();
   var extra = total(tx.filter(function(t){ return t.kind === 'income'; }), function(t){ return t.amount; });
   var exp = total(tx.filter(function(t){ return t.kind !== 'income'; }), function(t){ return t.amount; });
-  var unpaidArr = activeBills().filter(function(b){ return !isPaid(b.id, ym); });
-  var unpaid = total(unpaidArr, function(b){ return b.amount; });
+  var unpaidFixed = 0, unpaidCard = 0;
+  var unpaidArr = [], unpaidCardArr = [];
+  activeBills().forEach(function(b){
+    if (isPaid(b.id, ym)) return;
+    var a = billAmountFor(b, ym);
+    if (isCardBill(b)){
+      if (a > 0){ unpaidCard += a; unpaidCardArr.push(b); }
+    } else {
+      unpaidFixed += a; unpaidArr.push(b);
+    }
+  });
+  var unpaid = unpaidFixed + unpaidCard;
   var isCur = ym === curYM();
   var left = base + extra - exp - (isCur ? unpaid : 0);
-  var paidBillsSum = total(tx.filter(function(t){ return !!t.billId; }), function(t){ return t.amount; });
-  var variable = Math.max(0, exp - paidBillsSum);
+  /* 고정비 납부 기록은 고정비 합계에 이미 들어 있으니 변동비에서 뺀다.
+     카드 청구액 납부는 금액이 매달 달라 변동비로 남긴다. */
+  var paidFixedSum = 0;
+  tx.forEach(function(t){
+    if (!t.billId) return;
+    var bb = billById(t.billId);
+    if (!bb || !isCardBill(bb)) paidFixedSum += (+t.amount || 0);
+  });
+  var variable = Math.max(0, exp - paidFixedSum);
   return { ym:ym, income: base + extra, extraIncome: extra, expense: exp,
-    unpaid: unpaid, unpaidArr: unpaidArr, left: left, fixed: billTotal(),
-    variable: variable, paidBills: paidBillsSum };
+    unpaid: unpaid, unpaidFixed: unpaidFixed, unpaidCard: unpaidCard,
+    unpaidArr: unpaidArr, unpaidCardArr: unpaidCardArr, left: left,
+    fixed: fixedBillTotal(), card: cardBillTotal(ym),
+    variable: variable, paidBills: paidFixedSum };
 }
 
 /* ---------------- 렌더 ---------------- */
@@ -1149,7 +1259,27 @@ function renderHome(){
 
   $('homeIncome').textContent = won(s.income);
   $('homeSpent').textContent = won(s.expense);
-  $('homeFixed').textContent = won(s.unpaid);
+  $('homeFixed').textContent = won(s.unpaidFixed);
+
+  /* 이번 달 카드 청구액은 고정비와 섞지 않고 따로 보여준다 */
+  var cardEl = $('homeCardAmt'), cardSub = $('homeCardSub');
+  var allCards = cardBills().slice().sort(function(a,b){ return (+a.day || 1) - (+b.day || 1); });
+  if (cardEl){
+    var cardSum = cardBillTotal(ym);
+    if (!allCards.length){
+      cardEl.textContent = '추가';
+      cardEl.className = 'hc-amt none';
+      cardSub.textContent = '카드값도 고정비와 따로 관리해요 · 눌러서 추가';
+    } else if (!cardSum){
+      cardEl.textContent = '미입력';
+      cardEl.className = 'hc-amt none';
+      cardSub.textContent = '이번 달 카드 청구액을 넣어 주세요';
+    } else {
+      cardEl.textContent = won(cardSum);
+      cardEl.className = 'hc-amt';
+      cardSub.textContent = s.unpaidCard ? '이번 달 카드값 · 고정비와 따로' : '이번 달 카드값 · 납부 완료';
+    }
+  }
 
   var by = {'현기':0,'장미':0,'공동':0};
   txnsOf(ym).forEach(function(t){
@@ -1165,12 +1295,12 @@ function renderHome(){
   });
   $('ownerSplit').innerHTML = html;
 
-  var up = activeBills().filter(function(b){ return !isPaid(b.id, ym); })
+  var up = s.unpaidArr.slice()
     .map(function(b){ return {b:b, ds:billDateStr(b, ym)}; })
     .sort(function(x, y){ return x.ds < y.ds ? -1 : x.ds > y.ds ? 1 : 0; });
-  var paidList = activeBills().filter(function(b){ return isPaid(b.id, ym); });
+  var paidList = fixedBills().filter(function(b){ return isPaid(b.id, ym); });
   var upHtml = '';
-  if (!up.length){
+  if (!up.length && !allCards.length){
     upHtml = '<div class="empty">이번 달 남은 고정비가 없어요.<br>다음 달도 자동으로 다시 떠요.</div>';
   } else {
     up.forEach(function(it){ upHtml += billRowHTML(it.b, ym, false); });
@@ -1180,8 +1310,16 @@ function renderHome(){
       (showPaid ? '접기' : '보기') + '</button>';
     if (showPaid) paidList.forEach(function(b){ upHtml += billRowHTML(b, ym, true); });
   }
+  if (allCards.length){
+    upHtml += '<div class="cardsplit"><span>💳 카드 청구액 · 매달 변동</span><b>' +
+      (cardBillTotal(ym) ? won(cardBillTotal(ym)) : '미입력') + '</b></div>';
+    allCards.forEach(function(b){ upHtml += cardRowHTML(b, ym); });
+  }
   $('upcoming').innerHTML = upHtml;
-  $('upTotal').textContent = up.length ? ('남은 예정 ' + won(total(up, function(x){ return x.b.amount; }))) : '';
+  var upSum = total(up, function(x){ return billAmountFor(x.b, ym); });
+  var upTxt = upSum ? ('남은 예정 ' + won(upSum)) : '';
+  if (s.unpaidCard) upTxt += (upTxt ? ' · ' : '') + '카드 ' + won(s.unpaidCard);
+  $('upTotal').textContent = upTxt;
 
   var recent = txnsOf(ym).slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }).slice(0,5);
   $('homeRecent').innerHTML = recent.length ? recent.map(txnRowHTML).join('') :
@@ -1201,7 +1339,30 @@ function billRowHTML(b, ym, paid){
       '<div class="btop"><b>' + esc(b.name) + '</b>' + badge + '</div>' +
       '<div class="bsub">' + esc(b.cat) + ' · ' + esc(b.owner) + ' · 매월 ' + b.day + '일</div>' +
     '</div>' +
-    '<div class="bamt">' + won(b.amount) + '</div>' +
+    '<div class="bamt">' + won(billAmountFor(b, ym)) + '</div>' +
+  '</div>';
+}
+
+/* 카드 청구액 줄: 금액은 이번 달 것만, 비어 있으면 탭해서 입력 */
+function cardRowHTML(b, ym){
+  var paid = isPaid(b.id, ym);
+  var amt = billAmountFor(b, ym);
+  var ds = billDateStr(b, ym), dd = dday(ds), diff = dayDiff(ds);
+  var badge;
+  if (paid) badge = '<span class="bd" style="background:#F2F4F6;color:#8B95A1">납부 완료</span>';
+  else if (!amt) badge = '<span class="bd' + (diff <= 7 ? ' hot' : '') + '">금액 미입력</span>';
+  else badge = '<span class="bd' + (dd.hot ? ' hot' : '') + '">' + dd.t + '</span>';
+  var sub = '카드 · ' + esc(b.owner) + ' · 매월 ' + b.day + '일' + (amt ? '' : ' · 탭해서 금액 넣기');
+  return '<div class="bill' + (paid ? ' paid' : '') + '">' +
+    '<button class="check" data-act="pay" data-id="' + b.id + '" aria-label="' + (paid ? '납부 취소' : '납부 완료') + '">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>' +
+    '</button>' +
+    '<div class="bmain" data-act="cardbill" data-id="' + b.id + '">' +
+      '<div class="btop"><b>' + esc(b.name) + '</b>' + badge + '</div>' +
+      '<div class="bsub">' + sub + '</div>' +
+    '</div>' +
+    '<div class="bamt' + (amt ? '' : ' none') + '" data-act="cardbill" data-id="' + b.id + '">' +
+      (amt ? won(amt) : '미입력') + '</div>' +
   '</div>';
 }
 
@@ -1291,9 +1452,9 @@ function renderPlan(){
   $('incList').innerHTML = incHtml;
   $('incTotal').textContent = incomeTotal() ? ('월 ' + won(incomeTotal())) : '';
 
-  /* 고정비 */
+  /* 고정비 (카드 제외) */
   var billsHtml = '';
-  var sorted = activeBills().slice().sort(function(a,b){ return (+a.day || 1) - (+b.day || 1); });
+  var sorted = fixedBills().slice().sort(function(a,b){ return (+a.day || 1) - (+b.day || 1); });
   sorted.forEach(function(b){
     var paid = isPaid(b.id, ym);
     var ds = billDateStr(b, ym), dd = dday(ds);
@@ -1309,9 +1470,25 @@ function renderPlan(){
   });
   if (!sorted.length) billsHtml = '<div class="empty">등록된 고정비가 없어요.</div>';
   billsHtml += '<button class="addr" data-act="addBill">+ 고정비 추가</button>';
-  billsHtml += '<button class="addr" data-act="shotbill" style="font-weight:600;color:#4B8DE8">📷 대출·카드 청구서 캡처로 불러오기</button>';
+  billsHtml += '<button class="addr" data-act="shotbill" style="font-weight:600;color:#4B8DE8">📷 고정비·대출 캡처로 불러오기</button>';
   $('billList').innerHTML = billsHtml;
   $('billTotalLbl').textContent = billTotal() ? ('월 ' + won(billTotal())) : '';
+
+  /* 이번 달 카드 청구액 (매달 변동 · 별도) */
+  var cardHtml = '';
+  var cards = cardBills().slice().sort(function(a,b){ return (+a.day || 1) - (+b.day || 1); });
+  cards.forEach(function(b){ cardHtml += cardRowHTML(b, ym); });
+  if (!cards.length){
+    cardHtml = '<div class="empty">아직 카드 청구액이 없어요.<br>매달 바뀌는 카드값만 따로 적어 둘 수 있어요.</div>';
+  }
+  cardHtml += '<button class="addr" data-act="addCardBill">+ 카드 청구액 추가</button>';
+  cardHtml += '<button class="addr" data-act="shotcard" style="font-weight:600;color:#4B8DE8">📷 카드 청구액 캡처로 불러오기</button>';
+  $('cardList').innerHTML = cardHtml;
+  var cardSum = cardBillTotal(ym);
+  $('cardTotalLbl').textContent = cards.length
+    ? (cardSum ? (won(cardSum) + (s.unpaidCard ? ' · 남은 ' + won(s.unpaidCard) : ' · 납부 완료'))
+               : '이번 달 미입력')
+    : '';
 
   /* 예적금 */
   var accHtml = '';
@@ -1335,6 +1512,7 @@ function renderPlan(){
   var fp = denom ? Math.round(fixed / denom * 100) : 0;
   $('plIncome').textContent = won(s.income);
   $('plFixed').textContent = won(fixed);
+  $('plCard').textContent = won(s.card);
   $('plSavings').textContent = won(savingsTotal());
   $('ratioFixed').style.width = fp + '%';
   $('ratioVar').style.width = (denom ? 100 - fp : 0) + '%';
@@ -1523,6 +1701,7 @@ function deleteTxn(id){
 
 /* ---------------- 고정비 ---------------- */
 function openBill(b){
+  if (b && isCardBill(b)){ openCardBill(b); return; }   /* 카드 청구액은 따로 넣는다 */
   bEditing = b || null;
   $('bTitle').textContent = b ? '고정비 수정' : '고정비 추가';
   $('bName').value = b ? b.name : '';
@@ -1557,9 +1736,46 @@ function currentSeg(id, attr){
   return on ? on.getAttribute('data-' + attr) : '공동';
 }
 
+/* ---------------- 카드 청구액 (매달 변동 · 고정비와 별도) ---------------- */
+function openCardBill(b){
+  cEditing = b || null;
+  var ym = curYM();
+  var amt = b ? billAmountFor(b, ym) : 0;
+  $('cTitle').textContent = b ? '카드 청구액 수정' : '카드 청구액 추가';
+  $('cName').value = b ? b.name : '';
+  $('cDay').value = b ? b.day : '';
+  $('cAmount').value = amt ? fmt(amt) : '';
+  $('cAmountLbl').textContent = '이번 달 청구 금액 (' + ymLabel(ym) + ')';
+  renderSeg('cOwner', 'cowner', b ? b.owner : '공동');
+  $('cDelete').hidden = !b;
+  openSheet('shCardBill');
+}
+
+function saveCardBill(){
+  var name = $('cName').value.trim();
+  var day = num($('cDay').value);
+  var amount = num($('cAmount').value);
+  var ym = curYM();
+  if (!name){ toast('카드 이름을 입력해 주세요'); return; }
+  if (day < 1 || day > 31){ toast('결제일은 1~31일 사이로 입력해 주세요'); return; }
+  var owner = currentSeg('cOwner', 'owner');
+  if (cEditing){
+    cEditing.name = name; cEditing.cat = '카드'; cEditing.day = day; cEditing.owner = owner;
+    cEditing.active = cEditing.active !== false;
+    setCardMonth(cEditing, ym, amount);
+  } else {
+    var b = { id:uid(), name:name, cat:'카드', amount:0, day:day, owner:owner, active:true, byMonth:{} };
+    setCardMonth(b, ym, amount);
+    state.bills.push(b);
+  }
+  save(); closeSheet('shCardBill');
+  toast(amount ? (ymLabel(ym) + ' 카드 청구액 ' + won(amount) + ' 저장했어요')
+               : '카드 항목을 저장했어요 · 금액은 나중에 넣어도 돼요');
+}
+
 function payBill(id){
   var ym = curYM();
-  var b = state.bills.filter(function(x){ return x.id === id; })[0];
+  var b = billById(id);
   if (!b) return;
   if (isPaid(id, ym)){
     state.paid[paidKey(id, ym)] = false;
@@ -1569,11 +1785,17 @@ function payBill(id){
     save(); toast('납부를 취소했어요');
     return;
   }
+  var amt = billAmountFor(b, ym);
+  if (isCardBill(b) && amt <= 0){
+    openCardBill(b);   /* 이번 달 금액이 비었으면 먼저 적게 한다 */
+    toast('이번 달 카드 청구액을 먼저 넣어 주세요');
+    return;
+  }
   state.paid[paidKey(id, ym)] = true;
-  state.txns.push({id:uid(), date:todayStr(), amount:b.amount, kind:'expense',
+  state.txns.push({id:uid(), date:todayStr(), amount:amt, kind:'expense',
     cat:b.cat, owner:b.owner, memo:b.name, billId:b.id});
   save();
-  toast(b.name + ' 납부 완료 · ' + won(b.amount));
+  toast(b.name + ' 납부 완료 · ' + won(amt));
 }
 
 /* ---------------- 고정 수입 ---------------- */
@@ -1735,14 +1957,16 @@ function addCardTxn(){
 /* ---------------- 캡처 사진 자동 입력 (거래·고정비·예적금) ---------------- */
 var GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
 var SHOT_MAX = 10;   /* 한 번에 읽는 캡처 사진 장수 상한 */
-var shot = { mode:'txn', items:[], bills:[], accs:[], busy:false, dataUrl:'', raws:[], small:[], seq:0, cur:0, missed:[], gen:0, demo:false };
+var shot = { mode:'txn', items:[], bills:[], cards:[], accs:[], busy:false, dataUrl:'', raws:[], small:[], seq:0, cur:0, missed:[], gen:0, demo:false };
 var CHK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>';
 
 var SHOT_DROP = {
   txn:  { title:'캡처 사진 선택', sub:'은행·카드 앱의 내역 화면을 그대로 올려 주세요',
           hint:'글자가 선명할수록 정확해요. 여러 장을 고르면 겹치는 내역은 중복으로 걸러 드려요.' },
-  bill: { title:'고정비 캡처 선택', sub:'토스·은행 앱의 대출·카드 청구 화면을 올려 주세요',
-          hint:'대출 잔액과 상환액, 카드 청구 예정 금액을 읽어 고정비에 담아요. 여러 장도 한꺼번에 돼요.' },
+  bill: { title:'고정비 캡처 선택', sub:'토스·은행 앱의 대출·보험·통신 화면을 올려 주세요',
+          hint:'대출 잔액과 상환액을 읽어 고정비에 담아요. 카드값은 ‘카드 청구’에서 따로 담아요. 여러 장도 한꺼번에 돼요.' },
+  card: { title:'카드 청구액 캡처 선택', sub:'카드 앱의 이번 달 결제 예정 화면을 올려 주세요',
+          hint:'이번 달 청구 금액과 결제일을 읽어 카드 청구액에 담아요. 담은 금액은 이번 달에만 쓰여요.' },
   acc:  { title:'예적금 캡처 선택', sub:'은행 앱의 예금·적금 현황 화면을 올려 주세요',
           hint:'상품명·잔액·월 납입액·만기일을 읽어 예적금 목록에 담아요. 여러 장도 한꺼번에 돼요.' }
 };
@@ -1775,19 +1999,35 @@ function ocrPrompt(){
 
 function billPrompt(){
   return [
-    "너는 한국 은행·카드·토스 앱 화면 캡처에서 '고정비'(대출, 카드 청구 예정 금액, 보험, 통신, 관리비)를 뽑아 가계부 고정비 목록으로 바꾸는 도우미다.",
+    "너는 한국 은행·토스 앱 화면 캡처에서 매달 거의 같은 금액이 나가는 '고정비'(대출, 보험, 통신, 관리비·월세, 구독)를 뽑아 가계부 고정비 목록으로 바꾸는 도우미다.",
     '보이는 고정비를 빠짐없이 추출해 아래 JSON 객체 하나만 출력해라. 설명·인사말·코드블록 없이 JSON 만 출력한다.',
     '{"bills":[{"name":"국민은행 주택담보대출","category":"대출","amount":1150000,"billingDay":25,"balance":268000000,"rate":4.15,"memo":""},' +
-      '{"name":"신한카드 결제","category":"카드","amount":1340000,"billingDay":14,"balance":0,"rate":0,"memo":"이번 달 청구 예정"}]}',
+      '{"name":"KT 인터넷·TV","category":"통신","amount":55000,"billingDay":27,"balance":0,"rate":0,"memo":""}]}',
     '규칙:',
-    '- name: 은행·상품·카드 이름을 합쳐 짧고 알아보기 쉽게 24자 이내. 예: "국민은행 주택담보대출", "신한카드 결제".',
-    '- category: 다음 중 하나만 — 대출, 카드, 보험, 통신, 주거, 기타.',
-    '- amount: 매달 실제로 나가는 금액(원) 정수. 카드면 이번 달 청구·결제 예정 금액, 대출이면 월 상환액(원리금) 또는 이자.',
+    '- name: 은행·상품·서비스 이름을 합쳐 짧고 알아보기 쉽게 24자 이내. 예: "국민은행 주택담보대출", "KT 인터넷·TV".',
+    '- category: 다음 중 하나만 — 대출, 보험, 통신, 주거, 기타.',
+    '- amount: 매달 실제로 나가는 금액(원) 정수. 대출이면 월 상환액(원리금) 또는 이자, 보험·통신이면 월 납부액.',
     '- billingDay: 결제일·납부일(1~31). 없거나 모르면 0.',
     '- balance: 대출의 남은 잔액(원) 정수. 대출이 아니면 0.',
     '- rate: 연이율 숫자(예: 4.15). 모르면 0.',
+    '- 카드 결제·카드 청구 예정 금액은 이 화면의 고정비가 아니다. 카드값은 넣지 않는다.',
     '- 취소·완납된 항목, 포인트·한도·누적 사용액 같은 요약 수치는 넣지 않는다.',
     '- 보이는 고정비가 없으면 {"bills":[]} 만 출력한다.'
+  ].join('\n');
+}
+
+function cardPrompt(){
+  return [
+    "너는 한국 카드·은행 앱 화면 캡처에서 '이번 달 카드 청구액'(결제 예정·청구 금액)을 뽑아 가계부에 넣는 도우미다.",
+    '보이는 카드 청구액을 빠짐없이 추출해 아래 JSON 객체 하나만 출력해라. 설명·인사말·코드블록 없이 JSON 만 출력한다.',
+    '{"cards":[{"name":"신한카드","amount":1340000,"billingDay":14,"memo":"이번 달 청구 예정"}]}',
+    '규칙:',
+    '- name: 카드 이름을 짧고 알아보기 쉽게 24자 이내. 예: "신한카드", "삼성카드 taptap".',
+    '- amount: 이번 달 결제 예정·청구 금액(원) 정수. 일시불·할부를 합한 이번 달 결제 금액. 한도·누적 사용액·포인트·리워드는 아니다.',
+    '- billingDay: 결제일·출금일(1~31). 없거나 모르면 0.',
+    '- memo: 참고할 점만 짧게, 없으면 "".',
+    '- 취소된 거래·승인 취소, 이미 낸 결제의 영수증은 넣지 않는다.',
+    '- 보이는 카드 청구액이 없으면 {"cards":[]} 만 출력한다.'
   ].join('\n');
 }
 
@@ -1809,6 +2049,7 @@ function accPrompt(){
 
 function shotPrompt(mode){
   if (mode === 'bill') return billPrompt();
+  if (mode === 'card') return cardPrompt();
   if (mode === 'acc') return accPrompt();
   return ocrPrompt();
 }
@@ -1874,6 +2115,7 @@ function parseOcrJSON(txt, mode){
   }
   if (!obj) return null;
   var keys = mode === 'bill' ? ['bills', 'loans', 'fixed', 'items', 'data']
+    : mode === 'card' ? ['cards', 'bills', 'items', 'data', 'results']
     : mode === 'acc' ? ['accounts', 'savings', 'deposits', 'items', 'data']
     : ['transactions', 'txns', 'items', 'data', 'results'];
   var list = null;
@@ -1885,6 +2127,7 @@ function parseOcrJSON(txt, mode){
   }
   if (!list) return null;
   if (mode === 'bill') return normalizeBills(list);
+  if (mode === 'card') return normalizeCards(list);
   if (mode === 'acc') return normalizeAccs(list);
   return normalizeItems(list);
 }
@@ -2009,6 +2252,29 @@ function normalizeBills(list){
   return out;
 }
 
+/* 카드 청구액: 이번 달 금액만 담는다 (달별 기록으로 넣음) */
+function normalizeCards(list){
+  var out = [];
+  (list || []).forEach(function(raw){
+    if (!raw || typeof raw !== 'object') return;
+    var name = String(raw.name || raw.card || raw.title || '').trim().slice(0, 24);
+    if (!name) return;
+    var amount = money(raw.amount || raw.monthlyPayment || raw.payment || raw.bill);
+    out.push({
+      name: name,
+      amount: amount,
+      billingDay: Math.min(31, Math.max(0, Math.round(+raw.billingDay || +raw.day || 0))),
+      memo: String(raw.memo || '').trim().slice(0, 40),
+      owner: '공동',
+      on: true,
+      dup: false,
+      act: 'add',
+      matchId: ''
+    });
+  });
+  return out;
+}
+
 function normalizeAccs(list){
   var out = [];
   (list || []).forEach(function(raw){
@@ -2073,7 +2339,7 @@ function refreshDup(it){
 /* 여러 장을 읽을 때: 같은 사진 묶음 안에서 겹치는 항목까지 중복으로 본다 */
 function dupKeyOf(it, mode){
   if (!it) return '';
-  if (mode === 'bill' || mode === 'acc'){
+  if (mode === 'bill' || mode === 'card' || mode === 'acc'){
     var n = normName(it.name);
     return n ? mode + '|' + n : '';
   }
@@ -2108,10 +2374,15 @@ function sameBillItem(a, b){
   if (na && nb && na === nb) return true;
   return loanDupPair(a, b);
 }
+/* 모드별 검토 목록 */
+function shotListOf(mode){
+  return mode === 'bill' ? shot.bills : mode === 'card' ? shot.cards
+    : mode === 'acc' ? shot.accs : shot.items;
+}
 function shotDupPeer(it, mode){
   var k = dupKeyOf(it, mode);
   if (!k && mode !== 'bill') return null;
-  var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
+  var list = shotListOf(mode);
   for (var i = 0; i < (list || []).length; i++){
     var o = list[i];
     if (o === it) continue;
@@ -2160,6 +2431,14 @@ function markOne(it, mode, peer){
     it.act = m ? 'update' : 'add';
     if (m && OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
     it.on = m ? true : !peer;
+  } else if (mode === 'card'){
+    var cm = findCardMatch(it);
+    it.dup = !!(cm || peer);
+    src = cm && peer ? 'both' : cm ? 'state' : peer ? 'batch' : '';
+    it.matchId = cm ? cm.id : '';
+    it.act = cm ? 'update' : 'add';
+    if (cm && OWNERS.indexOf(cm.owner) >= 0) it.owner = cm.owner;
+    it.on = cm ? true : !peer;
   } else {
     var a = findByName(state.accounts, it.name);
     it.dup = !!(a || peer);
@@ -2175,7 +2454,7 @@ function markOne(it, mode, peer){
 }
 function addShotItems(items, mode){
   if (!items || !items.length) return 0;
-  var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
+  var list = shotListOf(mode);
   var seen = {};
   (list || []).forEach(function(o){ var k = dupKeyOf(o, mode); if (k && !seen[k]) seen[k] = o; });
   items.forEach(function(it){
@@ -2194,10 +2473,10 @@ function addShotItems(items, mode){
   return items.length;
 }
 function countShot(mode){
-  return mode === 'bill' ? shot.bills.length : mode === 'acc' ? shot.accs.length : shot.items.length;
+  return shotListOf(mode).length;
 }
 function shotDupCount(mode){
-  var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
+  var list = shotListOf(mode);
   return (list || []).filter(function(x){ return x.dup; }).length;
 }
 
@@ -2267,6 +2546,37 @@ function refreshBillDup(it){
   }
   if (!m) it.act = 'add';
 }
+function findCardMatch(it){
+  var n = normName(it && it.name);
+  if (!n) return null;
+  var list = cardBills();
+  for (var i = 0; i < list.length; i++){
+    var m = normName(list[i].name);
+    if (!m) continue;
+    if (m === n) return list[i];
+    if (n.length >= 3 && m.length >= 3 && (m.indexOf(n) >= 0 || n.indexOf(m) >= 0)) return list[i];
+  }
+  return null;
+}
+function markCardDups(list){
+  (list || []).forEach(function(it){
+    var m = findCardMatch(it);
+    it.dup = !!m;
+    it.matchId = m ? m.id : '';
+    it.act = m ? 'update' : 'add';
+    if (m && OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
+    it.on = true;   /* 같은 카드의 이번 달 금액을 갱신하는 것이 보통이다 */
+  });
+  return list;
+}
+function refreshCardDup(it){
+  var m = findCardMatch(it);
+  it.dup = !!m;
+  it.matchId = m ? m.id : '';
+  if (!m) it.act = 'add';
+  else if (it.act !== 'add') it.act = 'update';
+  if (m && OWNERS.indexOf(m.owner) >= 0) it.owner = m.owner;
+}
 function markAccDups(list){
   (list || []).forEach(function(it){
     var m = findByName(state.accounts, it.name);
@@ -2294,7 +2604,7 @@ function refreshAccDup(it){
 
 /* ---------- 화면 ---------- */
 function setShotMode(mode){
-  shot.mode = (mode === 'bill' || mode === 'acc') ? mode : 'txn';
+  shot.mode = (mode === 'bill' || mode === 'card' || mode === 'acc') ? mode : 'txn';
   Array.prototype.forEach.call($('shotMode').children, function(b){
     b.classList.toggle('on', b.getAttribute('data-v') === shot.mode);
   });
@@ -2306,7 +2616,7 @@ function setShotMode(mode){
 }
 
 function openShot(mode){
-  shot.items = []; shot.bills = []; shot.accs = [];
+  shot.items = []; shot.bills = []; shot.cards = []; shot.accs = [];
   shot.busy = false; shot.dataUrl = ''; shot.demo = false; shot.gen++;
   shot.raws = []; shot.small = []; shot.seq = 0; shot.cur = 0; shot.missed = [];
   setShotMode(mode);
@@ -2334,7 +2644,7 @@ function onShotFiles(files){
   var cut = 0;
   if (list.length > SHOT_MAX){ cut = list.length - SHOT_MAX; list = list.slice(0, SHOT_MAX); }
   shot.demo = false;
-  shot.items = []; shot.bills = []; shot.accs = [];
+  shot.items = []; shot.bills = []; shot.cards = []; shot.accs = [];
   shot.raws = []; shot.small = []; shot.seq = 0; shot.cur = 0; shot.missed = [];
   shot.busy = false; shot.gen++;
   $('shotReview').innerHTML = '';
@@ -2403,8 +2713,10 @@ function prepareImage(i, cb){
 function shotStateKey(){
   $('shotReview').innerHTML = '';
   var demoLabel = shot.mode === 'bill' ? '샘플 고정비 캡처 체험'
+    : shot.mode === 'card' ? '샘플 카드 청구액 체험'
     : shot.mode === 'acc' ? '샘플 예적금 캡처 체험' : '샘플 캡처 인식 체험';
-  var demoAct = shot.mode === 'bill' ? 'shotbilldemo' : shot.mode === 'acc' ? 'shotaccdemo' : 'shotdemo';
+  var demoAct = shot.mode === 'bill' ? 'shotbilldemo' : shot.mode === 'card' ? 'shotcarddemo'
+    : shot.mode === 'acc' ? 'shotaccdemo' : 'shotdemo';
   $('shotState').innerHTML =
     '<div class="keybox"><b>먼저 Gemini API 키를 넣어 주세요</b>' +
     '<p>은행·카드 내역 캡처에서 날짜·가맹점·금액·수입/지출을 자동으로 뽑아줍니다. 키는 이 기기에만 저장됩니다.</p>' +
@@ -2413,6 +2725,7 @@ function shotStateKey(){
     '<div style="display:flex;gap:6px;margin-top:10px">' +
       '<button class="mini" data-act="shotdemo">거래 내역 예시</button>' +
       '<button class="mini" data-act="shotbilldemo">토스 대출 예시</button>' +
+      '<button class="mini" data-act="shotcarddemo">카드 청구 예시</button>' +
       '<button class="mini" data-act="shotaccdemo">예적금 예시</button>' +
     '</div></div>';
 }
@@ -2435,6 +2748,12 @@ function sampleBillItems(){
     { name: '자동차 할부', category: '대출', amount: 420000, billingDay: 28, balance: 8400000, rate: 5.9 }
   ]);
 }
+function sampleCards(){
+  return normalizeCards([
+    { name: '신한카드', amount: 1184000, billingDay: 14, memo: '이번 달 결제 예정' },
+    { name: '삼성카드 taptap', amount: 486000, billingDay: 25, memo: '일시불·할부 합계' }
+  ]);
+}
 function sampleAccItems(){
   return normalizeAccs([
     { name: '청년도약계좌', type: '적금', balance: 8400000, monthly: 700000, maturity: '2028-12-31' },
@@ -2452,9 +2771,11 @@ function loadShotDemo(mode){
   $('shotThumbs').hidden = true;
   $('shotThumbs').innerHTML = '';
   $('shotState').innerHTML = '<div class="hint" style="margin:0 0 8px">' +
-    (mode === 'bill' ? '예시 고정비 캡처' : mode === 'acc' ? '예시 예적금 캡처' : '예시 캡처') +
+    (mode === 'bill' ? '예시 고정비 캡처' : mode === 'card' ? '예시 카드 청구액 캡처'
+      : mode === 'acc' ? '예시 예적금 캡처' : '예시 캡처') +
     '로 읽은 결과예요. 실제 사진을 올리면 이렇게 보여요.</div>';
   if (mode === 'bill') shot.bills = markBillDups(sampleBillItems());
+  else if (mode === 'card') shot.cards = markCardDups(sampleCards());
   else if (mode === 'acc') shot.accs = markAccDups(sampleAccItems());
   else shot.items = markDups(sampleShotItems());
   renderShotList();
@@ -2462,7 +2783,8 @@ function loadShotDemo(mode){
 
 /* ---------- 읽기 (고른 사진을 한 장씩 차례로) ---------- */
 function shotProgress(i, total){
-  var label = shot.mode === 'bill' ? '고정비를 읽는 중…' : shot.mode === 'acc' ? '예적금을 읽는 중…' : '사진을 읽는 중…';
+  var label = shot.mode === 'bill' ? '고정비를 읽는 중…' : shot.mode === 'card' ? '카드 청구액을 읽는 중…'
+    : shot.mode === 'acc' ? '예적금을 읽는 중…' : '사진을 읽는 중…';
   var cnt = total > 1 ? ' <b style="color:var(--blue-deep)">' + (i + 1) + '/' + total + '장</b>' : '';
   $('shotState').innerHTML = '<div class="load"><span class="spin"></span>' + label + cnt + '</div>' +
     '<div class="hint" style="text-align:center;margin:0 0 6px">' +
@@ -2486,7 +2808,7 @@ function runShotOcr(){
   function dead(){ return shot.mode !== mode || shot.gen !== gen; }
   shot.busy = true;
   shot.missed = [];
-  shot.items = []; shot.bills = []; shot.accs = []; shot.seq = 0; shot.cur = 0;
+  shot.items = []; shot.bills = []; shot.cards = []; shot.accs = []; shot.seq = 0; shot.cur = 0;
   $('shotReview').innerHTML = '';
   var fatal = null, failed = 0;
   function finish(){
@@ -2633,10 +2955,31 @@ function shotBillHTML(it, i){
       '<input class="sa" data-i="' + i + '" data-f="amount" inputmode="numeric" value="' + fmt(it.amount) + '" aria-label="월 금액">' +
     '</div>' +
     '<div class="s2">' + badge +
+      (it.category === '카드' ? '<span class="dupbadge">카드값 · 담으면 이번 달 카드 청구액으로 들어가요</span>' : '') +
       '<select class="mini" data-i="' + i + '" data-f="category" aria-label="분류">' + optHTML(cats, it.category) + '</select>' +
       '<label class="lbx">납부<input class="w2" data-i="' + i + '" data-f="billingDay" inputmode="numeric" value="' +
         (it.billingDay || '') + '" placeholder="일" aria-label="납부일"></label>' +
       loanFields +
+      '<select class="mini" data-i="' + i + '" data-f="owner" aria-label="누구">' + optHTML(OWNERS, it.owner) + '</select>' +
+    '</div>' +
+  '</div>';
+}
+
+function shotCardHTML(it, i){
+  var badge = it.dup
+    ? dupBadgeHTML(it, '이미 있는 카드 · 중복 의심') +
+      (it.matchId ? '<button class="mini on" data-act="shotact" data-i="' + i + '">' +
+      (it.act === 'update' ? '이번 달 금액 업데이트' : '새 카드로 추가') + '</button>' : '')
+    : '';
+  return '<div class="srow' + (it.on ? ' on' : '') + (it.dup ? ' dup' : '') + '">' +
+    '<div class="s1">' +
+      '<button class="schk" data-act="shotsel" data-i="' + i + '" aria-label="' + (it.on ? '선택 해제' : '선택') + '">' + CHK_SVG + '</button>' +
+      '<span class="sm"><input data-i="' + i + '" data-f="name" value="' + esc(it.name) + '" placeholder="카드 이름" maxlength="24" aria-label="카드 이름"></span>' +
+      '<input class="sa" data-i="' + i + '" data-f="amount" inputmode="numeric" value="' + fmt(it.amount) + '" aria-label="이번 달 청구 금액">' +
+    '</div>' +
+    '<div class="s2">' + badge +
+      '<label class="lbx">결제<input class="w2" data-i="' + i + '" data-f="billingDay" inputmode="numeric" value="' +
+        (it.billingDay || '') + '" placeholder="일" aria-label="결제일"></label>' +
       '<select class="mini" data-i="' + i + '" data-f="owner" aria-label="누구">' + optHTML(OWNERS, it.owner) + '</select>' +
     '</div>' +
   '</div>';
@@ -2721,6 +3064,24 @@ function renderShotBills(){
   box.innerHTML = html;
 }
 
+function renderShotCards(){
+  var box = $('shotReview');
+  if (!shot.cards.length){ box.innerHTML = ''; return; }
+  var ym = curYM();
+  var sel = shot.cards.filter(function(x){ return x.on; });
+  var dupN = shot.cards.filter(function(x){ return x.dup; }).length;
+  var sum = '선택 ' + sel.length + '건';
+  if (sel.length) sum += ' · ' + won(total(sel, function(x){ return x.amount; }));
+  var html = '<div class="shotsum"><b>읽은 카드 청구액 ' + shot.cards.length + '건' +
+    (dupN ? ' · 이미 있는 카드 ' + dupN + '건' : '') + '</b><span>' + esc(sum) + '</span></div>';
+  html += shot.cards.map(shotCardHTML).join('');
+  html += '<div class="sfoot"><div class="hint" style="margin:0 0 8px">담은 금액은 <b>' + ymLabel(ym) +
+    '</b>에만 쓰여요. 다음 달은 그달 금액을 새로 넣으면 돼요.</div>' +
+    '<button class="btn primary" data-act="shotadd"' +
+    (sel.length ? '' : ' disabled') + '>선택한 ' + sel.length + '건 카드 청구액에 담기</button></div>';
+  box.innerHTML = html;
+}
+
 function renderShotAccs(){
   var box = $('shotReview');
   if (!shot.accs.length){ box.innerHTML = ''; return; }
@@ -2741,13 +3102,12 @@ function renderShotAccs(){
 
 function renderShotList(){
   if (shot.mode === 'bill') return renderShotBills();
+  if (shot.mode === 'card') return renderShotCards();
   if (shot.mode === 'acc') return renderShotAccs();
   return renderShotTxn();
 }
 function shotRowAt(i){
-  if (shot.mode === 'bill') return shot.bills[i];
-  if (shot.mode === 'acc') return shot.accs[i];
-  return shot.items[i];
+  return shotListOf(shot.mode)[i];
 }
 
 /* ---------- 담기 ---------- */
@@ -2782,12 +3142,29 @@ function addShotTxn(){
 function addShotBills(){
   var sel = shot.bills.filter(function(x){ return x.on; });
   if (!sel.length){ toast('담을 고정비를 선택해 주세요'); return; }
-  var n = 0;
+  var n = 0, nc = 0;
   sel.forEach(function(it){
     var monthly = Math.round(+it.amount || 0);
     var bal = Math.round(+it.balance || 0);
     var day = Math.min(31, Math.max(1, Math.round(+it.billingDay || 1)));
     var cat = billCatOf(it.category, it.name);
+    if (cat === '카드'){
+      /* 고정비 화면에서 카드값이 섞여 읽혔을 때: 매달 반복되지 않게 이번 달 카드 청구액으로 담는다 */
+      var cm = findCardMatch(it);
+      if (cm){
+        if (it.name) cm.name = String(it.name).slice(0, 24);
+        if (+it.billingDay) cm.day = day;
+        if (OWNERS.indexOf(it.owner) >= 0) cm.owner = it.owner;
+        setCardMonth(cm, curYM(), monthly);
+      } else {
+        var nb = { id:uid(), name:String(it.name || '카드').slice(0, 24), cat:'카드', amount:0,
+          day:day, owner: OWNERS.indexOf(it.owner) >= 0 ? it.owner : '공동', active:true, byMonth:{} };
+        setCardMonth(nb, curYM(), monthly);
+        state.bills.push(nb);
+      }
+      nc++;
+      return;
+    }
     var target = it.act === 'update' && it.matchId
       ? state.bills.filter(function(b){ return b.id === it.matchId; })[0] : null;
     if (target){
@@ -2815,7 +3192,38 @@ function addShotBills(){
   shot.bills = [];
   save();
   closeSheet('shShot');
-  toast('고정비 ' + n + '건을 담았어요' + (d ? ' · 대출 잔액 반영' : ''));
+  toast('고정비 ' + n + '건을 담았어요' + (nc ? ' · 카드 청구액 ' + nc + '건은 이번 달로 담았어요' : '') +
+    (d ? ' · 대출 잔액 반영' : ''));
+}
+
+function addShotCards(){
+  var sel = shot.cards.filter(function(x){ return x.on; });
+  if (!sel.length){ toast('담을 카드 청구액을 선택해 주세요'); return; }
+  var ym = curYM(), n = 0;
+  sel.forEach(function(it){
+    var amt = Math.round(+it.amount || 0);
+    var day = Math.min(31, Math.max(1, Math.round(+it.billingDay || 1)));
+    var target = it.act === 'update' && it.matchId ? billById(it.matchId) : null;
+    if (target && isCardBill(target)){
+      if (it.name) target.name = String(it.name).slice(0, 24);
+      if (+it.billingDay) target.day = day;
+      if (OWNERS.indexOf(it.owner) >= 0) target.owner = it.owner;
+      if (it.memo) target.memo = String(it.memo).slice(0, 40);
+      target.active = target.active !== false;
+      setCardMonth(target, ym, amt);
+    } else {
+      var b = { id:uid(), name:String(it.name || '카드').slice(0, 24), cat:'카드', amount:0,
+        day:day, owner: OWNERS.indexOf(it.owner) >= 0 ? it.owner : '공동', active:true,
+        byMonth:{}, memo:String(it.memo || '').slice(0, 40) };
+      setCardMonth(b, ym, amt);
+      state.bills.push(b);
+    }
+    n++;
+  });
+  shot.cards = [];
+  save();
+  closeSheet('shShot');
+  toast('카드 청구액 ' + n + '건을 담았어요 · ' + ymLabel(ym) + '에만 적용돼요');
 }
 
 function addShotAccs(){
@@ -2852,6 +3260,7 @@ function addShotAccs(){
 
 function addShot(){
   if (shot.mode === 'bill') return addShotBills();
+  if (shot.mode === 'card') return addShotCards();
   if (shot.mode === 'acc') return addShotAccs();
   return addShotTxn();
 }
@@ -3164,6 +3573,8 @@ function bind(){
       case 'pay': payBill(t.getAttribute('data-id')); break;
       case 'bill': openBill(state.bills.filter(function(b){ return b.id === t.getAttribute('data-id'); })[0]); break;
       case 'addBill': openBill(null); break;
+      case 'cardbill': openCardBill(billById(t.getAttribute('data-id'))); break;
+      case 'addCardBill': openCardBill(null); break;
       case 'income': openIncome(state.incomes.filter(function(i){ return i.id === t.getAttribute('data-id'); })[0]); break;
       case 'addIncome': openIncome(null); break;
       case 'acc': openAcc(state.accounts.filter(function(a){ return a.id === t.getAttribute('data-id'); })[0]); break;
@@ -3173,17 +3584,19 @@ function bind(){
       case 'showPaid': showPaid = !showPaid; renderHome(); break;
       case 'shot': openShot('txn'); break;
       case 'shotbill': openShot('bill'); break;
+      case 'shotcard': openShot('card'); break;
       case 'shotacc': openShot('acc'); break;
       case 'shotpick': try { $('shotFile').click(); } catch(e){} break;
       case 'shotretry': runShotOcr(); break;
       case 'shotdemo': loadShotDemo('txn'); break;
       case 'shotbilldemo': loadShotDemo('bill'); break;
+      case 'shotcarddemo': loadShotDemo('card'); break;
       case 'shotaccdemo': loadShotDemo('acc'); break;
       case 'shotkey': openGemSettings(); break;
       case 'shotmode': {
         if (shot.busy) break;
         setShotMode(t.getAttribute('data-v'));
-        shot.items = []; shot.bills = []; shot.accs = []; shot.demo = false;
+        shot.items = []; shot.bills = []; shot.cards = []; shot.accs = []; shot.demo = false;
         shot.seq = 0; shot.cur = 0; shot.missed = [];
         $('shotState').innerHTML = ''; $('shotReview').innerHTML = '';
         if (shot.dataUrl){ if (gemKey()) runShotOcr(); else shotStateKey(); }
@@ -3245,6 +3658,9 @@ function bind(){
       case 'bowner':
         renderSeg('bOwner', 'bowner', t.getAttribute('data-owner'));
         break;
+      case 'cowner':
+        renderSeg('cOwner', 'cowner', t.getAttribute('data-owner'));
+        break;
       case 'iowner':
         renderSeg('iOwner', 'iowner', t.getAttribute('data-owner'));
         break;
@@ -3260,6 +3676,12 @@ function bind(){
         askConfirm('고정비 삭제', '이 고정비를 목록에서 지울까요?', function(){
           state.bills = state.bills.filter(function(b){ return b.id !== bEditing.id; });
           save(); closeSheet('shBill'); toast('삭제했어요');
+        });
+        break;
+      case 'delCardBill':
+        askConfirm('카드 청구액 삭제', '이 카드 청구액을 목록에서 지울까요? 지금까지 넣은 달별 금액도 같이 지워져요.', function(){
+          state.bills = state.bills.filter(function(b){ return b.id !== cEditing.id; });
+          save(); closeSheet('shCardBill'); toast('삭제했어요');
         });
         break;
       case 'delIncome':
@@ -3280,6 +3702,7 @@ function bind(){
 
   $('qSave').addEventListener('click', saveQuick);
   $('bSave').addEventListener('click', saveBill);
+  $('cSave').addEventListener('click', saveCardBill);
   $('iSave').addEventListener('click', saveIncome);
   $('aSave').addEventListener('click', saveAcc);
   $('pSave').addEventListener('click', savePlan);
@@ -3298,7 +3721,7 @@ function bind(){
   $('qAmount').addEventListener('input', function(){
     var v = digits(this.value); this.value = v ? fmt(v) : '';
   });
-  ['bAmount','iAmount','aMonthly','aBalance','pSaveGoal','pLoan','pAssets'].forEach(function(id){
+  ['bAmount','cAmount','iAmount','aMonthly','aBalance','pSaveGoal','pLoan','pAssets'].forEach(function(id){
     $(id).addEventListener('input', function(){
       var v = digits(this.value); this.value = v ? fmt(v) : '';
     });
@@ -3362,6 +3785,7 @@ function bind(){
       it.maturity = normDate(el.value, '');
     } else if (f === 'name'){
       if (shot.mode === 'bill') refreshBillDup(it);
+      else if (shot.mode === 'card') refreshCardDup(it);
       else if (shot.mode === 'acc') refreshAccDup(it);
     } else if (f === 'amount' || f === 'balance' || f === 'monthly'){
       var dg2 = digits(el.value);
