@@ -1277,7 +1277,10 @@ function renderHome(){
     } else {
       cardEl.textContent = won(cardSum);
       cardEl.className = 'hc-amt';
-      cardSub.textContent = s.unpaidCard ? '이번 달 카드값 · 고정비와 따로' : '이번 달 카드값 · 납부 완료';
+      var cardMissing = allCards.some(function(b){ return billAmountFor(b, ym) <= 0; });
+      cardSub.textContent = s.unpaidCard ? '이번 달 카드값 · 고정비와 따로'
+        : cardMissing ? '이번 달 카드값 · 넣을 카드가 남았어요'
+        : '이번 달 카드값 · 납부 완료';
     }
   }
 
