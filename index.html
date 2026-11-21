@@ -3613,7 +3613,7 @@ function ruleHeadline(ym){
   if (w)
     return '금리 ' + shortNum(w.rate) + '% ' + cutStr(w.name, 9) + ' 갚으면 매달 ' + shortWon(w.monthly) + '원 줄어요';
   if (p.isCur && p.leftDays > 0 && p.left > 0)
-    return '남은 ' + p.leftDays + '일 · 하루 ' + fmt(p.perDay) + '원까지 쓸 수 있어요';
+    return '오늘 포함 ' + p.leftDays + '일 · 하루 ' + fmt(p.perDay) + '원까지 쓸 수 있어요';
   var c = loanRank('cash')[0];
   if (c && c.monthly > 0)
     return cutStr(c.name, 9) + ' 완납하면 매달 ' + shortWon(c.monthly) + '원 가벼워져요';
