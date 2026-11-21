@@ -1856,6 +1856,9 @@ function saveBill(){
   var cat = $('bCat').value;
   /* 보험·통신 등으로 바꾸면 잔액은 지운다 (잔액이 남아 있으면 대출로 보이기 때문) */
   var balance = cat === '대출' ? num($('bBal').value) : 0;
+  /* 잔액이 바뀐 만큼 재무설계의 대출 잔액에도 반영 (캡처로 담을 때와 같은 방식) */
+  var oldBal = bEditing ? Math.round(+bEditing.balance || 0) : 0;
+  var balDelta = balance - oldBal;
   if (bEditing){
     bEditing.name = name; bEditing.cat = cat; bEditing.amount = amount;
     bEditing.day = day; bEditing.owner = owner;
@@ -1866,6 +1869,7 @@ function saveBill(){
     if (cat === '대출') nb.balance = balance;
     state.bills.push(nb);
   }
+  if (balDelta) state.plan.loan = Math.max(0, (+state.plan.loan || 0) + balDelta);
   save(); closeSheet('shBill'); toast('저장했어요');
 }
 

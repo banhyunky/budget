@@ -495,6 +495,7 @@ try:
           ev("__T.loanBills().filter(function(b){return b.name==='신용대출';}).length") == 1)
     check('대출 저장: 잔액도 함께 저장', ev("__T.loanBalanceTotal()") == 268000000 + 12000000, str(ev("__T.loanBalanceTotal()")))
     check('대출 저장: 월 상환 합계 1,470,000', ev("__T.loanBillTotal()") == 1470000)
+    check('대출 저장: 재무설계 대출 잔액에도 반영', ev("__T.state.plan.loan") == 12000000, str(ev("__T.state.plan.loan")))
 
     ev("__T.openBill(null, '보험')")
     check('보험 추가: 제목', ev("document.getElementById('bTitle').textContent") == '보험·고정비 추가', str(ev("document.getElementById('bTitle').textContent")))
@@ -518,6 +519,7 @@ try:
     check('바뀐 항목은 보험·생활로 이동',
           ev("__T.livingBills().filter(function(b){return b.name==='신용대출';}).length") == 1)
     check('대출 잔액에서도 빠짐', ev("__T.loanBalanceTotal()") == 268000000, str(ev("__T.loanBalanceTotal()")))
+    check('재무설계 대출 잔액도 되돌아감', ev("__T.state.plan.loan") == 0, str(ev("__T.state.plan.loan")))
 except Exception as e:
     check('시트 기본값/잔액', False, str(e))
 
