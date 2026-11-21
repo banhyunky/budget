@@ -699,7 +699,7 @@ input.mini{font-weight:600;padding:5px 7px}
     <div class="shd"><h3>설정</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
 
     <div style="font-size:14px;font-weight:700;margin-bottom:6px">둘이 같이 쓰기 (Firebase)</div>
-    <div class="hint">Firebase 콘솔 → 새 프로젝트 → 웹 앱 추가에서 나오는 <b>firebaseConfig</b>를 그대로 붙여 넣으세요. 비워 두면 이 기기에만 저장되는 데모 모드로 동작해요.</div>
+    <div class="hint">기본으로 <b>banhyunky-budget</b> 프로젝트에 자동 연결돼요. 다른 프로젝트를 쓰려면 아래 <b>firebaseConfig</b>를 바꿔 넣으면 됩니다.</div>
     <div class="field">
       <label>firebaseConfig</label>
       <textarea class="ipt" id="sFb" placeholder='{
@@ -720,6 +720,8 @@ input.mini{font-weight:600;padding:5px 7px}
     </details>
     <div class="field"><label>가계부 ID (둘이 같은 값)</label><input class="ipt" id="sHouse" placeholder="예: hyeongi-jangmi" autocomplete="off"></div>
     <div class="field"><label>PIN (숫자 4~8자리, 둘이 같은 값)</label><input class="ipt" id="sPin" inputmode="numeric" placeholder="예: 1234" autocomplete="off"></div>
+    <div class="hint" style="margin:0 2px 10px">장미님 폰에서도 같은 <b>가계부 ID</b>와 <b>PIN</b>을 넣으면 같은 가계부를 실시간으로 봐요.</div>
+    <button class="btn ghost" id="sShare" style="padding:12px;font-size:14px;margin-bottom:8px">가계부 ID·PIN 복사</button>
     <div class="status" id="sStatus">로컬 데모 모드 · 이 기기에만 저장 중</div>
     <button class="btn primary" id="sConnect">Firebase 연결</button>
     <button class="btn ghost" id="sDisconnect" hidden>연결 해제</button>
@@ -824,6 +826,18 @@ var CAT_GUESS = [
   [/학원|인강|교재|교육|에듀/, '교육']
 ];
 
+/* 기본 Firebase 프로젝트 (banhyunky-budget)
+   웹 apiKey는 공개되어도 되는 값이고, 실제 가계부는 아래 가계부 ID·PIN으로 나뉩니다. */
+var DEFAULT_FB = {
+  apiKey: "AIzaSyChoF00fEI31uVW7IqnCo8-zIBFLLCamxw",
+  authDomain: "banhyunky-budget.firebaseapp.com",
+  projectId: "banhyunky-budget",
+  storageBucket: "banhyunky-budget.firebasestorage.app",
+  messagingSenderId: "1073213948293",
+  appId: "1:1073213948293:web:36220bfadec1ae782704ec"
+};
+var DEFAULT_FB_JSON = JSON.stringify(DEFAULT_FB, null, 2);
+
 var state = null;
 var fb = { db:null, ref:null, unsub:null, connected:false };
 var applying = false, pushTimer = null, lastPushTs = 0, showPaid = false;
@@ -849,6 +863,45 @@ function esc(s){
   });
 }
 function digits(v){ return String(v || '').replace(/[^\d]/g, ''); }
+
+function randStr(n){
+  var chars = 'abcdefghijkmnpqrstuvwxyz23456789', out = '', i;
+  try {
+    var a = new Uint32Array(n);
+    window.crypto.getRandomValues(a);
+    for (i = 0; i < n; i++) out += chars.charAt(a[i] % chars.length);
+  } catch(e){
+    for (i = 0; i < n; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return out;
+}
+
+function randPin(){
+  var out = '', i;
+  try {
+    var a = new Uint8Array(4);
+    window.crypto.getRandomValues(a);
+    for (i = 0; i < 4; i++) out += String(a[i] % 10);
+  } catch(e){
+    for (i = 0; i < 4; i++) out += String(Math.floor(Math.random() * 10));
+  }
+  return out;
+}
+
+/* 저장된 설정이 비어 있으면 banhyunky-budget 프로젝트에 바로 연결되도록 기본값을 채운다.
+   둘이 같이 쓰는 가계부 ID·PIN은 공개 저장소에 남지 않게 이 기기에서 새로 만든다. */
+function ensureDefaultFirebase(){
+  var s = state && state.settings;
+  if (!s) return false;
+  if (s.autoConnect === false) return false;
+  var changed = false;
+  if (!s.fbRaw){ s.fbRaw = DEFAULT_FB_JSON; changed = true; }
+  if (!s.houseId){ s.houseId = 'hy-' + randStr(10); changed = true; }
+  if (!s.pin){ s.pin = randPin(); changed = true; }
+  if (s.autoConnect === undefined) s.autoConnect = true;
+  return changed;
+}
+
 function num(v){ var d = digits(v); return d ? parseInt(d, 10) : 0; }
 function todayD(){ return new Date(); }
 function todayStr(){ var d = new Date(); return ymStr(d) + '-' + pad(d.getDate()); }
@@ -967,7 +1020,7 @@ function blankState(){
     incomes:[], accounts:[], bills:[], txns:[], paid:{},
     settings:{
       fbRaw: st.fbRaw || '', houseId: st.houseId || '', pin: st.pin || '',
-      geminiKey: st.geminiKey || '',
+      geminiKey: st.geminiKey || '', autoConnect: st.autoConnect !== false,
       connected: !!st.connected, currentUser: u, lastOwner: u
     }
   };
@@ -2626,12 +2679,13 @@ function applyRemote(data){
   applying = true;
   var keepRaw = state.settings.fbRaw, keepHouse = state.settings.houseId,
       keepPin = state.settings.pin, keepUser = state.settings.currentUser,
-      keepGem = state.settings.geminiKey;
+      keepGem = state.settings.geminiKey, keepAuto = state.settings.autoConnect;
   state = normalize(data);
   state.settings.fbRaw = keepRaw || '';
   state.settings.houseId = keepHouse || '';
   state.settings.pin = keepPin || '';
   state.settings.geminiKey = keepGem || '';
+  state.settings.autoConnect = keepAuto;
   state.settings.currentUser = keepUser || state.settings.currentUser;
   state.settings.connected = true;
   persistLocal();
@@ -2673,6 +2727,7 @@ async function connectFirebase(){
   state.settings.fbRaw = raw || JSON.stringify(cfg);
   state.settings.houseId = house;
   state.settings.pin = pin;
+  state.settings.autoConnect = true;
   persistLocal();
 
   setStatus('연결 중…', '');
@@ -2732,6 +2787,7 @@ function disconnectFirebase(){
   if (fb.unsub){ try { fb.unsub(); } catch(e){} }
   fb = { db:null, ref:null, unsub:null, connected:false };
   state.settings.connected = false;
+  state.settings.autoConnect = false;   /* 다음에 열어도 다시 자동 연결하지 않음 */
   persistLocal();
   renderSettingsStatus();
   renderHeader();
@@ -2777,6 +2833,30 @@ function copyHook(){
     }
   } catch(e){}
   toast('길게 눌러 복사해 주세요');
+}
+
+function copyShareInfo(){
+  var s = state.settings;
+  var txt = '우리집 가계부\n가계부 ID: ' + (s.houseId || '') + '\nPIN: ' + (s.pin || '') +
+    '\n앱 주소: https://banhyunky.github.io/budget/';
+  var ok = function(){ toast('가계부 ID와 PIN을 복사했어요'); };
+  var fail = function(){ toast('복사하지 못했어요 · 칸에 적힌 값을 직접 보내 주세요'); };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok, fail);
+      return;
+    }
+  } catch(e){}
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var done = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (done) ok(); else fail();
+  } catch(e2){ fail(); }
 }
 
 /* ---------------- 이벤트 ---------------- */
@@ -3013,6 +3093,7 @@ function bind(){
   $('sDisconnect').addEventListener('click', disconnectFirebase);
   $('sExport').addEventListener('click', exportJSON);
   $('sCopy').addEventListener('click', copyHook);
+  $('sShare').addEventListener('click', copyShareInfo);
   $('sCardTest').addEventListener('click', openCard);
   $('sImportBtn').addEventListener('click', function(){ $('sImport').click(); });
   $('sImport').addEventListener('change', function(){
@@ -3038,12 +3119,14 @@ function bind(){
   $('sSample').addEventListener('click', function(){
     askConfirm('샘플 데이터로 초기화', '지금 기록을 모두 지우고 샘플 데이터로 되돌릴까요?', function(){
       var keep = {fbRaw:(state.settings.fbRaw||''), houseId:(state.settings.houseId||''),
-        pin:(state.settings.pin||''), currentUser:me(), geminiKey:(state.settings.geminiKey||'')};
+        pin:(state.settings.pin||''), currentUser:me(), geminiKey:(state.settings.geminiKey||''),
+        autoConnect:(state.settings.autoConnect !== false)};
       state = normalize(sampleState());
       state.settings.fbRaw = keep.fbRaw;
       state.settings.houseId = keep.houseId;
       state.settings.pin = keep.pin;
       state.settings.geminiKey = keep.geminiKey;
+      state.settings.autoConnect = keep.autoConnect;
       state.settings.currentUser = keep.currentUser;
       state.settings.lastOwner = keep.currentUser;
       save(); openSettings(); toast('샘플 데이터로 초기화했어요');
@@ -3066,6 +3149,7 @@ function shiftMonth(dir){
 /* ---------------- 시작 ---------------- */
 function init(){
   state = loadState();
+  ensureDefaultFirebase();
 
   var d = todayD();
   var minD = addDays(d, -365 * 3), maxD = addDays(d, 365);
@@ -3085,14 +3169,15 @@ function init(){
     });
   }
 
-  if (state.settings.fbRaw && state.settings.houseId && state.settings.pin){
+  if (state.settings.autoConnect !== false && state.settings.fbRaw &&
+      state.settings.houseId && state.settings.pin){
     setTimeout(function(){
-      if (!fb.connected){
-        $('sFb').value = state.settings.fbRaw;
-        $('sHouse').value = state.settings.houseId;
-        $('sPin').value = state.settings.pin;
-        connectFirebase().catch(function(){});
-      }
+      if (fb.connected) return;
+      if (document.querySelector('#shSet.open')) return;   /* 설정을 직접 만지는 중이면 건너뜀 */
+      $('sFb').value = state.settings.fbRaw;
+      $('sHouse').value = state.settings.houseId;
+      $('sPin').value = state.settings.pin;
+      connectFirebase().catch(function(){});
     }, 800);
   }
 }

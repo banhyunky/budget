@@ -26,8 +26,9 @@
 
 ## 저장 방식
 
-- 기본은 **로컬 데모 모드**: 데이터가 그 폰의 브라우저(localStorage)에만 저장됩니다.
-- 설정에서 **Firebase(Firestore) `firebaseConfig` + 가계부 ID + PIN**을 넣으면, 같은 값을 넣은 기기끼리 실시간으로 같은 가계부를 봅니다.
+- 인터넷이 없거나 연결을 해제하면 **로컬 모드**로 동작하고, 데이터는 그 폰의 브라우저(localStorage)에 저장됩니다.
+- 기본은 **Firebase 자동 연결**: 앱을 처음 열면 `banhyunky-budget` 프로젝트에 바로 연결되고, 이 기기 몫의 **가계부 ID·PIN**이 자동으로 만들어집니다 (설정에서 확인·복사 가능).
+- 장미님 폰처럼 다른 기기에서는 설정에 같은 **가계부 ID + PIN**을 넣으면 둘이 실시간으로 같은 가계부를 봅니다. 다른 Firebase 프로젝트를 쓰려면 설정에서 `firebaseConfig`를 바꿔 넣으면 됩니다.
 - 이 저장소는 **공개 저장소**입니다. 실제 가계 데이터는 저장소에 넣지 않았고, 샘플 데이터만 코드에 들어 있습니다.
 - **Gemini API 키**는 `localStorage`에만 저장됩니다. 저장소·코드·Firebase 동기화·JSON 백업 어디에도 실리지 않아요.
 
@@ -38,7 +39,7 @@
 ```
 index.html      앱 전체 (HTML+CSS+JS)
 manifest.json   PWA 매니페스트
-sw.js           오프라인 캐시 서비스워커 (budget-v9)
+sw.js           오프라인 캐시 서비스워커 (budget-v10)
 icon-192.png    아이콘
 icon-512.png    아이콘
 make_icons.py   아이콘 생성 스크립트
