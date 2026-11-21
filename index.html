@@ -100,6 +100,8 @@ main{padding:6px 16px 0}
 .billsum{display:flex;align-items:center;justify-content:space-between;padding:9px 20px;
   border-top:1px solid var(--line);background:#FAFBFC;font-size:12.5px;font-weight:600;color:var(--sub)}
 .billsum b{font-size:13px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.billsum b.pos{color:var(--blue)}
+.billsum b.neg{color:var(--red)}
 .bamt{flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .bill.paid .bmain{opacity:.5}
 .bill.paid .bamt{color:#B0B8C1}
@@ -179,14 +181,15 @@ main{padding:6px 16px 0}
 .tlamt.in{color:var(--blue)}
 .tlamt.out{color:var(--ink)}
 .tlrow.plan .tlamt.out{color:#FF7A3D}
-.tlrow.done .tlname,.tlrow.done .tlsub{color:#9AA4B0}
+.tlrow.done .tlname{color:#6B7684}
+.tlrow.done .tlsub{color:#A2ABB6}
 .tlrow.done .tlamt.out{color:#8B95A1}
 .tlrow.done .tlamt.in{color:#8FB6F0}
 .tlbadge{flex:none;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:6px;
   background:var(--blue-bg);color:var(--blue)}
 .tlbadge.hot{background:var(--red-bg);color:var(--red)}
 .tlcheck{width:28px;height:28px;flex:none;border-radius:50%;border:1.5px solid #DDE1E6;
-  background:#fff;color:transparent;display:grid;place-items:center;padding:0}
+  background:#fff;color:#C3CBD4;display:grid;place-items:center;padding:0}
 .tlcheck svg{width:14px;height:14px}
 .tlcheck.paid{background:var(--blue);border-color:var(--blue);color:#fff}
 .tlmore{width:100%;border:0;background:none;border-top:1px solid var(--line);
@@ -1684,7 +1687,7 @@ function renderHome(){
   $('ownerSplit').innerHTML = html;
 
   renderHomeTimeline(s, ym);
-  $('upTotal').textContent = s.expExpense ? ('예정 -' + fmt(s.expExpense) + '원') : '예정 없음';
+  $('upTotal').textContent = isPastYM(ym) ? '' : ('예정 ' + signedWon(s.expIncome - s.expExpense));
 
   var recent = txnsOf(ym).slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }).slice(0,5);
   $('homeRecent').innerHTML = recent.length ? recent.map(txnRowHTML).join('') :
