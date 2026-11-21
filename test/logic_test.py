@@ -357,6 +357,21 @@ try:
     check('밀린 기준일은 화살표로 같이 표시', '매월 5일 → 7일(월)' in r_move, r_move[:220])
     c_move = ev("__T.cardRowHTML({id:'c', name:'신한카드', cat:'카드', amount:0, day:25, owner:'공동', active:true, byMonth:{}}, '2026-12')")
     check('카드 줄에도 표시', '매월 25일 → 28일(월)' in c_move, c_move[:220])
+    # 홈 '곧 빠져나갈 돈' 목록도 실제 출금일 기준 (이번 달 28일은 토요일 → 30일(월))
+    ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.bills = [{id:'h28', name:'실손보험', cat:'보험', amount:92000, day:28, owner:'공동', active:true},
+              {id:'h15', name:'통신비', cat:'통신', amount:55000, day:15, owner:'공동', active:true}];
+  __T.state = __T.normalize(st);
+})();
+''')
+    home = ev("(function(){__T.renderHome(); return document.getElementById('upcoming').innerHTML;})()")
+    check('홈 목록에 이연 표기', '매월 28일 → 30일(월)' in home, home[:300])
+    want_dd = ev("(function(){var b=__T.state.bills.filter(function(x){return x.id==='h28';})[0]; return __T.dday(__T.billDateStr(b,'2026-11')).t;})()")
+    check('홈 D-day 가 11/30 기준 (' + str(want_dd) + ')', want_dd in home, home[:300])
+    order = ev("(function(){__T.renderHome(); var h=document.getElementById('upcoming').innerHTML; return h.indexOf('통신비') < h.indexOf('실손보험');})()")
+    check('정렬도 실제 출금일 순 (15일 통신비가 30일 실손보험보다 앞)', order == True)
 except Exception as e:
     check('줄 렌더', False, str(e))
 
