@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#F2F4F6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="우리집 가계부">
-<title>우리집 가계부</title>
+<meta name="apple-mobile-web-app-title" content="머니로그">
+<title>머니로그</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -381,7 +381,7 @@ input.mini{font-weight:600;padding:5px 7px}
   <header>
     <div>
       <div class="hd-sub" id="hdSub">이번 달</div>
-      <h1>우리집 가계부</h1>
+      <h1>머니로그</h1>
     </div>
     <div class="hd-right">
       <button class="who" data-act="who" aria-label="보는 사람 바꾸기">
@@ -3530,7 +3530,7 @@ function copyHook(){
 
 function copyShareInfo(){
   var s = state.settings;
-  var txt = '우리집 가계부\n가계부 ID: ' + (s.houseId || '') + '\nPIN: ' + (s.pin || '') +
+  var txt = '머니로그\n가계부 ID: ' + (s.houseId || '') + '\nPIN: ' + (s.pin || '') +
     '\n앱 주소: https://banhyunky.github.io/budget/';
   var ok = function(){ toast('가계부 ID와 PIN을 복사했어요'); };
   var fail = function(){ toast('복사하지 못했어요 · 칸에 적힌 값을 직접 보내 주세요'); };

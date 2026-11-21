@@ -1,6 +1,6 @@
 {
-  "name": "우리집 가계부",
-  "short_name": "가계부",
+  "name": "머니로그",
+  "short_name": "머니로그",
   "description": "현기·장미 부부의 가계부와 재무설계",
   "start_url": "./",
   "scope": "./",
