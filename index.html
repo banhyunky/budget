@@ -2082,17 +2082,64 @@ function dupKeyOf(it, mode){
   return 'txn|' + (it.type === 'income' ? 'income' : 'expense') + '|' +
     String(it.date || '') + '|' + amount;
 }
+/* 대출은 이름이 달라도(요약 화면은 은행명이 앞에 붙는다) 잔액이 같고 금리나 납부일이 같으면 같은 대출로 본다 */
+function billDayOf(x){
+  if (!x) return 0;
+  var d = (x.billingDay !== undefined && x.billingDay !== null && x.billingDay !== '') ? x.billingDay : x.day;
+  return Math.round(+d || 0);
+}
+function isLoanBill(x){
+  if (!x) return false;
+  if (String(x.category || x.cat || '') === '대출') return true;
+  return Math.round(+x.balance || 0) > 0;
+}
+function loanDupPair(a, b){
+  if (!isLoanBill(a) || !isLoanBill(b)) return false;
+  var ab = Math.round(+a.balance || 0), bb = Math.round(+b.balance || 0);
+  if (ab <= 0 || bb <= 0) return false;
+  if (Math.abs(ab - bb) !== 0) return false;
+  var ar = +a.rate || 0, br = +b.rate || 0;
+  var ad = billDayOf(a), bd = billDayOf(b);
+  return (ar > 0 && ar === br) || (ad > 0 && ad === bd);
+}
+function sameBillItem(a, b){
+  if (!a || !b) return false;
+  var na = normName(a.name), nb = normName(b.name);
+  if (na && nb && na === nb) return true;
+  return loanDupPair(a, b);
+}
 function shotDupPeer(it, mode){
   var k = dupKeyOf(it, mode);
-  if (!k) return null;
+  if (!k && mode !== 'bill') return null;
   var list = mode === 'bill' ? shot.bills : mode === 'acc' ? shot.accs : shot.items;
   for (var i = 0; i < (list || []).length; i++){
     var o = list[i];
     if (o === it) continue;
     if ((o._seq || 0) >= (it._seq || 0)) continue;
-    if (dupKeyOf(o, mode) === k) return o;
+    if (mode === 'bill'){ if (sameBillItem(o, it)) return o; }
+    else if (dupKeyOf(o, mode) === k) return o;
   }
   return null;
+}
+/* 같은 대출을 요약 화면(금액 0)과 상세 화면에서 각각 읽었을 때: 금액이 있는 쪽을 남기고 빈 칸을 채운다 */
+function mergeShotBill(peer, it){
+  if (!peer || !it) return false;
+  var pa = Math.round(+peer.amount || 0), ia = Math.round(+it.amount || 0);
+  if (pa > 0 && ia > 0){
+    if (!(+peer.balance || 0) && +it.balance) peer.balance = +it.balance;
+    if (!(+peer.rate || 0) && +it.rate) peer.rate = +it.rate;
+    if (!billDayOf(peer) && +it.billingDay) peer.billingDay = +it.billingDay;
+    if (!peer.memo && it.memo) peer.memo = it.memo;
+    return true;
+  }
+  if (ia <= 0) return true;   /* 금액 0짜리 요약 행은 이미 담은 항목에 합친다 */
+  peer.name = it.name || peer.name;
+  peer.amount = ia;
+  if (+it.balance) peer.balance = +it.balance;
+  if (+it.rate) peer.rate = +it.rate;
+  if (+it.billingDay) peer.billingDay = +it.billingDay;
+  if (!peer.memo && it.memo) peer.memo = it.memo;
+  return true;
 }
 /* 겹침 판정: 이미 저장된 항목(state)과 앞 사진에서 읽은 항목(peer) 둘 다 본다 */
 function markOne(it, mode, peer){
@@ -2132,9 +2179,15 @@ function addShotItems(items, mode){
   var seen = {};
   (list || []).forEach(function(o){ var k = dupKeyOf(o, mode); if (k && !seen[k]) seen[k] = o; });
   items.forEach(function(it){
-    var k = dupKeyOf(it, mode);
-    markOne(it, mode, k ? (seen[k] || null) : null);
     it._seq = ++shot.seq;
+    var k = dupKeyOf(it, mode);
+    var peer = mode === 'bill' ? shotDupPeer(it, mode) : (k ? (seen[k] || null) : null);
+    if (peer && loanDupPair(peer, it) && mergeShotBill(peer, it)){
+      /* 같은 대출이 사진마다 겹치면 두 줄로 담지 않고 한 줄로 합친다 */
+      if (k && !seen[k]) seen[k] = peer;
+      return;
+    }
+    markOne(it, mode, peer);
     if (k && !seen[k]) seen[k] = it;
     list.push(it);
   });
@@ -2168,16 +2221,25 @@ function findBillMatch(it){
   var m = findByName(state.bills, it.name);
   if (m) return m;
   var amount = Math.round(+it.amount || 0);
-  if (!amount) return null;
   var day = Math.round(+it.billingDay || 0);
   var list = state.bills || [];
-  for (var i = 0; i < list.length; i++){
-    var b = list[i];
+  var i, b;
+  if (amount){
+    for (i = 0; i < list.length; i++){
+      b = list[i];
+      if (b.active === false) continue;
+      if (billCatOf(b.cat, b.name) !== it.category) continue;
+      if (Math.round(+b.amount || 0) !== amount) continue;
+      if ((+b.day || 0) !== day) continue;
+      return b;
+    }
+  }
+  /* 이름이 달라도 잔액이 같고 금리나 납부일이 같으면 같은 대출 (요약 화면 행이 새 대출로 또 담기는 것 방지) */
+  if (!isLoanBill(it)) return null;
+  for (i = 0; i < list.length; i++){
+    b = list[i];
     if (b.active === false) continue;
-    if (billCatOf(b.cat, b.name) !== it.category) continue;
-    if (Math.round(+b.amount || 0) !== amount) continue;
-    if ((+b.day || 0) !== day) continue;
-    return b;
+    if (loanDupPair(b, it)) return b;
   }
   return null;
 }
