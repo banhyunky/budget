@@ -1139,6 +1139,13 @@ function isMasked(t){
 }
 /* 부부끼리 오간 돈(현기↔장미). 같은 돈이 두 번 잡히지 않게 어느 통계에도 넣지 않는다 */
 function isTransfer(t){ return !!t && t.kind === 'transfer'; }
+/* 이체 줄 제목: 메모가 없으면 누가 누구에게인지 보여 준다 */
+function transferLabel(t){
+  if (t && t.memo) return t.memo;
+  var o = (t && t.owner) || '공동';
+  if (o === '공동') return '부부 이체';
+  return o + ' ↔ ' + (o === '장미' ? '현기' : '장미');
+}
 function me(){ return state.settings.currentUser || '현기'; }
 
 /* ---------------- 표본 데이터 ---------------- */
@@ -1580,7 +1587,7 @@ function txnRowHTML(t){
   if (tr){
     return '<button class="txn tr" data-act="txn" data-id="' + t.id + '">' +
       '<span class="tcat">🔄</span>' +
-      '<span class="tmain"><span class="tname">' + esc(t.memo || '부부 이체') + '</span>' +
+      '<span class="tmain"><span class="tname">' + esc(transferLabel(t)) + '</span>' +
         '<span class="tsub"><span class="tbadge">부부 이체</span>집계 제외 · ' + esc(t.owner || '공동') + '</span></span>' +
       '<span class="tamt tr">' + fmt(t.amount) + '</span>' +
     '</button>';
