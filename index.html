@@ -848,6 +848,20 @@ input.mini{font-weight:600;padding:5px 7px}
   </div>
 </div>
 
+<!-- ============ SHEET: admin pin ============ -->
+<div class="sw" id="shAdmin">
+  <div class="bd-layer" data-close></div>
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="shd"><h3>관리자 PIN</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
+    <div class="hint" style="margin:0 2px 10px">현기님으로 보려면 가계부 <b>PIN</b>을 넣어 주세요. 한 번 넣으면 이 기기에서는 다시 묻지 않아요.</div>
+    <div class="field"><label>PIN</label><input class="ipt" id="admPin" type="password" inputmode="numeric" autocomplete="off" placeholder="숫자 4~8자리"></div>
+    <div class="status err" id="admErr" hidden>PIN이 맞지 않아요.</div>
+    <button class="btn primary" id="admOk">현기님으로 보기</button>
+    <button class="btn ghost" id="admJangmi">장미님으로 보기</button>
+  </div>
+</div>
+
 <!-- ============ SHEET: card alert test ============ -->
 <div class="sw" id="shCard">
   <div class="bd-layer" data-close></div>
@@ -1868,6 +1882,35 @@ function askConfirm(title, text, cb, danger){
 }
 
 /* ---------------- 보는 사람 ---------------- */
+/* 현기님은 관리자라 둘 다 보이고, 장미님 기기에서는 장미 것만 본다.
+   현기님으로 바꿀 때만 가계부 PIN 을 묻고, 한 번 풀면 이 기기에 기억해 둔다. */
+var ADMIN_KEY = 'moneylog_admin_ok_v1';
+var adminPending = '현기';
+
+function adminOn(){
+  try { return localStorage.getItem(ADMIN_KEY) === '1'; } catch(e){ return false; }
+}
+function setAdminOn(v){
+  try {
+    if (v) localStorage.setItem(ADMIN_KEY, '1');
+    else localStorage.removeItem(ADMIN_KEY);
+  } catch(e){}
+}
+function adminPin(){ return digits((state.settings && state.settings.pin) || ''); }
+/* PIN 이 없거나 아직 둘이 같이 쓰는 가계부에 연결되기 전이면 잠그지 않는다
+   (처음 쓰는 기기에서 자동으로 만든 PIN 으로 스스로를 가두지 않도록) */
+function adminLockOn(){
+  return adminPin().length >= 4 && !!(state.settings && state.settings.connected);
+}
+function pinOk(v){
+  var want = adminPin();
+  if (want.length < 4) return true;
+  return digits(v) === want;
+}
+function adminNeeded(u){
+  return adminLockOn() && !adminOn() && (u || me()) === '현기';
+}
+
 function openWho(){
   var cur = me();
   var html = '';
@@ -1879,15 +1922,56 @@ function openWho(){
       (cur === u ? '<svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>' : '') +
     '</button>';
   });
+  if (adminLockOn() && adminOn()){
+    html += '<button class="who-row" data-act="lockdevice">' +
+      '<span class="avat">🔒</span>' +
+      '<span><b>이 기기를 장미 기기로 잠그기</b><small>다음에 현기님으로 보려면 PIN이 필요해요</small></span>' +
+    '</button>';
+  } else if (adminLockOn()){
+    html += '<div class="hint" style="margin:12px 2px 0">현기님(관리자)으로 보려면 가계부 <b>PIN</b>이 필요해요.</div>';
+  }
   $('whoList').innerHTML = html;
   openSheet('shWho');
 }
 function setWho(u){
+  if (adminNeeded(u)){ openAdminPin(u); return; }
+  applyWho(u);
+}
+function applyWho(u){
   state.settings.currentUser = u;
   state.settings.lastOwner = u;
   save();
   closeSheet('shWho');
+  closeSheet('shAdmin');
   toast(u + '님으로 보고 있어요');
+}
+function openAdminPin(u){
+  adminPending = u || '현기';
+  $('admPin').value = '';
+  $('admErr').hidden = true;
+  openSheet('shAdmin');
+  setTimeout(function(){ try { $('admPin').focus(); } catch(e){} }, 250);
+}
+function submitAdminPin(){
+  if (!pinOk($('admPin').value)){
+    $('admErr').hidden = false;
+    $('admPin').value = '';
+    try { $('admPin').focus(); } catch(e){}
+    return;
+  }
+  setAdminOn(true);
+  $('admErr').hidden = true;
+  applyWho(adminPending || '현기');
+}
+/* 이 기기를 장미 기기로 넘긴다 — 풀어 둔 관리자 잠금을 다시 잠근다 */
+function lockDevice(){
+  setAdminOn(false);
+  applyWho('장미');
+  toast('이 기기를 장미님 기기로 잠갔어요');
+}
+/* 앱을 열었을 때: 현기님 모드인데 이 기기에서 아직 안 풀었으면 PIN 을 묻는다 */
+function gateAdmin(){
+  if (adminNeeded('현기') && me() === '현기') openAdminPin('현기');
 }
 
 /* ---------------- 빠른 기록 ---------------- */
@@ -4429,6 +4513,7 @@ function bind(){
       case 'coachai': runCoachAI(); break;
       case 'who': openWho(); break;
       case 'setwho': setWho(t.getAttribute('data-who')); break;
+      case 'lockdevice': lockDevice(); break;
       case 'quick': openQuick(null); break;
       case 'month': shiftMonth(+t.getAttribute('data-dir')); break;
       case 'owner':
@@ -4717,6 +4802,13 @@ function bind(){
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape') closeAll();
   });
+
+  /* 관리자 PIN 시트 */
+  $('admOk').addEventListener('click', submitAdminPin);
+  $('admJangmi').addEventListener('click', function(){ applyWho('장미'); });
+  $('admPin').addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){ e.preventDefault(); submitAdminPin(); }
+  });
 }
 
 function shiftMonth(dir){
@@ -4744,6 +4836,7 @@ function init(){
   render();
   bind();
   showView('home');
+  gateAdmin();   /* 이 기기에서 아직 안 풀었으면 관리자 PIN 을 묻는다 */
 
   if ('serviceWorker' in navigator){
     window.addEventListener('load', function(){

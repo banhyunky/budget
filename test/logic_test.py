@@ -43,7 +43,12 @@ globalThis.__T = {
   txnRowHTML: txnRowHTML, renderList: renderList, parseCardMsg: parseCardMsg,
   saveQuick: saveQuick, openQuick: openQuick, isTransfer: isTransfer, q: q,
   barsSVG: barsSVG, shareSVG: shareSVG,
-  loanRankCardHTML: loanRankCardHTML, renderCharts: renderCharts, COACH_KEY: 'money-coach-v1'
+  loanRankCardHTML: loanRankCardHTML, renderCharts: renderCharts, COACH_KEY: 'money-coach-v1',
+  ADMIN_KEY: ADMIN_KEY, adminOn: adminOn, setAdminOn: setAdminOn, adminLockOn: adminLockOn,
+  adminPin: adminPin, pinOk: pinOk, adminNeeded: adminNeeded, openWho: openWho, setWho: setWho,
+  applyWho: applyWho, openAdminPin: openAdminPin, submitAdminPin: submitAdminPin,
+  lockDevice: lockDevice, gateAdmin: gateAdmin, isMasked: isMasked, me: me,
+  isTransfer: isTransfer, transferLabel: transferLabel
 };
 '''
 idx = js.rstrip().rfind('})();')
@@ -946,6 +951,98 @@ try:
     check('수동 이체는 이체 합계에', ev("__T.stats('2026-11').moved") == 1000)
 except Exception as e:
     check('수동 부부이체 입력', False, str(e))
+
+print('\n[33] 관리자(현기) PIN 잠금·나만 보기 가리기')
+ADMIN_SETUP = r'''
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-11';
+  st.bills = []; st.incomes = [];
+  st.txns = [
+    {id:'t1', date:'2026-11-19', amount:120000, kind:'expense', cat:'식비', owner:'공동', memo:'이마트'},
+    {id:'t2', date:'2026-11-20', amount:12000, kind:'expense', cat:'기타', owner:'현기', memo:'개인 커피', private:true},
+    {id:'t3', date:'2026-11-20', amount:8000, kind:'expense', cat:'기타', owner:'장미', memo:'장미 화장품', private:true}
+  ];
+  st.settings.currentUser = '장미';
+  st.settings.lastOwner = '장미';
+  st.settings.pin = '6591';
+  st.settings.connected = true;
+  __T.state = __T.normalize(st);
+  localStorage.removeItem(__T.ADMIN_KEY);
+})();
+'''
+ev(ADMIN_SETUP)
+try:
+    check('처음에는 관리자 잠금이 풀려 있지 않음', ev("__T.adminOn()") == False)
+    check('PIN·공유 가계부면 잠금이 켜짐', ev("__T.adminLockOn()") == True)
+    check('장미 모드에서는 현기로 바꿀 때 PIN 필요', ev("__T.adminNeeded('현기')") == True)
+    check('장미로 바꿀 때는 PIN 필요 없음', ev("__T.adminNeeded('장미')") == False)
+    check('PIN 확인 (공백·하이픈 섞여도)', ev("__T.pinOk('6 5-9 1')") == True)
+    check('틀린 PIN 은 거부', ev("__T.pinOk('6590')") == False)
+    check('빈 PIN 은 거부', ev("__T.pinOk('')") == False)
+
+    check('장미 시점: 현기의 나만 보기 기록은 가려짐', ev("__T.isMasked(__T.state.txns[1])") == True)
+    check('장미 시점: 자기 나만 보기 기록은 보임', ev("__T.isMasked(__T.state.txns[2])") == False)
+    row_masked = ev("__T.txnRowHTML(__T.state.txns[1])")
+    check('가려진 줄은 비공개 지출로 표시', '비공개 지출' in row_masked and '개인 커피' not in row_masked, row_masked)
+    check('가려진 줄은 눌러도 열리지 않음', 'data-act=\"masked\"' in row_masked, row_masked)
+
+    ev("__T.openWho()")
+    who_locked = ev("document.getElementById('whoList').innerHTML")
+    check('누구로 볼까요: 잠겨 있으면 PIN 안내', 'PIN' in who_locked, who_locked[:400])
+    check('누구로 볼까요: 잠겨 있으면 잠그기 버튼 없음', '잠그기' not in who_locked, who_locked[:400])
+
+    ev("__T.setWho('현기')")
+    check('잠긴 기기에서 현기를 눌러도 바로 바뀌지 않음', ev("__T.me()") == '장미', ev("__T.me()"))
+    check('PIN 입력칸을 비워서 연다', ev("document.getElementById('admPin').value") == '')
+    ev("document.getElementById('admPin').value = '1111'")
+    ev("__T.submitAdminPin()")
+    check('틀린 PIN 이면 그대로 장미', ev("__T.me()") == '장미' and ev("__T.adminOn()") == False)
+    check('틀린 PIN 안내가 보임', ev("document.getElementById('admErr').hidden") == False)
+
+    ev("document.getElementById('admPin').value = '6591'")
+    ev("__T.submitAdminPin()")
+    check('맞는 PIN 이면 현기로 바뀜', ev("__T.me()") == '현기', ev("__T.me()"))
+    check('이 기기에 관리자 해제를 기억', ev("__T.adminOn()") == True)
+    check('기억은 localStorage 에 (moneylog_admin_ok_v1)',
+          ev("localStorage.getItem('moneylog_admin_ok_v1')") == '1')
+    check('풀린 뒤에는 현기의 나만 보기 기록이 보임', ev("__T.isMasked(__T.state.txns[1])") == False)
+    check('풀린 뒤에는 장미 기록이 가려짐', ev("__T.isMasked(__T.state.txns[2])") == True)
+
+    ev("__T.setWho('장미')")
+    check('관리자로 볼 때는 장미로 바로 바꿀 수 있음', ev("__T.me()") == '장미')
+    check('바꾼 뒤에도 이 기기는 풀린 상태', ev("__T.adminOn()") == True)
+    ev("__T.setWho('현기')")
+    check('다시 현기로도 PIN 없이 바로', ev("__T.me()") == '현기')
+
+    ev("__T.openWho()")
+    who_open = ev("document.getElementById('whoList').innerHTML")
+    check('풀린 기기에서는 잠그기 버튼 보임', '잠그기' in who_open, who_open[:500])
+    ev("__T.lockDevice()")
+    check('잠그면 장미 기기로', ev("__T.me()") == '장미' and ev("__T.adminOn()") == False)
+    check('잠근 뒤 localStorage 플래그도 지움', ev("localStorage.getItem('moneylog_admin_ok_v1')") is None)
+    ev("__T.setWho('현기')")
+    check('잠근 뒤에는 다시 PIN 을 묻는다', ev("__T.me()") == '장미')
+
+    # 앱을 열었을 때: 현기 모드인데 이 기기에서 안 풀었으면 PIN 을 묻는다
+    ev("localStorage.removeItem(__T.ADMIN_KEY); __T.state.settings.currentUser = '현기'")
+    ev("__T.gateAdmin()")
+    check('현기 모드로 열면 PIN 을 묻는다(입력칸 비움)',
+          ev("document.getElementById('admPin').value") == '' and ev("__T.adminOn()") == False)
+    ev("localStorage.setItem(__T.ADMIN_KEY, '1')")
+    ev("document.getElementById('admErr').hidden = false")
+    ev("__T.gateAdmin()")
+    check('이미 풀린 기기에서는 다시 묻지 않음', ev("document.getElementById('admErr').hidden") == False)
+
+    # PIN 이 없거나 아직 공유 가계부에 연결되기 전에는 잠그지 않는다
+    check('PIN 이 없으면 잠그지 않음',
+          ev("(function(){var st=__T.blankState(); st.settings.pin=''; st.settings.connected=true; __T.state=__T.normalize(st); return __T.adminLockOn();})()") == False)
+    check('연결 전(로컬)에는 잠그지 않음',
+          ev("(function(){var st=__T.blankState(); st.settings.pin='6591'; st.settings.connected=false; __T.state=__T.normalize(st); return __T.adminLockOn();})()") == False)
+    check('PIN 없으면 현기로 그냥 바뀜',
+          ev("(function(){var st=__T.blankState(); st.settings.pin=''; st.settings.connected=true; st.settings.currentUser='장미'; __T.state=__T.normalize(st); __T.setWho('현기'); return __T.me();})()") == '현기')
+except Exception as e:
+    check('관리자 PIN 잠금', False, str(e))
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)

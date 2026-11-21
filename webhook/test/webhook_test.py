@@ -239,6 +239,31 @@ check('장미 폰 입금과 짝지어 한 줄로 정리', r2.get('status') == 'p
 check('짝지은 기록은 transfer', txns()[0]['kind'] == 'transfer' and txns()[0]['amount'] == 1000,
       json.dumps(txns()[0], ensure_ascii=False))
 
+# 두 폰이 같은 이체를 거의 동시에 보내고, 양쪽 다 이미 '이체'로 읽히는 경우 → 한 줄만
+reset()
+r1 = post(payload('장미님에게 1,000원을 보냈어요', source='push', app='KB스타뱅킹', atv=at('13:31', '39')))
+r2 = post(payload('반현기님이 1,000원을 보냈어요', owner='장미', source='push', app='KB스타뱅킹', atv=at('13:31', '40')))
+check('현기 폰 이체 알림은 added', r1.get('status') == 'added' and r1.get('kind') == 'transfer', str(r1))
+check('장미 폰의 같은 이체는 merged', r2.get('status') == 'merged', str(r2))
+check('같은 이체는 한 줄만 남음', len(txns()) == 1, str(len(txns())))
+check('남은 줄에 새 id 를 만들지 않음', r2.get('id') == r1.get('id'), '%s vs %s' % (r2.get('id'), r1.get('id')))
+check('남은 줄은 처음 기록 그대로', txns()[0]['owner'] == '현기' and txns()[0]['kind'] == 'transfer',
+      json.dumps(txns()[0], ensure_ascii=False))
+check('merged 는 문서를 다시 쓰지 않음', patch_count() == 1, str(patch_count()))
+
+reset()
+r1 = post(payload('신한은행 1,000원 출금 장미 잔액 500,000원', atv=at('14:00', '05')))
+r2 = post(payload('신한은행 1,000원 입금 반현기 잔액 300,000원', owner='장미', atv=at('14:00', '07')))
+check('은행 출금/입금도 양쪽 다 이체로 읽힘', r1.get('kind') == 'transfer' and r2.get('kind') == 'transfer',
+      str(r1) + ' / ' + str(r2))
+check('둘 다 이체여도 한 줄 (merged)', r2.get('status') == 'merged' and len(txns()) == 1,
+      str(r2) + ' / ' + str(len(txns())))
+
+reset()
+post(payload('장미님에게 1,000원을 보냈어요', source='push', app='KB스타뱅킹', atv=at('13:31', '39')))
+r = post(payload('반현기님이 1,000원을 보냈어요', owner='장미', source='push', app='KB스타뱅킹', atv=at('13:45', '00')))
+check('10분 넘게 떨어진 이체는 따로 기록', r.get('status') == 'added' and len(txns()) == 2, str(r))
+
 reset()
 post(payload('승인 30,000원 장미꽃집', atv=at('11:00')))
 check('가맹점 이름에 장미가 있어도 이체 아님', txns()[0]['kind'] == 'expense', json.dumps(txns()[0], ensure_ascii=False))

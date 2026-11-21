@@ -6,7 +6,7 @@
  * · 문자(SMS)와 앱 알림을 받아 금액·종류·가맹점을 읽고 가계부에 한 건 추가한다.
  * · 같은 결제의 문자+알림이 3분 안에 둘 다 오면 한 건만 남긴다.
  * · 부부(현기↔장미)끼리 오간 이체는 kind:'transfer' 로 기록해 수입·지출 집계에서 뺀다.
- * · 두 폰이 같은 이체를 각각 보내도 한 줄만 남긴다.
+ * · 두 폰이 같은 이체를 각각 보내도(둘 다 이미 '이체'로 읽혀도) 10분 안이면 한 줄만 남긴다.
  *
  * 설정 방법은 같은 폴더의 SETUP.md 참고.
  * 수정 후에는 [배포] → [배포 관리] → 연필 → 버전 '새 버전' → 배포 를 다시 해야 반영된다.
@@ -26,7 +26,7 @@ var CFG = {
   DUP_WINDOW_MS: 3 * 60 * 1000,
   PAIR_WINDOW_MS: 10 * 60 * 1000,
 
-  VERSION: '1.0.0'
+  VERSION: '1.1.0'
 };
 
 /* ============================== 상수 ============================== */
@@ -177,12 +177,14 @@ function ingest(p) {
         return { ok: true, status: 'duplicate', id: same.id, kind: same.kind, amount: same.amount };
       }
 
-      /* 2) 배우자 폰에서 같은 금액이 반대 방향으로 잡힌 경우 = 같은 이체 */
+      /* 2) 배우자 폰에서 같은 금액이 잡힌 경우 = 같은 이체 (한 줄만 남긴다) */
       var pi = findPair(js, cand);
       if (pi >= 0) {
         var mate = js[pi];
         if (mate.kind === 'transfer') {
-          return { ok: true, status: 'duplicate', id: mate.id, kind: 'transfer', amount: mate.amount };
+          /* 두 폰 모두 이미 '이체'로 읽힌 같은 부부 이체 — 새 줄을 만들지 않는다 */
+          var st = (cand.kind === 'transfer') ? 'merged' : 'duplicate';
+          return { ok: true, status: st, id: mate.id, kind: 'transfer', amount: mate.amount };
         }
         mate.kind = 'transfer';
         mate.cat = TRANSFER_CAT;
@@ -374,7 +376,9 @@ function findSame(txns, cand) {
   return -1;
 }
 
-/* 배우자 폰에서 같은 금액이 반대로 잡힌 경우 = 같은 이체 한 건 */
+/* 배우자 폰에서 같은 금액이 잡힌 경우 = 같은 이체 한 건
+   · 방향이 반대(입금↔출금)면 짝으로 묶는다.
+   · 둘 다 이미 '이체'면(각 폰이 배우자 이름을 다 읽은 경우) 같은 이체로 보고 합친다. */
 function findPair(txns, cand) {
   for (var i = txns.length - 1; i >= 0; i--) {
     var t = txns[i];
@@ -383,7 +387,10 @@ function findPair(txns, cand) {
     if (normOwner(t.owner) === cand.owner) continue;
     if (Math.abs(+t.at - cand.at) > CFG.PAIR_WINDOW_MS) continue;
     if (!cand.mv || !t.mv) continue;              /* 카드 승인처럼 돈이 '이체'로 움직인 문구만 */
-    if (kindOf(t) === kindOf(cand)) continue;     /* 입금↔출금 처럼 방향이 반대여야 함 */
+    if (kindOf(t) === kindOf(cand)) {
+      if (cand.kind === 'transfer' && kindOf(t) === 'transfer') return i;  /* 같은 부부 이체 */
+      continue;                                   /* 그 밖에는 방향이 반대여야 함 */
+    }
     return i;
   }
   return -1;
