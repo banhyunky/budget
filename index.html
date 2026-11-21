@@ -3854,7 +3854,7 @@ function coachPaceHTML(ym){
 function coachLoanRowHTML(l, i, mode){
   var balTxt = l.balance ? '잔액 ' + won(l.balance) : '잔액 미입력';
   var meta = mode === 'cash'
-    ? (l.balance ? '잔액 1,000만원당 월 ' + won(l.per10m) : '잔액 미입력 · 금리로만 비교')
+    ? (l.balance ? '잔액 1,000만원당 월 ' + won(l.per10m) : '잔액 미입력' + (l.rate ? ' · 금리 ' + shortNum(l.rate) + '%' : ''))
     : balTxt + (l.rate ? ' · 금리 ' + shortNum(l.rate) + '%' : ' · 금리 미입력');
   var val = l.monthly ? won(l.monthly) : '—';
   return '<div class="crow"><span class="rkno">' + (i + 1) + '</span>' +
