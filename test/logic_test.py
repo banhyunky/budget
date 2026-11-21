@@ -39,7 +39,8 @@ globalThis.__T = {
   coachPrompt: coachPrompt, parseCoachJSON: parseCoachJSON, coachCleanText: coachCleanText,
   runCoachAI: runCoachAI, renderCoachBar: renderCoachBar, renderCoach: renderCoach, openCoach: openCoach,
   coachLoanHTML: coachLoanHTML, coachAIHTML: coachAIHTML,
-  chart6Months: chart6Months, monthShare: monthShare, barsSVG: barsSVG, shareSVG: shareSVG,
+  chart6Months: chart6Months, monthShare: monthShare, monthSpendSplit: monthSpendSplit,
+  barsSVG: barsSVG, shareSVG: shareSVG,
   loanRankCardHTML: loanRankCardHTML, renderCharts: renderCharts, COACH_KEY: 'money-coach-v1'
 };
 '''
@@ -646,6 +647,28 @@ shsvg = ev("__T.shareSVG(__T.monthShare('2026-11'))")
 check('가로 누적 바 SVG (2조각)', shsvg.startswith('<svg') and shsvg.count('<rect') == 2, shsvg[:300])
 check('기록이 없으면 빈 비중',
 ev("(function(){var st=__T.blankState(); __T.state=__T.normalize(st); var s=__T.monthShare('2026-11'); return s.total===0 && s.loanPct===0 && __T.shareSVG(s)==='';})()") == True)
+
+print('\n[24-b] 카드 청구액 납부 기록을 두 번 세지 않음')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [
+    {id:'L1', name:'주택담보대출', cat:'대출', amount:1000000, day:25, owner:'공동', active:true, balance:100000000, rate:4},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  st.txns = [{id:'p1', date:'2026-11-16', amount:1340000, kind:'expense', cat:'카드', owner:'공동', memo:'신한카드', billId:'C1'}];
+  __T.state = __T.normalize(st);
+})();
+''')
+sp = _json.loads(ev("JSON.stringify(__T.monthSpendSplit('2026-11'))"))
+check('카드 납부액은 변동에서 빠짐', sp['variable'] == 0 and sp['paidCard'] == 1340000, str(sp))
+check('카드 몫은 한 번만', sp['flexible'] == 1340000 and sp['total'] == 2340000, str(sp))
+sh_paid = _json.loads(ev("JSON.stringify(__T.monthShare('2026-11'))"))
+check('비중도 두 번 안 셈', sh_paid['flex'] == 1340000 and sh_paid['total'] == 2340000, str(sh_paid))
+check('납부한 카드도 비중에는 남음', abs(sh_paid['flexPct'] - 57.3) <= 0.2, str(sh_paid['flexPct']))
+sp_sum = _json.loads(ev("JSON.stringify(__T.coachSummary('2026-11'))"))
+check('AI 요약도 납부한 카드값을 따로', sp_sum['variableSpend'] == 0 and sp_sum['cardBillThisMonth'] == 1340000, str(sp_sum))
 
 print('\n[25] 제미나이 진단 JSON 파서')
 def coach_parse(text):
