@@ -3992,7 +3992,7 @@ function barsSVG(data, hiYm){
   var slot = W / (data.length || 1);
   var bw = Math.max(14, Math.min(30, slot - 12));
   var base = H - padB, hMax = base - padT;
-  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" role="img" aria-label="월별 지출 흐름">';
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="display:block;width:100%;height:auto" role="img" aria-label="월별 지출 흐름">';
   data.forEach(function(d, i){
     var cx = slot * i + slot / 2, x = cx - bw / 2, hi = d.ym === hiYm;
     var hTot = d.total > 0 ? Math.max(3, Math.round(hMax * d.total / maxV)) : 0;
