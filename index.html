@@ -141,6 +141,71 @@ main{padding:6px 16px 0}
 .obar{height:6px;border-radius:99px;background:var(--bar);overflow:hidden}
 .obar i{display:block;height:100%;border-radius:99px;transition:width .4s}
 
+/* ---------- 실제·예정 / 타임라인 ---------- */
+.hchip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;
+  font-size:10.5px;font-weight:700;letter-spacing:0;vertical-align:1px;
+  background:#F2F4F6;color:#8B95A1}
+.planrow{display:flex;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+.planrow>div{flex:1;min-width:0;background:#FAFBFC;border-radius:12px;padding:9px 11px}
+.planrow span{display:block;font-size:11.5px;font-weight:600;color:var(--sub);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.planrow b{display:block;margin-top:2px;font-size:13.5px;font-weight:700;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pos{color:var(--blue)}
+.neg{color:var(--red)}
+
+.tlfilters{padding:10px 20px 8px;gap:6px}
+.tlfilters .chip{padding:7px 12px;font-size:12.5px}
+.tlabor{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 20px;font-size:11.5px;font-weight:700;color:var(--sub);background:#FAFBFC}
+.tlabor b{font-size:12px;font-weight:700;color:var(--mid);font-variant-numeric:tabular-nums}
+.tldiv{display:flex;align-items:center;gap:8px;padding:9px 20px;
+  font-size:11.5px;font-weight:700;color:var(--blue);background:#F7FAFF}
+.tldiv:before,.tldiv:after{content:"";flex:1;height:1px;background:#DCE9FB}
+.tlrow{display:flex;align-items:center;gap:11px;padding:11px 20px;position:relative}
+.tlrow+.tlrow:before{content:"";position:absolute;left:20px;right:20px;top:0;height:1px;background:var(--line)}
+.tlico{width:30px;height:30px;flex:none;border-radius:10px;display:grid;place-items:center;
+  font-size:15px;font-weight:800;line-height:1}
+.tlico.in{background:var(--blue-bg);color:var(--blue)}
+.tlico.out{background:#F2F4F6;color:#6B7684}
+.tlrow.plan .tlico.out{background:#FFF1EA;color:#FF7A3D}
+.tlmain{flex:1;min-width:0}
+.tlname{display:flex;align-items:center;gap:5px;font-size:14.5px;font-weight:600;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tlname b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tlsub{margin-top:1px;font-size:11.5px;font-weight:500;color:var(--sub);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tlamt{flex:none;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.tlamt.in{color:var(--blue)}
+.tlamt.out{color:var(--ink)}
+.tlrow.plan .tlamt.out{color:#FF7A3D}
+.tlrow.done .tlname,.tlrow.done .tlsub{color:#9AA4B0}
+.tlrow.done .tlamt.out{color:#8B95A1}
+.tlrow.done .tlamt.in{color:#8FB6F0}
+.tlbadge{flex:none;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:6px;
+  background:var(--blue-bg);color:var(--blue)}
+.tlbadge.hot{background:var(--red-bg);color:var(--red)}
+.tlcheck{width:28px;height:28px;flex:none;border-radius:50%;border:1.5px solid #DDE1E6;
+  background:#fff;color:transparent;display:grid;place-items:center;padding:0}
+.tlcheck svg{width:14px;height:14px}
+.tlcheck.paid{background:var(--blue);border-color:var(--blue);color:#fff}
+.tlmore{width:100%;border:0;background:none;border-top:1px solid var(--line);
+  padding:12px 20px;font-size:12.5px;font-weight:700;color:var(--blue);text-align:center}
+.tlsum{display:flex;gap:8px;padding:2px 20px 10px}
+.tlsum>div{flex:1;min-width:0;background:#FAFBFC;border-radius:12px;padding:9px 11px}
+.tlsum span{display:block;font-size:11.5px;font-weight:600;color:var(--sub)}
+.tlsum b{display:block;margin-top:2px;font-size:14px;font-weight:700;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.inc.paid .acc-main{opacity:.5}
+.inc.paid .bamt{color:#B0B8C1}
+.sum2{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px}
+.sum2>div{padding:4px 0;min-width:0}
+.sum2 span{display:block;font-size:11.5px;font-weight:600;color:var(--sub)}
+.sum2 b{display:block;margin-top:1px;font-size:15px;font-weight:700;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum2 .full{grid-column:1 / -1}
+
 /* ---------- month nav / chips ---------- */
 .mnav{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 12px}
 .mnav button{width:36px;height:36px;border:0;background:#fff;border-radius:50%;
@@ -467,14 +532,18 @@ input.mini{font-weight:600;padding:5px 7px}
     <!-- ============ HOME ============ -->
     <section class="view on" id="view-home">
       <div class="card hero">
-        <div class="hero-label">이번 달 남은 여유 자금</div>
+        <div class="hero-label">이번 달 실제 수지 <span class="hchip on">확정</span></div>
         <div class="hero-amount" id="homeFree"><span id="homeFreeNum">0</span><span class="u">원</span></div>
         <div class="progress"><i id="homeBar" style="width:0%"></i></div>
         <div class="hero-meta"><span id="homeUsed">사용 0%</span><span id="homeLeftDays"></span></div>
         <div class="hero-grid">
-          <div><span>이번 달 수입</span><b id="homeIncome">0원</b></div>
-          <div><span>쓴 돈</span><b id="homeSpent">0원</b></div>
-          <div><span>남은 고정비</span><b id="homeFixed">0원</b></div>
+          <div><span>실제 수입</span><b id="homeIncome">0원</b></div>
+          <div><span>실제 지출</span><b id="homeSpent">0원</b></div>
+          <div><span>월말 예상</span><b id="homeEnd">0원</b></div>
+        </div>
+        <div class="planrow">
+          <div><span>앞으로 들어올 돈</span><b class="pos" id="homeExpInc">+0원</b></div>
+          <div><span>앞으로 나갈 돈</span><b class="neg" id="homeExpExp">-0원</b></div>
         </div>
         <button class="hero-card" id="homeCardRow" data-act="tab" data-view="plan">
           <span class="hc-ico">💳</span>
@@ -495,7 +564,7 @@ input.mini{font-weight:600;padding:5px 7px}
         <div id="ownerSplit"></div>
       </div>
 
-      <div class="sechd"><h2>곧 빠져나갈 돈</h2><span id="upTotal"></span></div>
+      <div class="sechd"><h2>이번 달 타임라인</h2><span id="upTotal"></span></div>
       <div class="card p0" id="upcoming"></div>
 
       <div class="sechd"><h2>이번 달 최근 기록</h2><button data-act="tab" data-view="list">전체보기</button></div>
@@ -510,10 +579,15 @@ input.mini{font-weight:600;padding:5px 7px}
         <button data-act="month" data-dir="1" aria-label="다음 달">›</button>
       </div>
       <div class="card tight">
-        <div class="sumrow"><span>수입</span><b id="lstIncome">0원</b></div>
-        <div class="sumrow"><span>지출</span><b id="lstExpense" class="neg">0원</b></div>
-        <div class="sumdiv"></div>
-        <div class="sumrow"><span>남은 돈</span><b id="lstLeft">0원</b></div>
+        <div class="sum2">
+          <div><span>실제 수입</span><b id="lstIncome" class="pos">0원</b></div>
+          <div><span>실제 지출</span><b id="lstExpense" class="neg">0원</b></div>
+          <div><span>예정 수입</span><b id="lstExpInc" class="pos">+0원</b></div>
+          <div><span>예정 지출</span><b id="lstExpExp" class="neg">-0원</b></div>
+          <div class="full" style="height:1px;background:var(--line);margin:7px 0;padding:0"></div>
+          <div><span>현재 수지</span><b id="lstNet">0원</b></div>
+          <div><span>월말 예상</span><b id="lstEnd">0원</b></div>
+        </div>
       </div>
       <div class="chips" id="ownerChips">
         <button class="chip on" data-act="owner" data-owner="전체">전체</button>
@@ -798,6 +872,27 @@ input.mini{font-weight:600;padding:5px 7px}
   </div>
 </div>
 
+<!-- ============ SHEET: 이번 달 타임라인 ============ -->
+<div class="sw" id="shTimeline">
+  <div class="bd-layer" data-close></div>
+  <div class="sheet" style="padding-left:0;padding-right:0">
+    <div class="grip"></div>
+    <div class="shd" style="padding:0 20px;margin-bottom:4px">
+      <h3>이번 달 타임라인</h3>
+      <button class="xbtn" data-close aria-label="닫기">✕</button>
+    </div>
+    <div class="hint" style="margin:0 20px 6px">이미 오간 돈과 앞으로 오갈 돈을 날짜 순으로 모았어요. 줄을 누르면 수정, ✓를 누르면 입금·납부 완료로 바뀌어요.</div>
+    <div class="mnav" style="padding:0 20px 6px">
+      <button data-act="tlmonth" data-dir="-1" aria-label="이전 달">‹</button>
+      <b id="tlMonthLabel">2026년 11월</b>
+      <button data-act="tlmonth" data-dir="1" aria-label="다음 달">›</button>
+    </div>
+    <div class="tlsum" id="tlSummary"></div>
+    <div class="chips tlfilters" id="tlFilterRow"></div>
+    <div id="tlFull"></div>
+  </div>
+</div>
+
 <!-- ============ SHEET: savings account ============ -->
 <div class="sw" id="shAcc">
   <div class="bd-layer" data-close></div>
@@ -1052,6 +1147,7 @@ var state = null;
 var fb = { db:null, ref:null, unsub:null, connected:false };
 var applying = false, pushTimer = null, lastPushTs = 0, showPaid = false;
 var view = 'home', ownerFilter = '전체';
+var tlFilter = 'all', tlYM = null;   /* 타임라인: 전체 / 나갈 것만(예정) / 나간 것만(완료) */
 var q = { id:null, kind:'expense', cat:'식비', owner:'현기', private:false };
 var bEditing = null, iEditing = null, aEditing = null, cEditing = null, confirmCb = null;
 var cardParsed = null, cardCat = '기타', cardCatTouched = false;
@@ -1259,6 +1355,7 @@ function normalize(s){
   s.bills = s.bills || [];
   s.txns = s.txns || [];
   s.paid = s.paid || {};
+  s.received = s.received || {};
   s.plan = s.plan || { saveGoal:0, loan:0, assets:0 };
   s.settings = s.settings || {};
   if (s.settings.geminiKey === undefined) s.settings.geminiKey = '';
@@ -1353,6 +1450,15 @@ function savingsTotal(){ return total(state.accounts, function(a){ return a.bala
 function savingsMonthly(){ return total(state.accounts, function(a){ return a.monthly; }); }
 function paidKey(id, ym){ return id + '|' + ym; }
 function isPaid(id, ym){ return !!state.paid[paidKey(id, ym)]; }
+function incomeKey(id, ym){ return id + '|' + ym; }
+/* 고정 수입을 이번 달에 이미 받았는지. 안 받았으면 '예정 수입'으로 잡힌다 */
+function isIncomeReceived(id, ym){ return !!(state.received && state.received[incomeKey(id, ym)]); }
+function isPastYM(ym){ return String(ym) < curYM(); }
+/* 아직 안 들어온 고정 수입 (지난 달은 이미 지난 일이라 예정으로 잡지 않음) */
+function expectedIncomes(ym){
+  if (isPastYM(ym)) return [];
+  return activeIncomes().filter(function(i){ return !isIncomeReceived(i.id, ym); });
+}
 /* ---------------- 기준일 → 실제 출금일 (주말·공휴일이면 다음 평일로) ---------------- */
 /* 법정 공휴일 중 날짜가 매년 같은 것만 (음력·대체공휴일은 해마다 달라 넣지 않음) */
 var FIXED_HOLIDAYS = ['01-01', '03-01', '05-05', '06-06', '08-15', '10-03', '10-09', '12-25'];
@@ -1399,8 +1505,9 @@ function bindDayHint(dayId, hintId){
 }
 function stats(ym){
   var tx = txnsOf(ym);
-  var base = incomeTotal();
-  var extra = total(tx.filter(function(t){ return t.kind === 'income'; }), function(t){ return t.amount; });
+  var past = isPastYM(ym);
+  /* 실제: 이번 달에 이미 기록된 돈만. 안 받은 월급·안 낸 고정비는 여기에 넣지 않는다 */
+  var actIncome = total(tx.filter(function(t){ return t.kind === 'income'; }), function(t){ return t.amount; });
   var exp = total(tx.filter(function(t){ return t.kind !== 'income' && !isTransfer(t); }), function(t){ return t.amount; });
   var moved = total(tx.filter(isTransfer), function(t){ return t.amount; });
   var unpaidFixed = 0, unpaidCard = 0;
@@ -1409,14 +1516,23 @@ function stats(ym){
     if (isPaid(b.id, ym)) return;
     var a = billAmountFor(b, ym);
     if (isCardBill(b)){
-      if (a > 0){ unpaidCard += a; unpaidCardArr.push(b); }
+      unpaidCard += a;
+      if (a > 0) unpaidCardArr.push(b);
     } else {
-      unpaidFixed += a; unpaidArr.push(b);
+      unpaidFixed += a;
+      unpaidArr.push(b);
     }
   });
-  var unpaid = unpaidFixed + unpaidCard;
+  /* 예정: 아직 안 들어온 고정 수입 + 아직 안 나간 고정비·카드값 (지난 달은 0) */
+  var expIncomeArr = expectedIncomes(ym);
+  var expIncome = total(expIncomeArr, function(i){ return i.amount; });
+  var expBillArr = past ? [] : unpaidArr.filter(function(b){ return billAmountFor(b, ym) > 0; });
+  var expCardArr = past ? [] : unpaidCardArr.slice();
+  var expExpense = past ? 0 : (unpaidFixed + unpaidCard);
+  var curNet = actIncome - exp;
+  var monthEnd = curNet + expIncome - expExpense;
   var isCur = ym === curYM();
-  var left = base + extra - exp - (isCur ? unpaid : 0);
+  var left = monthEnd;
   /* 고정비 납부 기록은 고정비 합계에 이미 들어 있으니 변동비에서 뺀다.
      카드 청구액 납부는 금액이 매달 달라 변동비로 남긴다. */
   var paidFixedSum = 0;
@@ -1426,12 +1542,63 @@ function stats(ym){
     if (!bb || !isCardBill(bb)) paidFixedSum += (+t.amount || 0);
   });
   var variable = Math.max(0, exp - paidFixedSum);
-  return { ym:ym, income: base + extra, extraIncome: extra, expense: exp, moved: moved,
-    unpaid: unpaid, unpaidFixed: unpaidFixed, unpaidCard: unpaidCard,
+  return { ym:ym, income: actIncome + expIncome, extraIncome: actIncome, expense: exp, moved: moved,
+    actIncome: actIncome, actExpense: exp, curNet: curNet,
+    expIncome: expIncome, expExpense: expExpense, monthEnd: monthEnd,
+    expIncomeArr: expIncomeArr, expBillArr: expBillArr, expCardArr: expCardArr,
+    unpaid: unpaidFixed + unpaidCard, unpaidFixed: unpaidFixed, unpaidCard: unpaidCard,
     unpaidArr: unpaidArr, unpaidCardArr: unpaidCardArr, left: left,
     fixed: fixedBillTotal(), loan: loanBillTotal(), living: livingBillTotal(),
     loanBalance: loanBalanceTotal(), card: cardBillTotal(ym),
     variable: variable, paidBills: paidFixedSum };
+}
+
+/* ---------------- 타임라인 (이미 오간 돈 + 앞으로 오갈 돈) ---------------- */
+function signedWon(n){
+  n = Math.round(+n || 0);
+  return (n > 0 ? '+' : n < 0 ? '-' : '') + fmt(Math.abs(n)) + '원';
+}
+function mdLabel(ds){
+  if (!ds) return '';
+  var p = String(ds).split('-');
+  var dt = new Date(+p[0], +p[1] - 1, +p[2]);
+  return (+p[1]) + '월 ' + (+p[2]) + '일 (' + WD[dt.getDay()] + ')';
+}
+/* 이번 달에 오간 돈(완료)과 앞으로 오갈 돈(예정)을 한 줄씩. 날짜 순으로 섞어서
+   '지금까지 쓴 돈'과 '앞으로 나갈 돈'이 한 타임라인에서 이어지게 한다.
+   부부 이체(현기↔장미)는 집계와 똑같이 타임라인에서도 뺀다. */
+function timelineOf(ym){
+  var items = [];
+  txnsOf(ym).forEach(function(t){
+    if (isTransfer(t)) return;
+    var dir = t.kind === 'income' ? 'in' : (t.kind === 'expense' ? 'out' : '');
+    if (!dir) return;
+    items.push({ key:'t' + t.id, status:'done', dir:dir, ds:String(t.date || '').slice(0, 10),
+      name:t.memo || t.cat || (dir === 'in' ? '수입' : '지출'), cat:t.cat || '',
+      owner:t.owner || '공동', amount:Math.round(+t.amount || 0), txn:t });
+  });
+  if (!isPastYM(ym)){
+    expectedIncomes(ym).forEach(function(i){
+      items.push({ key:'i' + i.id, status:'plan', dir:'in', ds:dsOfDate(actualBillDate(ym, i.day)),
+        name:i.name, cat:'고정 수입', owner:i.owner || '공동',
+        amount:Math.round(+i.amount || 0), income:i });
+    });
+    activeBills().forEach(function(b){
+      if (isPaid(b.id, ym)) return;
+      var a = billAmountFor(b, ym);
+      if (a <= 0 && !isCardBill(b)) return;   /* 금액 0인 고정비는 줄을 만들지 않음 */
+      items.push({ key:'b' + b.id, status:'plan', dir:'out', ds:billDateStr(b, ym),
+        name:b.name, cat:b.cat || '', owner:b.owner || '공동',
+        amount:a, bill:b, card:isCardBill(b) });
+    });
+  }
+  items.sort(function(x, y){
+    if (x.ds !== y.ds) return x.ds < y.ds ? -1 : 1;
+    if (x.status !== y.status) return x.status === 'done' ? -1 : 1;
+    if (x.dir !== y.dir) return x.dir === 'in' ? -1 : 1;
+    return x.name < y.name ? -1 : 1;
+  });
+  return items;
 }
 
 /* ---------------- 렌더 ---------------- */
@@ -1441,6 +1608,7 @@ function render(){
   renderList();
   renderPlan();
   renderSettingsStatus();
+  if (sheetOpen('shTimeline')) renderTimelineSheet();
 }
 
 function renderHeader(){
@@ -1456,21 +1624,27 @@ function renderHeader(){
 
 function renderHome(){
   var ym = curYM(), s = stats(ym), d = todayD(), dim = daysIn(ym);
-  var pct = s.income > 0 ? Math.round((s.expense + s.unpaid) / s.income * 100) : 0;
+  /* 사용률은 '이번 달에 들어올 돈' 대비 '나갈 돈(이미 나간 + 앞으로 나갈)' */
+  var inflow = s.actIncome + s.expIncome, outflow = s.actExpense + s.expExpense;
+  var pct = inflow > 0 ? Math.round(outflow / inflow * 100) : 0;
   var freeEl = $('homeFree'), numEl = $('homeFreeNum');
-  numEl.textContent = (s.left < 0 ? '-' : '') + fmt(Math.abs(s.left));
-  freeEl.classList.toggle('neg', s.left < 0);
+  numEl.textContent = (s.curNet < 0 ? '-' : '') + fmt(Math.abs(s.curNet));
+  freeEl.classList.toggle('neg', s.curNet < 0);
 
   var bar = $('homeBar');
   bar.style.width = Math.min(100, pct) + '%';
   bar.className = pct >= 100 ? 'over' : (pct >= 80 ? 'warn' : '');
-  $('homeUsed').textContent = '이번 달 사용 ' + pct + '%';
+  $('homeUsed').textContent = '이번 달 지출 ' + pct + '%';
   var remain = Math.max(0, dim - d.getDate());
   $('homeLeftDays').textContent = remain > 0 ? ('이번 달 ' + remain + '일 남음') : '이번 달 마지막 날';
 
-  $('homeIncome').textContent = won(s.income);
-  $('homeSpent').textContent = won(s.expense);
-  $('homeFixed').textContent = won(s.unpaidFixed);
+  $('homeIncome').textContent = won(s.actIncome);
+  $('homeSpent').textContent = won(s.actExpense);
+  var endEl = $('homeEnd');
+  endEl.textContent = signedWon(s.monthEnd);
+  endEl.className = s.monthEnd < 0 ? 'neg' : (s.monthEnd > 0 ? 'pos' : '');
+  $('homeExpInc').textContent = '+' + fmt(s.expIncome) + '원';
+  $('homeExpExp').textContent = '-' + fmt(s.expExpense) + '원';
 
   /* 이번 달 카드 청구액은 고정비와 섞지 않고 따로 보여준다 */
   var cardEl = $('homeCardAmt'), cardSub = $('homeCardSub');
@@ -1509,31 +1683,8 @@ function renderHome(){
   });
   $('ownerSplit').innerHTML = html;
 
-  var up = s.unpaidArr.slice()
-    .map(function(b){ return {b:b, ds:billDateStr(b, ym)}; })
-    .sort(function(x, y){ return x.ds < y.ds ? -1 : x.ds > y.ds ? 1 : 0; });
-  var paidList = fixedBills().filter(function(b){ return isPaid(b.id, ym); });
-  var upHtml = '';
-  if (!up.length && !allCards.length){
-    upHtml = '<div class="empty">이번 달 남은 고정비가 없어요.<br>다음 달도 자동으로 다시 떠요.</div>';
-  } else {
-    up.forEach(function(it){ upHtml += billRowHTML(it.b, ym, false); });
-  }
-  if (paidList.length){
-    upHtml += '<button class="paidtoggle" data-act="showPaid">납부 완료 ' + paidList.length + '건 ' +
-      (showPaid ? '접기' : '보기') + '</button>';
-    if (showPaid) paidList.forEach(function(b){ upHtml += billRowHTML(b, ym, true); });
-  }
-  if (allCards.length){
-    upHtml += '<div class="cardsplit"><span>💳 카드 청구액 · 매달 변동</span><b>' +
-      (cardBillTotal(ym) ? won(cardBillTotal(ym)) : '미입력') + '</b></div>';
-    allCards.forEach(function(b){ upHtml += cardRowHTML(b, ym); });
-  }
-  $('upcoming').innerHTML = upHtml;
-  var upSum = total(up, function(x){ return billAmountFor(x.b, ym); });
-  var upTxt = upSum ? ('남은 예정 ' + won(upSum)) : '';
-  if (s.unpaidCard) upTxt += (upTxt ? ' · ' : '') + '카드 ' + won(s.unpaidCard);
-  $('upTotal').textContent = upTxt;
+  renderHomeTimeline(s, ym);
+  $('upTotal').textContent = s.expExpense ? ('예정 -' + fmt(s.expExpense) + '원') : '예정 없음';
 
   var recent = txnsOf(ym).slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }).slice(0,5);
   $('homeRecent').innerHTML = recent.length ? recent.map(txnRowHTML).join('') :
@@ -1541,6 +1692,163 @@ function renderHome(){
 
   /* 홈 한 줄 어드바이스: 저장된 AI 진단이 있으면 그 문장, 없으면 규칙 계산 (스크롤 늘리지 않게 한 줄만) */
   renderCoachBar();
+}
+
+/* ---------------- 타임라인 그리기 ---------------- */
+function tlFiltersHTML(){
+  var defs = [['all','전체'],['plan','나갈 것만'],['done','나간 것만']];
+  var h = '';
+  defs.forEach(function(d){
+    h += '<button class="chip soft' + (tlFilter === d[0] ? ' on' : '') + '" data-act="tlfilter" data-v="' + d[0] + '">' + d[1] + '</button>';
+  });
+  return h;
+}
+function tlEmptyHTML(txt){
+  return '<div class="empty" style="padding:20px 22px">' + txt + '</div>';
+}
+function tlRowHTML(it, ym){
+  var done = it.status === 'done';
+  var inc = it.dir === 'in';
+  var badge = '';
+  if (!done){
+    if (it.card && !it.amount) badge = '<span class="tlbadge hot">금액 미입력</span>';
+    else {
+      var dd = dday(it.ds);
+      badge = '<span class="tlbadge' + (dd.hot ? ' hot' : '') + '">' + dd.t + '</span>';
+    }
+  }
+  var act, id;
+  if (done){ act = 'txn'; id = it.txn.id; }
+  else if (it.income){ act = 'income'; id = it.income.id; }
+  else if (it.card){ act = 'cardbill'; id = it.bill.id; }
+  else { act = 'bill'; id = it.bill.id; }
+  var sub = mdLabel(it.ds);
+  if (done) sub += ' · ' + esc(it.cat) + ' · ' + esc(it.owner);
+  else if (it.income) sub += ' · 입금 예정 · ' + esc(it.owner) + ' · 매월 ' + it.income.day + '일';
+  else if (it.bill) sub += ' · ' + esc(it.owner) + (billMoved(it.bill, ym) ? ' · ' + billDayLabel(it.bill, ym) : '') +
+    (it.card && !it.amount ? ' · 탭해서 금액 넣기' : '');
+  var chk = '';
+  if (!done){
+    chk = '<button class="tlcheck" data-act="' + (it.income ? 'incpay' : 'pay') + '" data-id="' + id + '" aria-label="' +
+      (it.income ? '입금 완료' : '납부 완료') + '">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg></button>';
+  }
+  return '<div class="tlrow ' + (done ? 'done' : 'plan') + ' ' + it.dir + '">' +
+    '<span class="tlico ' + it.dir + '">' + (inc ? '+' : '−') + '</span>' +
+    '<div class="tlmain" data-act="' + act + '" data-id="' + id + '">' +
+      '<div class="tlname"><b>' + esc(it.name) + '</b>' + badge + '</div>' +
+      '<div class="tlsub">' + sub + '</div>' +
+    '</div>' +
+    '<div class="tlamt ' + it.dir + '">' + (inc ? '+' : '−') + fmt(it.amount) + '</div>' +
+    chk +
+  '</div>';
+}
+function tlRowsHTML(items, ym){
+  var h = '';
+  items.forEach(function(it){ h += tlRowHTML(it, ym); });
+  return h;
+}
+function tlSplit(ym){
+  var all = timelineOf(ym), done = [], plan = [];
+  all.forEach(function(it){ (it.status === 'done' ? done : plan).push(it); });
+  return { all: all, done: done, plan: plan };
+}
+
+/* 홈 카드: 타임라인을 짧게 (완료 3건 + 예정 4건). 전체는 시트에서 */
+function renderHomeTimeline(s, ym){
+  var el = $('upcoming'); if (!el) return;
+  var sp = tlSplit(ym), done = sp.done, plan = sp.plan;
+  var html = '<div class="chips tlfilters">' + tlFiltersHTML() + '</div>';
+  if (tlFilter === 'plan'){
+    html += plan.length ? tlRowsHTML(plan.slice(0, 6), ym) : tlEmptyHTML('앞으로 오갈 돈이 없어요.');
+  } else if (tlFilter === 'done'){
+    html += done.length ? tlRowsHTML(done.slice(-6), ym) : tlEmptyHTML('이번 달 기록이 아직 없어요.');
+  } else {
+    if (done.length){
+      html += '<div class="tlabor"><span>이미 오간 돈</span><b>지금까지 ' + signedWon(s.curNet) + '</b></div>';
+      html += tlRowsHTML(done.slice(-3), ym);
+    }
+    if (!isPastYM(ym)){
+      html += '<div class="tldiv"><span>오늘 · ' + mdLabel(todayStr()) + '</span></div>';
+      html += plan.length ? tlRowsHTML(plan.slice(0, 4), ym) : tlEmptyHTML('앞으로 예정된 돈이 없어요.');
+    } else if (!done.length){
+      html += tlEmptyHTML('이번 달 기록이 아직 없어요.');
+    }
+  }
+  html += '<div class="billsum"><span>월말 예상</span><b class="' + (s.monthEnd < 0 ? 'neg' : 'pos') + '">' +
+    signedWon(s.monthEnd) + '</b></div>';
+  html += '<button class="tlmore" data-act="timeline">전체 타임라인 보기' +
+    (sp.all.length ? ' · ' + sp.all.length + '건' : '') + ' ›</button>';
+  el.innerHTML = html;
+}
+
+/* 전체 타임라인 시트: 이번 달(or 고른 달)의 모든 줄을 날짜 순으로 */
+function renderTimelineSheet(){
+  var ym = tlYM || curYM();
+  var s = stats(ym);
+  if ($('tlMonthLabel')) $('tlMonthLabel').textContent = ymLabel(ym);
+  if ($('tlSummary')) $('tlSummary').innerHTML =
+    '<div><span>지금까지 확정</span><b class="' + (s.curNet < 0 ? 'neg' : (s.curNet > 0 ? 'pos' : '')) + '">' + signedWon(s.curNet) + '</b></div>' +
+    '<div><span>월말 예상</span><b class="' + (s.monthEnd < 0 ? 'neg' : (s.monthEnd > 0 ? 'pos' : '')) + '">' + signedWon(s.monthEnd) + '</b></div>';
+  if ($('tlFilterRow')) $('tlFilterRow').innerHTML = tlFiltersHTML();
+  var sp = tlSplit(ym), done = sp.done, plan = sp.plan;
+  var html = '';
+  if (tlFilter !== 'plan'){
+    html += '<div class="tlabor"><span>나간 것 · 들어온 것 ' + done.length + '건</span><b>' + signedWon(s.curNet) + '</b></div>';
+    html += done.length ? tlRowsHTML(done, ym) : tlEmptyHTML('이번 달 기록이 아직 없어요.');
+    html += '<div class="billsum"><span>지금까지 수지</span><b class="' + (s.curNet < 0 ? 'neg' : 'pos') + '">' + signedWon(s.curNet) + '</b></div>';
+  }
+  if (tlFilter === 'all' && !isPastYM(ym)){
+    html += '<div class="tldiv"><span>오늘 · ' + mdLabel(todayStr()) + '</span></div>';
+  }
+  if (tlFilter !== 'done'){
+    html += '<div class="tlabor"><span>나갈 것 · 들어올 것 ' + plan.length + '건</span><b>' +
+      (plan.length ? signedWon(s.expIncome - s.expExpense) : '없음') + '</b></div>';
+    html += plan.length ? tlRowsHTML(plan, ym) : tlEmptyHTML('앞으로 예정된 돈이 없어요.');
+    html += '<div class="billsum"><span>월말 예상</span><b class="' + (s.monthEnd < 0 ? 'neg' : 'pos') + '">' + signedWon(s.monthEnd) + '</b></div>';
+  }
+  if ($('tlFull')) $('tlFull').innerHTML = html;
+}
+function openTimeline(ym){ tlYM = ym || curYM(); renderTimelineSheet(); openSheet('shTimeline'); }
+function setTlFilter(v){ tlFilter = (v === 'plan' || v === 'done') ? v : 'all'; renderHome(); renderTimelineSheet(); }
+function shiftTlMonth(dir){
+  var d = ymDate(tlYM || curYM());
+  d.setMonth(d.getMonth() + dir);
+  tlYM = ymStr(d);
+  renderTimelineSheet();
+}
+
+/* 고정 수입 입금 완료/취소. 이미 같은 금액의 수입 기록이 있으면 그 줄에 붙여 두 번 세지 않는다 */
+function payIncome(id, ym){
+  ym = ym || curYM();
+  var inc = (state.incomes || []).filter(function(i){ return i.id === id; })[0];
+  if (!inc) return;
+  var k = incomeKey(id, ym);
+  if (state.received[k]){
+    var keep = [];
+    state.txns.forEach(function(t){
+      if (t.incomeId === id && String(t.date).slice(0, 7) === ym){
+        if (t.autoIncome) return;          /* 앱이 만든 입금 줄만 지움 */
+        t.incomeId = null; t.autoIncome = null;   /* 원래 있던 기록은 살림 */
+      }
+      keep.push(t);
+    });
+    state.txns = keep;
+    delete state.received[k];
+    save(); toast(inc.name + ' 입금 표시를 취소했어요');
+    return;
+  }
+  var cand = null;
+  state.txns.forEach(function(t){
+    if (cand) return;
+    if (t.kind === 'income' && !t.incomeId && String(t.date).slice(0, 7) === ym &&
+        Math.round(+t.amount || 0) === Math.round(+inc.amount || 0)) cand = t;
+  });
+  if (cand) cand.incomeId = id;
+  else state.txns.push({ id:uid(), date:todayStr(), amount:Math.round(+inc.amount || 0), kind:'income',
+    cat:'급여', owner:inc.owner || me(), memo:inc.name, incomeId:id, autoIncome:true });
+  state.received[k] = true;
+  save(); toast(inc.name + ' 입금 완료 · ' + won(inc.amount));
 }
 
 function billRowHTML(b, ym, paid){
@@ -1619,10 +1927,14 @@ function renderList(){
   var ym = state.viewMonth || curYM();
   var s = stats(ym);
   $('monthLabel').textContent = ymLabel(ym);
-  $('lstIncome').textContent = won(s.income);
-  $('lstExpense').textContent = won(s.expense);
-  $('lstLeft').textContent = won(s.left);
-  $('lstLeft').className = s.left < 0 ? 'neg' : 'pos';
+  $('lstIncome').textContent = won(s.actIncome);
+  $('lstExpense').textContent = won(s.actExpense);
+  $('lstExpInc').textContent = '+' + fmt(s.expIncome) + '원';
+  $('lstExpExp').textContent = '-' + fmt(s.expExpense) + '원';
+  $('lstNet').textContent = signedWon(s.curNet);
+  $('lstNet').className = s.curNet < 0 ? 'neg' : (s.curNet > 0 ? 'pos' : '');
+  $('lstEnd').textContent = signedWon(s.monthEnd);
+  $('lstEnd').className = s.monthEnd < 0 ? 'neg' : (s.monthEnd > 0 ? 'pos' : '');
 
   Array.prototype.forEach.call($('ownerChips').children, function(ch){
     ch.classList.toggle('on', ch.getAttribute('data-owner') === ownerFilter);
@@ -1684,13 +1996,21 @@ function planBillRowHTML(b, ym){
 function renderPlan(){
   var ym = curYM(), s = stats(ym);
 
-  /* 고정 수입 */
+  /* 고정 수입: 들어왔는지 표시하고, 안 들어온 건은 '예정 수입'으로 남긴다 */
   var incHtml = '';
   activeIncomes().forEach(function(i){
-    incHtml += '<div class="inc">' +
+    var got = isIncomeReceived(i.id, ym);
+    var ds = dsOfDate(actualBillDate(ym, i.day));
+    var badge = got ? '<span class="bd" style="background:#F2F4F6;color:#8B95A1">입금 완료</span>'
+      : (isPastYM(ym) ? '' : '<span class="bd' + (dday(ds).hot ? ' hot' : '') + '">' + dday(ds).t + '</span>');
+    incHtml += '<div class="inc' + (got ? ' paid' : '') + '">' +
+      '<button class="check' + (got ? ' paid' : '') + '" data-act="incpay" data-id="' + i.id + '" aria-label="' +
+        (got ? '입금 취소' : '입금 완료') + '">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg></button>' +
       '<div class="acc-main" data-act="income" data-id="' + i.id + '">' +
-        '<div class="btop"><b>' + esc(i.name) + '</b></div>' +
-        '<div class="bsub">' + esc(i.owner) + ' · 매월 ' + i.day + '일</div>' +
+        '<div class="btop"><b>' + esc(i.name) + '</b>' + badge + '</div>' +
+        '<div class="bsub">' + esc(i.owner) + ' · 매월 ' + i.day + '일' +
+          (billMoved({ day: i.day }, ym) ? ' → ' + mdLabel(ds) : '') + '</div>' +
       '</div>' +
       '<div class="bamt inc-amt">+' + fmt(i.amount) + '</div></div>';
   });
@@ -1863,6 +2183,10 @@ function closeSheet(id){
 function closeAll(){
   Array.prototype.forEach.call(document.querySelectorAll('.sw.open'), function(s){ s.classList.remove('open'); });
   document.body.style.overflow = '';
+}
+function sheetOpen(id){
+  var el = $(id);
+  return !!(el && String(el.className || '').indexOf('open') >= 0);
 }
 
 function toast(msg){
@@ -4522,6 +4846,10 @@ function bind(){
         break;
       case 'masked': toast('상대방이 나만 보기로 기록했어요'); break;
       case 'pay': payBill(t.getAttribute('data-id')); break;
+      case 'incpay': payIncome(t.getAttribute('data-id')); break;
+      case 'timeline': openTimeline(curYM()); break;
+      case 'tlfilter': setTlFilter(t.getAttribute('data-v')); break;
+      case 'tlmonth': shiftTlMonth(+t.getAttribute('data-dir')); break;
       case 'bill': openBill(state.bills.filter(function(b){ return b.id === t.getAttribute('data-id'); })[0]); break;
       case 'addBill': openBill(null, '대출'); break;
       case 'addLivingBill': openBill(null, '보험'); break;

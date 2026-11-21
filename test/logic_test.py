@@ -48,7 +48,12 @@ globalThis.__T = {
   adminPin: adminPin, pinOk: pinOk, adminNeeded: adminNeeded, openWho: openWho, setWho: setWho,
   applyWho: applyWho, openAdminPin: openAdminPin, submitAdminPin: submitAdminPin,
   lockDevice: lockDevice, gateAdmin: gateAdmin, isMasked: isMasked, me: me,
-  isTransfer: isTransfer, transferLabel: transferLabel
+  isTransfer: isTransfer, transferLabel: transferLabel,
+  isIncomeReceived: isIncomeReceived, expectedIncomes: expectedIncomes, incomeKey: incomeKey,
+  timelineOf: timelineOf, tlRowHTML: tlRowHTML, renderTimelineSheet: renderTimelineSheet,
+  setTlFilter: setTlFilter, payIncome: payIncome, signedWon: signedWon, mdLabel: mdLabel,
+  isPastYM: isPastYM, renderHomeTimeline: renderHomeTimeline, openTimeline: openTimeline,
+  todayStr: todayStr, shiftTlMonth: shiftTlMonth
 };
 '''
 idx = js.rstrip().rfind('})();')
@@ -1043,6 +1048,143 @@ try:
           ev("(function(){var st=__T.blankState(); st.settings.pin=''; st.settings.connected=true; st.settings.currentUser='장미'; __T.state=__T.normalize(st); __T.setWho('현기'); return __T.me();})()") == '현기')
 except Exception as e:
     check('관리자 PIN 잠금', False, str(e))
+
+
+print('\n[34] 실제(확정) vs 예정 분리 — 안 받은 월급·안 낸 고정비')
+ev(r"""
+(function(){
+  var st = __T.blankState();
+  st.viewMonth  = '2026-11';
+  st.incomes = [
+    {id:'i1', name:'현기 월급', amount:3200000, day:25, owner:'현기', active:true},
+    {id:'i2', name:'장미 월급', amount:2100000, day:25, owner:'장미', active:true}
+  ];
+  st.bills = [
+    {id:'loan1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true, balance:400000000},
+    {id:'ins1',  name:'실손보험',     cat:'보험', amount:92000,   day:20, owner:'공동', active:true},
+    {id:'card1', name:'신한카드',     cat:'카드', amount:0,       day:28, owner:'공동', active:true, byMonth:{'2026-11':1340000}}
+  ];
+  st.txns = [
+    {id:'t1', date:'2026-11-05', amount:120000, kind:'expense', cat:'식비', owner:'공동', memo:'이마트'},
+    {id:'t2', date:'2026-11-10', amount:180000, kind:'income',  cat:'부수입', owner:'현기', memo:'지인 소개'}
+  ];
+  st.paid = {}; st.received = {};
+  __T.state = __T.normalize(st);
+})();
+""")
+_s = _json.loads(ev("JSON.stringify((function(){var s=__T.stats('2026-11');return {actIncome:s.actIncome, actExpense:s.actExpense, curNet:s.curNet, expIncome:s.expIncome, expExpense:s.expExpense, monthEnd:s.monthEnd, income:s.income, left:s.left};})())"))
+check('실제 수입 = 이미 들어온 기록 180,000 (안 받은 월급 5,300,000 제외)', _s['actIncome'] == 180000, str(_s))
+check('실제 지출 = 이미 나간 기록 120,000 (안 낸 고정비·카드 2,552,000 제외)', _s['actExpense'] == 120000, str(_s))
+check('현재 수지 = 60,000', _s['curNet'] == 60000, str(_s))
+check('예정 수입 = 안 받은 고정 수입 5,300,000', _s['expIncome'] == 5300000, str(_s))
+check('예정 지출 = 안 낸 고정비 1,212,000 + 카드 1,340,000 = 2,552,000', _s['expExpense'] == 2552000, str(_s))
+check('월말 예상 = 60,000 + 5,300,000 − 2,552,000 = 2,808,000', _s['monthEnd'] == 2808000, str(_s))
+check('기존 수입 표기(income)는 실제+예정 = 5,480,000 그대로', _s['income'] == 5480000, str(_s))
+check('남은 여유(left)도 월말 예상과 같음', _s['left'] == 2808000, str(_s))
+check('고정 수입은 아직 received 아님', ev("__T.isIncomeReceived('i1','2026-11')") == False)
+
+print('\n[35] 타임라인 — 완료·예정을 날짜 순으로')
+_tl = _json.loads(ev("JSON.stringify(__T.timelineOf('2026-11').map(function(x){return [x.status,x.dir,x.name,x.ds,x.amount];}))"))
+check('완료 2건 + 예정 5건', len(_tl) == 7 and sum(1 for r in _tl if r[0]=='done') == 2 and sum(1 for r in _tl if r[0]=='plan') == 5, str(_tl))
+check('날짜 오름차순', [r[3] for r in _tl] == sorted(r[3] for r in _tl), str([r[3] for r in _tl]))
+check('첫 줄은 11/5 이마트 지출', _tl[0][2] == '이마트' and _tl[0][1] == 'out', str(_tl[0]))
+check('부부 이체는 타임라인에서 빠짐', ev("(function(){__T.state.txns.push({id:'tr1',date:'2026-11-15',amount:500000,kind:'transfer',cat:'이체',owner:'현기',memo:'장미에게'}); return __T.timelineOf('2026-11').filter(function(x){return x.txn && x.txn.kind==='transfer';}).length;})()") == 0)
+_html_home = ev("(function(){__T.renderHome(); return document.getElementById('upcoming').innerHTML;})()")
+check('홈 타임라인에 오늘 구분선', '오늘 · ' in _html_home and '11월 21일' in _html_home, _html_home[:300])
+check('홈 타임라인에 완료 구역과 예정 구역', '이미 오간 돈' in _html_home and '월말 예상' in _html_home, _html_home[:400])
+check('홈 타임라인에 안 받은 월급이 예정으로', '현기 월급' in _html_home and 'D-4' in _html_home, _html_home[:600])
+check('완료 줄은 흐리게(done 클래스)', 'tlrow done' in _html_home, _html_home[:400])
+check('월말 예상 금액이 홈에 표시', '2,808,000원' in _html_home and '+2,808,000원' in _html_home.replace('월말 예상',''), _html_home[-400:])
+_sheet = ev("(function(){__T.setTlFilter('all'); __T.renderTimelineSheet(); return document.getElementById('tlFull').innerHTML;})()")
+check('시트 타임라인: 나간 것·들어온 것 / 나갈 것·들어올 것', '나간 것 · 들어온 것' in _sheet and '나갈 것 · 들어올 것' in _sheet, _sheet[:300])
+check('시트 타임라인: 지금까지 수지 · 월말 예상', '지금까지 수지' in _sheet and '월말 예상' in _sheet, _sheet[-400:])
+
+print('\n[36] 고정 수입 입금완료 — 예정에서 실제로 (두 번 안 셈)')
+ev("__T.setTlFilter('all'); __T.payIncome('i1')")
+check('받음 표시됨', ev("__T.isIncomeReceived('i1','2026-11')") == True)
+check('입금 기록 1건 생김', ev("__T.state.txns.filter(function(t){return t.incomeId==='i1';}).length") == 1)
+check('실제 수입 = 180,000 + 3,200,000 = 3,380,000', ev("__T.stats('2026-11').actIncome") == 3380000, str(ev("__T.stats('2026-11').actIncome")))
+check('예정 수입 = 장미 월급 2,100,000 만 남음', ev("__T.stats('2026-11').expIncome") == 2100000)
+check('월말 예상은 그대로 2,808,000 (두 번 안 셈)', ev("__T.stats('2026-11').monthEnd") == 2808000, str(ev("__T.stats('2026-11').monthEnd")))
+check('타임라인에서 월급이 완료 줄로 바뀜', ev("__T.timelineOf('2026-11').filter(function(x){return x.name==='현기 월급' && x.status==='done';}).length") == 1)
+check('입금 기록 날짜는 오늘', ev("__T.state.txns.filter(function(t){return t.incomeId==='i1';})[0].date") == ev("__T.todayStr()"))
+ev("__T.payIncome('i1')")
+check('취소하면 실제 수입 원복', ev("__T.stats('2026-11').actIncome") == 180000)
+check('취소하면 예정 수입 원복', ev("__T.stats('2026-11').expIncome") == 5300000)
+check('앱이 만든 입금 줄은 취소 때 지움', ev("__T.state.txns.filter(function(t){return t.incomeId==='i1';}).length") == 0)
+check('취소해도 월말 예상 그대로', ev("__T.stats('2026-11').monthEnd") == 2808000)
+
+print('\n[37] 이미 들어온 급여 기록이 있으면 그 줄에 붙임 (중복 방지)')
+ev(r"""
+(function(){
+  __T.state.txns.push({id:'salary', date:'2026-11-18', amount:3200000, kind:'income', cat:'급여', owner:'현기', memo:'급여 입금'});
+  __T.state.received = {};
+})();
+""")
+_before = ev("__T.state.txns.filter(function(t){return t.kind==='income';}).length")
+ev("__T.payIncome('i1')")
+_after = ev("__T.state.txns.filter(function(t){return t.kind==='income';}).length")
+check('새 줄을 만들지 않고 기존 급여 기록에 연결', _before == _after, str(_before) + '→' + str(_after))
+check('연결된 기록은 incomeId 를 가짐', ev("__T.state.txns.filter(function(t){return t.id==='salary';})[0].incomeId") == 'i1')
+check('실제 수입 3,380,000 그대로', ev("__T.stats('2026-11').actIncome") == 3380000)
+ev("__T.payIncome('i1')")
+check('취소해도 원래 급여 기록은 남김', ev("__T.state.txns.filter(function(t){return t.id==='salary';}).length") == 1)
+check('취소하면 연결만 풀림', ev("__T.state.txns.filter(function(t){return t.id==='salary';})[0].incomeId") == None)
+check('실제 수입은 급여 기록 그대로 3,380,000', ev("__T.stats('2026-11').actIncome") == 3380000)
+
+print('\n[38] 고정비·카드 납부 → 예정에서 실제로 (월말 예상 불변)')
+_end_before = ev("__T.stats('2026-11').monthEnd")
+ev("__T.payBill('loan1')")
+check('실제 지출 = 120,000 + 1,120,000', ev("__T.stats('2026-11').actExpense") == 1240000)
+check('예정 지출 = 2,552,000 − 1,120,000', ev("__T.stats('2026-11').expExpense") == 1432000)
+check('월말 예상은 납부해도 그대로', ev("__T.stats('2026-11').monthEnd") == _end_before, str(ev("__T.stats('2026-11').monthEnd")) + ' vs ' + str(_end_before))
+check('타임라인에서 대출이 완료 줄로', ev("__T.timelineOf('2026-11').filter(function(x){return x.name==='주택담보대출' && x.status==='done';}).length") == 1)
+check('안 낸 카드값은 예정으로 남음', ev("__T.timelineOf('2026-11').filter(function(x){return x.name==='신한카드' && x.status==='plan';}).length") == 1)
+ev("__T.payBill('loan1')")
+check('납부 취소하면 실제 지출 원복', ev("__T.stats('2026-11').actExpense") == 120000)
+
+print('\n[39] 지난 달은 예정을 잡지 않음')
+ev(r"""
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-10';
+  st.incomes = [{id:'i1', name:'현기 월급', amount:3200000, day:25, owner:'현기', active:true}];
+  st.bills = [{id:'b1', name:'실손보험', cat:'보험', amount:92000, day:20, owner:'공동', active:true}];
+  st.txns = [{id:'x1', date:'2026-10-20', amount:92000, kind:'expense', cat:'보험', owner:'공동', memo:'실손보험'}];
+  st.paid = {}; st.received = {};
+  __T.state = __T.normalize(st);
+})();
+""")
+check('지난 달 예정 수입 0', ev("__T.stats('2026-10').expIncome") == 0)
+check('지난 달 예정 지출 0', ev("__T.stats('2026-10').expExpense") == 0)
+check('지난 달 월말 예상 = 실제 수지 (-92,000)', ev("__T.stats('2026-10').monthEnd") == -92000)
+check('지난 달 타임라인은 완료 기록만', ev("__T.timelineOf('2026-10').every(function(x){return x.status==='done';})") == True)
+
+print('\n[40] 타임라인 필터 · 월 이동')
+ev(r"""
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-11';
+  st.incomes = [{id:'i1', name:'현기 월급', amount:3200000, day:25, owner:'현기', active:true}];
+  st.bills = [{id:'b1', name:'실손보험', cat:'보험', amount:92000, day:20, owner:'공동', active:true}];
+  st.txns = [{id:'t1', date:'2026-11-05', amount:120000, kind:'expense', cat:'식비', owner:'공동', memo:'이마트'}];
+  st.paid = {}; st.received = {};
+  __T.state = __T.normalize(st);
+})();
+""")
+ev("__T.setTlFilter('plan')")
+_h = ev("document.getElementById('upcoming').innerHTML")
+check('나갈 것만: 지출 기록(이마트) 안 보임', '이마트' not in _h, _h[:300])
+check('나갈 것만: 안 낸 보험·안 받은 월급 보임', '실손보험' in _h and '현기 월급' in _h, _h[:600])
+ev("__T.setTlFilter('done')")
+_h = ev("document.getElementById('upcoming').innerHTML")
+check('나간 것만: 완료 기록만', '이마트' in _h and '실손보험' not in _h and '현기 월급' not in _h, _h[:600])
+ev("__T.setTlFilter('all')")
+_h = ev("document.getElementById('upcoming').innerHTML")
+check('전체: 둘 다', '이마트' in _h and '실손보험' in _h and '현기 월급' in _h)
+ev("__T.openTimeline('2026-11'); __T.setTlFilter('all'); __T.shiftTlMonth(1)")
+check('시트 달 이동 → 12월', ev("document.getElementById('tlMonthLabel').textContent") == '2026년 12월', ev("document.getElementById('tlMonthLabel').textContent"))
+check('12월 타임라인은 예정만 (완료 0)', ev("__T.timelineOf('2026-12').every(function(x){return x.status==='plan';})") == True)
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)
