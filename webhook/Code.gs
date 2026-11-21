@@ -71,13 +71,19 @@ function doGet(e) {
   });
 }
 
-/* MacroDroid 는 application/json 으로 보내지만, 가끔 form-urlencoded 로도 온다 */
+/* MacroDroid 는 application/json 으로 보내지만, 가끔 form-urlencoded 로도 온다.
+   문자 본문에 줄바꿈이 들어가면 JSON 이 깨지므로 그 경우까지 받아 준다. */
 function readPayload(e) {
   if (!e) return null;
   var body = e.postData && e.postData.contents;
   if (body) {
     var s = String(body);
     try { return JSON.parse(s); } catch (err) {}
+    try { return JSON.parse(s.replace(/[\r\n\t]+/g, ' ').replace(/[\u0000-\u001f]/g, ' ')); } catch (err1) {}
+    try {
+      var loose = looseFields(s);
+      if (loose) return loose;
+    } catch (err2) {}
     try {
       if (s.indexOf('=') >= 0) {
         var o = {}, parts = s.split('&');
@@ -88,12 +94,25 @@ function readPayload(e) {
         }
         if (o.secret !== undefined || o.text !== undefined) return o;
       }
-    } catch (err2) {}
+    } catch (err3) {}
   }
   if (e.parameter && (e.parameter.secret !== undefined || e.parameter.text !== undefined)) {
     return e.parameter;
   }
   return null;
+}
+
+/* 깨진 JSON 에서 키·값만 느슨하게 뽑아낸다 (값 안의 줄바꿈 허용) */
+function looseFields(s) {
+  var keys = ['secret', 'owner', 'source', 'app', 'title', 'text', 'at'];
+  var o = {}, found = 0;
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var re = new RegExp('"' + k + '"\\s*:\\s*"([\\s\\S]*?)"\\s*[,}]');
+    var m = s.match(re);
+    if (m) { o[k] = m[1]; found++; }
+  }
+  return found >= 2 ? o : null;
 }
 
 function out(obj) {

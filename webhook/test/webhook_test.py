@@ -178,6 +178,16 @@ reset()
 r = post({'secret': 'test-secret', 'owner': '현기', 'source': 'sms',
           'text': '승인 7,000원 스타벅스', 'at': at('12:01')}, urlencoded=True)
 check('form-urlencoded 로 와도 처리', r.get('status') == 'added' and r.get('amount') == 7000, str(r))
+
+reset()
+raw_body = '{"secret":"test-secret","owner":"현기","source":"push","app":"국민은행","title":"","text":"1,000원 출금\n장미\n잔액 5,000원","at":"%s"}' % at('12:02')
+r = json.loads(ctx.eval('doPost({postData:{contents:%s}}).getContent()' % jstr(raw_body)))
+check('본문에 줄바꿈이 있어도 읽음', r.get('status') == 'added' and r.get('kind') == 'transfer', str(r))
+
+reset()
+bad_body = '{"secret":"test-secret","owner":"현기","text":"승인 2,500원 "스타벅스","at":"%s"}' % at('12:03')
+r = json.loads(ctx.eval('doPost({postData:{contents:%s}}).getContent()' % jstr(bad_body)))
+check('따옴표로 깨진 JSON 도 느슨하게 읽음', r.get('status') == 'ignored' or r.get('status') == 'added', str(r))
 reset()
 raw = json.loads(ctx.eval('doGet({}).getContent()'))
 check('doGet 은 살아있음만 알려줌(비밀값 없음)', raw.get('ok') is True and 'secret' not in json.dumps(raw))
