@@ -21,6 +21,9 @@ globalThis.__T = {
   fixedBills: fixedBills, cardBills: cardBills, fixedBillTotal: fixedBillTotal,
   cardBillTotal: cardBillTotal, stats: stats, payBill: payBill, isPaid: isPaid,
   curYM: curYM, dday: dday, dayDiff: dayDiff, billDateStr: billDateStr,
+  actualBillDate: actualBillDate, baseBillDate: baseBillDate, isFixedHoliday: isFixedHoliday,
+  isBizDay: isBizDay, billMoved: billMoved, billDayLabel: billDayLabel, dayHintText: dayHintText,
+  billRowHTML: billRowHTML, cardRowHTML: cardRowHTML, dsOfDate: dsOfDate,
   normalizeCards: normalizeCards, normalizeBills: normalizeBills, parseOcrJSON: parseOcrJSON, markCardDups: markCardDups, markBillDups: markBillDups, addShotBills: addShotBills, loadShotDemo: loadShotDemo,
   addShotCards: addShotCards, saveCardBill: saveCardBill, openCardBill: openCardBill,
   shot: shot, setShot: function(v){ shot = v; }, save: save,
@@ -284,6 +287,103 @@ try:
     check('12월에는 0', ev("__T.cardBillTotal('2026-12')") == 0)
 except Exception as e:
     check('카드 섞임 처리', False, str(e))
+
+print('\n[12] 기준 결제일 → 실제 출금일 (주말·공휴일 평일 이연)')
+def ds(ym, day):
+    return ev("__T.dsOfDate(__T.actualBillDate('%s', %d))" % (ym, day))
+
+check('2026-12-05(토) → 2026-12-07(월)', ds('2026-12', 5) == '2026-12-07', ds('2026-12', 5))
+check('2026-12-20(일) → 2026-12-21(월)', ds('2026-12', 20) == '2026-12-21', ds('2026-12', 20))
+check('2026-11-28(토) → 2026-11-30(월)', ds('2026-11', 28) == '2026-11-30', ds('2026-11', 28))
+check('2026-12-25(성탄절 금) → 2026-12-28(월)', ds('2026-12', 25) == '2026-12-28', ds('2026-12', 25))
+check('2026-11-21(토) → 2026-11-23(월)', ds('2026-11', 21) == '2026-11-23', ds('2026-11', 21))
+check('2026-12-01(화, 평일·공휴일 아님) 그대로', ds('2026-12', 1) == '2026-12-01', ds('2026-12', 1))
+check('2026-12-04(금) 그대로', ds('2026-12', 4) == '2026-12-04', ds('2026-12', 4))
+check('2026-05-05(어린이날 화) → 2026-05-06(수)', ds('2026-05', 5) == '2026-05-06', ds('2026-05', 5))
+check('2026-10-03(개천절 토) → 2026-10-05(월)', ds('2026-10', 3) == '2026-10-05', ds('2026-10', 3))
+check('2026-08-15(광복절 토) → 2026-08-17(월)', ds('2026-08', 15) == '2026-08-17', ds('2026-08', 15))
+check('2026-01-01(신정 목) → 2026-01-02(금)', ds('2026-01', 1) == '2026-01-02', ds('2026-01', 1))
+check('2026-06-06(현충일 토) → 2026-06-08(월)', ds('2026-06', 6) == '2026-06-08', ds('2026-06', 6))
+check('2026-02-31 → 말일(28일 토) → 2026-03-02(월)', ds('2026-02', 31) == '2026-03-02', ds('2026-02', 31))
+check('2026-02-17(화, 말일 아님) 그대로', ds('2026-02', 17) == '2026-02-17', ds('2026-02', 17))
+check('2026-04-31 → 30일(목) 그대로', ds('2026-04', 31) == '2026-04-30', ds('2026-04', 31))
+check('2026-11-31 → 30일(월) 그대로', ds('2026-11', 31) == '2026-11-30', ds('2026-11', 31))
+check('2027-01-01(신정 금) → 2027-01-04(월)', ds('2027-01', 1) == '2027-01-04', ds('2027-01', 1))
+check('해 넘김: 2026-12-31(목) 그대로', ds('2026-12', 31) == '2026-12-31', ds('2026-12', 31))
+check('연속 공휴일 아님 확인: 2026-05-06(수) 그대로', ds('2026-05', 6) == '2026-05-06', ds('2026-05', 6))
+
+print('\n[13] 목록 표기 (기준일 + 실제 출금일)')
+check('안 밀리면 매월 그대로 (2026-12-01)',
+      ev("__T.billDayLabel({day:1}, '2026-12')") == '매월 1일', ev("__T.billDayLabel({day:1}, '2026-12')"))
+check('밀리면 둘 다 (2026-11-28 → 30일(월))',
+      ev("__T.billDayLabel({day:28}, '2026-11')") == '매월 28일 → 30일(월)',
+      ev("__T.billDayLabel({day:28}, '2026-11')"))
+check('달을 넘기면 달도 표기 (2026-02-31 → 3월 2일(월))',
+      ev("__T.billDayLabel({day:31}, '2026-02')") == '매월 31일 → 3월 2일(월)',
+      ev("__T.billDayLabel({day:31}, '2026-02')"))
+check('공휴일도 표기 (2026-12-25 → 12-28(월))',
+      ev("__T.billDayLabel({day:25}, '2026-12')") == '매월 25일 → 28일(월)',
+      ev("__T.billDayLabel({day:25}, '2026-12')"))
+check('billDateStr 가 실제 출금일 (2026-12-05 → 2026-12-07)',
+      ev("__T.billDateStr({day:5}, '2026-12')") == '2026-12-07')
+check('billMoved: 밀린 날 true', ev("__T.billMoved({day:5}, '2026-12')") == True)
+check('billMoved: 안 밀린 날 false', ev("__T.billMoved({day:1}, '2026-12')") == False)
+check('isFixedHoliday("12-25")', ev("__T.isFixedHoliday(new Date(2026,11,25))") == True)
+check('isBizDay(2026-12-04 금)', ev("__T.isBizDay(new Date(2026,11,4))") == True)
+
+print('\n[14] D-day 이 실제 출금일 기준')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.bills = [
+    {id:'sat', name:'토요일 결제', cat:'통신', amount:55000, day:5, owner:'공동', active:true},
+    {id:'hol', name:'성탄절 결제', cat:'보험', amount:92000, day:25, owner:'공동', active:true},
+    {id:'plain', name:'평일 결제', cat:'대출', amount:1000000, day:4, owner:'공동', active:true}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+check('12월 5일 결제 → 실제 12/7 의 D-day 로 계산',
+      ev("__T.dsOfDate(__T.actualBillDate('2026-12', __T.state.bills.filter(function(b){return b.id==='sat';})[0].day))") == '2026-12-07')
+
+print('\n[15] 줄 렌더에 기준일·실제일 함께 표시')
+html_row = ev("__T.billRowHTML(__T.state.bills.filter(function(b){return b.id==='sat';})[0], '2026-12')") if False else None
+import datetime
+try:
+    # 이번 달(2026-11) 기준: 5일은 목요일이라 밀리지 않고, 28일은 토요일이라 밀린다
+    r_plain = ev("__T.billRowHTML(__T.state.bills.filter(function(b){return b.id==='plain';})[0], '2026-11')")
+    r_move = ev("__T.billRowHTML(__T.state.bills.filter(function(b){return b.id==='sat';})[0], '2026-12')")
+    check('평일 기준일은 매월 N일만 (2026-11-04 수)', '매월 4일' in r_plain and '→' not in r_plain, r_plain[:200])
+    check('밀린 기준일은 화살표로 같이 표시', '매월 5일 → 7일(월)' in r_move, r_move[:220])
+    c_move = ev("__T.cardRowHTML({id:'c', name:'신한카드', cat:'카드', amount:0, day:25, owner:'공동', active:true, byMonth:{}}, '2026-12')")
+    check('카드 줄에도 표시', '매월 25일 → 28일(월)' in c_move, c_move[:220])
+except Exception as e:
+    check('줄 렌더', False, str(e))
+
+print('\n[16] 입력칸 안내문')
+check('빈 값 안내', ev("__T.dayHintText('')") == '주말·공휴일이면 자동으로 다음 평일로 계산돼요', ev("__T.dayHintText('')"))
+check('31 초과 안내', ev("__T.dayHintText('32')") == '주말·공휴일이면 자동으로 다음 평일로 계산돼요')
+check('밀리지 않는 날은 "이번 달 출금일은" 으로 안내',
+      ev('''(function(){
+        var ym = __T.curYM();
+        for (var d = 1; d <= 31; d++){
+          if (__T.billMoved({day:d}, ym)) continue;
+          var t = __T.dayHintText(String(d));
+          return t === '이번 달 출금일은 ' + __T.actualBillDate(ym, d).getDate() + '일(' +
+            '일월화수목금토'.charAt(__T.actualBillDate(ym, d).getDay()) + ')';
+        }
+        return false;
+      })()''') == True)
+check('밀리는 날은 "주말·공휴일이라 이번 달은" 으로 안내',
+      ev('''(function(){
+        var ym = __T.curYM();
+        for (var d = 1; d <= 31; d++){
+          if (!__T.billMoved({day:d}, ym)) continue;
+          var t = __T.dayHintText(String(d));
+          return t.indexOf('주말·공휴일이라 이번 달은 ') === 0;
+        }
+        return false;
+      })()''') == True)
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)
