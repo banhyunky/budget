@@ -40,6 +40,8 @@ globalThis.__T = {
   runCoachAI: runCoachAI, renderCoachBar: renderCoachBar, renderCoach: renderCoach, openCoach: openCoach,
   coachLoanHTML: coachLoanHTML, coachAIHTML: coachAIHTML,
   chart6Months: chart6Months, monthShare: monthShare, monthSpendSplit: monthSpendSplit,
+  txnRowHTML: txnRowHTML, renderList: renderList, parseCardMsg: parseCardMsg,
+  saveQuick: saveQuick, openQuick: openQuick, isTransfer: isTransfer, q: q,
   barsSVG: barsSVG, shareSVG: shareSVG,
   loanRankCardHTML: loanRankCardHTML, renderCharts: renderCharts, COACH_KEY: 'money-coach-v1'
 };
@@ -867,6 +869,83 @@ try:
     check('프롬프트에 요약 JSON 이 붙음', '"month":"2026년 11월"' in pr)
 except Exception as e:
     check('코치 요약', False, str(e))
+
+print('\n[31] 부부 이체(현기↔장미)는 집계에서 빠진다')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-11';
+  st.incomes = [{id:'i1', name:'월급', amount:5300000, day:25, owner:'공동', active:true}];
+  st.bills = [];
+  st.txns = [
+    {id:'t1', date:'2026-11-18', amount:120000, kind:'expense', cat:'식비', owner:'공동', memo:'이마트'},
+    {id:'t2', date:'2026-11-19', amount:1000, kind:'transfer', cat:'이체', owner:'현기', memo:'현기 ↔ 장미'},
+    {id:'t3', date:'2026-11-19', amount:1000, kind:'transfer', cat:'이체', owner:'장미', memo:'장미 ↔ 현기'},
+    {id:'t4', date:'2026-11-20', amount:300000, kind:'income', cat:'부수입', owner:'현기', memo:'지인'}
+  ];
+  st.settings.currentUser = '현기';
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    s = json.loads(ev("JSON.stringify(__T.stats('2026-11'))"))
+    check('stats: 지출에서 이체 제외', s['expense'] == 120000, str(s))
+    check('stats: 수입에서 이체 제외', s['income'] == 5600000, str(s))
+    check('stats: 변동비에도 이체 없음', s['variable'] == 120000, str(s))
+    check('stats: 이체는 따로 셈', s['moved'] == 2000, str(s['moved']))
+    sp = json.loads(ev("JSON.stringify(__T.monthSpendSplit('2026-11'))"))
+    check('월 지출 흐름에서 이체 제외', sp['variable'] == 120000 and sp['total'] == 120000, str(sp))
+    cs = json.loads(ev("JSON.stringify(__T.coachSummary('2026-11'))"))
+    cats = {c['cat']: c['amount'] for c in cs['categories']}
+    check('코치 요약: 분류에 이체 없음', '이체' not in cats and sum(cats.values()) == 120000, str(cats))
+    check('코치 요약: 주중/주말에도 이체 없음',
+          cs['weekdaySpend'] + cs['weekendSpend'] == 120000, str(cs['weekdaySpend'] + cs['weekendSpend']))
+    check('코치 요약: 자주 쓴 곳에 이체 없음',
+          all('↔' not in m['name'] for m in cs['merchants']), str(cs['merchants']))
+
+    row = ev("__T.txnRowHTML(__T.state.txns[1])")
+    check('내역 줄: 부부 이체 배지와 집계 제외', '부부 이체' in row and '집계 제외' in row and '🔄' in row, row)
+    check('내역 줄: 이체 금액은 부호 없이', '-1,000' not in row, row)
+    mis = ev("__T.txnRowHTML({id:'tz', date:'2026-11-19', amount:1000, kind:'transfer', owner:'현기'})")
+    check('메모 없는 이체 줄도 깨지지 않음', '부부 이체' in mis, mis)
+
+    ev("__T.renderList()")
+    html = ev("document.getElementById('txnList').innerHTML")
+    check('내역: 이체 두 건이 보임', html.count('부부 이체') == 2, str(html.count('부부 이체')))
+    check('내역: 날짜 합계에 이체가 안 더해짐', '2,000' not in html, html[:400])
+    check('내역: 지출 합계는 그대로', ev("document.getElementById('lstExpense').textContent") == '120,000원',
+          ev("document.getElementById('lstExpense').textContent"))
+
+    check('문구 해석: 장미에게 보냄은 이체', ev("__T.parseCardMsg('장미님에게 1,000원을 보냈어요').transfer") == True)
+    check('문구 해석: 카드 승인은 이체 아님', ev("__T.parseCardMsg('[신한카드] 승인 14,800원 스타벅스').transfer") == False)
+    check('문구 해석: 장미꽃집 결제는 이체 아님', ev("__T.parseCardMsg('승인 30,000원 장미꽃집').transfer") == False)
+    check('문구 해석: 금액은 1,000원', ev("__T.parseCardMsg('장미님에게 1,000원을 보냈어요').amount") == 1000)
+except Exception as e:
+    check('부부 이체 집계 제외', False, str(e))
+
+print('\n[32] 직접 입력: 부부이체')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.viewMonth = '2026-11'; st.txns = []; st.bills = []; st.incomes = [];
+  st.settings.currentUser = '현기';
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    ev("__T.openQuick(null)")
+    ev("__T.q.kind = 'transfer'; __T.q.owner = '공동'; __T.q.cat = '식비'; __T.q.id = null;")
+    ev("document.getElementById('qAmount').value = '1,000'")
+    ev("document.getElementById('qDate').value = '2026-11-21'")
+    ev("document.getElementById('qMemo').value = ''")
+    ev("document.getElementById('qPrivate').checked = false")
+    ev("__T.saveQuick()")
+    t = json.loads(ev("JSON.stringify(__T.state.txns[0])"))
+    check('수동 이체: kind·분류·기록자', t['kind'] == 'transfer' and t['cat'] == '이체' and t['owner'] == '현기', str(t))
+    check('수동 이체도 지출 0', ev("__T.stats('2026-11').expense") == 0)
+    check('수동 이체는 이체 합계에', ev("__T.stats('2026-11').moved") == 1000)
+except Exception as e:
+    check('수동 부부이체 입력', False, str(e))
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)

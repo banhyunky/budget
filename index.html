@@ -177,6 +177,10 @@ main{padding:6px 16px 0}
 .tsub{font-size:12px;font-weight:500;color:var(--sub);display:flex;align-items:center;gap:3px}
 .tamt{flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .tamt.inc{color:var(--blue)}
+.tamt.tr{color:var(--sub);font-weight:600}
+.txn.tr .tcat{background:#EEF3FF;font-size:15px}
+.tbadge{display:inline-block;padding:1px 6px;border-radius:6px;background:#EEF3FF;color:#3182F6;
+  font-size:11px;font-weight:700;margin-right:4px}
 .txn.masked .tcat{background:#F0F2F5;font-size:14px}
 .txn.masked .tname{color:var(--mid)}
 .plock{width:12px;height:12px;flex:none;color:#AEB7C2}
@@ -635,13 +639,15 @@ input.mini{font-weight:600;padding:5px 7px}
     <div class="seg" id="qKind" style="margin-bottom:16px">
       <button data-act="kind" data-kind="expense" class="on">지출</button>
       <button data-act="kind" data-kind="income">수입</button>
+      <button data-act="kind" data-kind="transfer">부부이체</button>
     </div>
+    <div class="hint" id="qTrHint" hidden style="margin:-8px 2px 14px">현기↔장미 사이 이체는 수입·지출 집계에서 빼고 기록해요.</div>
     <div class="amtfield">
       <input id="qAmount" inputmode="numeric" autocomplete="off" placeholder="0" aria-label="금액">
       <span class="u">원</span>
     </div>
-    <div class="field">
-      <label>분류</label>
+    <div class="field" id="qCatField">
+      <label id="qCatLbl">분류</label>
       <div class="chips" id="qCats"></div>
     </div>
     <div class="field">
@@ -848,14 +854,14 @@ input.mini{font-weight:600;padding:5px 7px}
   <div class="sheet">
     <div class="grip"></div>
     <div class="shd"><h3>카드 알림 테스트</h3><button class="xbtn" data-close aria-label="닫기">✕</button></div>
-    <div class="hint">카드 승인 문자·카톡 알림 문구를 붙여넣으면 금액·가맹점을 읽어 가계부에 넣어요. 실제 연동 전에 결과를 미리 보는 화면이에요.</div>
+    <div class="hint">카드 승인·은행 입출금·이체 문구를 붙여넣으면 금액·가맹점을 읽어 가계부에 넣어요. 현기↔장미 이체는 '부부 이체'로 기록해 집계에서 빼요.</div>
     <div class="field">
       <label>알림 문구</label>
       <textarea class="ipt" id="cdText" spellcheck="false">[신한카드] 승인 14,800원 스타벅스 11/21 12:34</textarea>
     </div>
     <button class="btn ghost" id="cdParse" style="padding:12px;font-size:14px">문구 다시 읽기</button>
     <div id="cdPrev"></div>
-    <div class="field"><label>분류</label><div class="chips" id="cdCats"></div></div>
+    <div class="field" id="cdCatField"><label>분류</label><div class="chips" id="cdCats"></div></div>
     <div class="swrow" style="margin-bottom:14px">
       <span>나만 보기</span>
       <label class="switch"><input type="checkbox" id="cdPrivate"><i></i></label>
@@ -914,14 +920,19 @@ input.mini{font-weight:600;padding:5px 7px}
     <div class="hint" style="margin:10px 0 0">키는 <b>aistudio.google.com/apikey</b> 에서 무료로 받을 수 있어요. 저장한 키는 이 기기 브라우저에만 남고, 공개 저장소나 Firebase로 보내지 않습니다.</div>
 
     <div class="divider"></div>
-    <div style="font-size:14px;font-weight:700;margin-bottom:6px">카드 알림 자동 수집</div>
-    <div class="hint">카드 승인 알림을 자동으로 가계부에 넣는 기능이에요. 폰의 알림(Android MacroDroid · iOS 단축어)을 아래 주소로 보내면 기록돼요.</div>
-    <div class="endpoint" id="sHook">Firebase를 연결하면 수신 주소가 만들어져요</div>
-    <div style="display:flex;gap:6px;margin-bottom:8px">
-      <button class="btn ghost" id="sCopy" style="padding:12px;font-size:14px">주소 복사</button>
-      <button class="btn ghost" id="sCardTest" style="padding:12px;font-size:14px">카드 알림 테스트</button>
+    <div style="font-size:14px;font-weight:700;margin-bottom:6px">문자·알림 자동 수집</div>
+    <div class="hint">카드 승인·은행 입출금·이체 문자와 앱 알림을 자동으로 가계부에 넣어요. 폰의 MacroDroid가 아래 웹훅 주소로 보내면 기록됩니다. 만드는 방법은 저장소의 <b>webhook/SETUP.md</b></div>
+    <div class="field">
+      <label>웹훅 주소 (Apps Script 웹 앱)</label>
+      <input class="ipt" id="sHookUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
     </div>
-    <div class="hint" style="margin:0">지금은 <b>테스트</b>로 문자 문구가 어떻게 읽히는지 바로 확인할 수 있어요. 실제 수신 함수는 Firebase 연결 후 붙이면 돼요.</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button class="btn primary" id="sHookSave" style="padding:12px;font-size:14px">주소 저장</button>
+      <button class="btn ghost" id="sCopy" style="padding:12px;font-size:14px">주소 복사</button>
+      <button class="btn ghost" id="sCardTest" style="padding:12px;font-size:14px">문자 읽기 테스트</button>
+    </div>
+    <div class="endpoint" id="sHook">주소를 넣으면 두 폰의 문자·알림이 여기로 모여요</div>
+    <div class="hint" style="margin:0">현기↔장미 이체는 <b>부부 이체</b>로 남고 수입·지출에서 빠져요. 같은 결제가 문자·알림으로 두 번 와도 한 건만 남아요.</div>
 
     <div class="divider"></div>
     <div style="font-size:14px;font-weight:700;margin-bottom:8px">데이터</div>
@@ -995,6 +1006,8 @@ var OCOLOR = {'현기':'#3182F6','장미':'#FF7A6B','공동':'#9AA4B0'};
 var CATS_EXP = [['식비','🍚'],['생활','🧺'],['교통','🚌'],['주거','🏠'],['통신','📶'],['보험','🛡️'],
   ['카드','💳'],['대출','🏦'],['의료','🏥'],['교육','📚'],['여가','🎬'],['경조사','🎁'],['기타','📌']];
 var CATS_INC = [['급여','💰'],['부수입','✨'],['이자','📈'],['기타','📌']];
+/* 부부 간 이체: 수입·지출 어느 쪽에도 더하지 않는 기록 */
+var CATS_TRANSFER = [['이체','🔄']];
 var BILL_CATS = [['대출','🏦'],['카드','💳'],['보험','🛡️'],['통신','📶'],['주거','🏠'],['기타','📌']];
 var WD = ['일','월','화','수','목','금','토'];
 var CAT_GUESS = [
@@ -1124,6 +1137,8 @@ function dayDiff(ds){
 function isMasked(t){
   return !!t.private && (t.owner || '공동') !== state.settings.currentUser;
 }
+/* 부부끼리 오간 돈(현기↔장미). 같은 돈이 두 번 잡히지 않게 어느 통계에도 넣지 않는다 */
+function isTransfer(t){ return !!t && t.kind === 'transfer'; }
 function me(){ return state.settings.currentUser || '현기'; }
 
 /* ---------------- 표본 데이터 ---------------- */
@@ -1365,7 +1380,8 @@ function stats(ym){
   var tx = txnsOf(ym);
   var base = incomeTotal();
   var extra = total(tx.filter(function(t){ return t.kind === 'income'; }), function(t){ return t.amount; });
-  var exp = total(tx.filter(function(t){ return t.kind !== 'income'; }), function(t){ return t.amount; });
+  var exp = total(tx.filter(function(t){ return t.kind !== 'income' && !isTransfer(t); }), function(t){ return t.amount; });
+  var moved = total(tx.filter(isTransfer), function(t){ return t.amount; });
   var unpaidFixed = 0, unpaidCard = 0;
   var unpaidArr = [], unpaidCardArr = [];
   activeBills().forEach(function(b){
@@ -1384,12 +1400,12 @@ function stats(ym){
      카드 청구액 납부는 금액이 매달 달라 변동비로 남긴다. */
   var paidFixedSum = 0;
   tx.forEach(function(t){
-    if (!t.billId) return;
+    if (!t.billId || isTransfer(t)) return;
     var bb = billById(t.billId);
     if (!bb || !isCardBill(bb)) paidFixedSum += (+t.amount || 0);
   });
   var variable = Math.max(0, exp - paidFixedSum);
-  return { ym:ym, income: base + extra, extraIncome: extra, expense: exp,
+  return { ym:ym, income: base + extra, extraIncome: extra, expense: exp, moved: moved,
     unpaid: unpaid, unpaidFixed: unpaidFixed, unpaidCard: unpaidCard,
     unpaidArr: unpaidArr, unpaidCardArr: unpaidCardArr, left: left,
     fixed: fixedBillTotal(), loan: loanBillTotal(), living: livingBillTotal(),
@@ -1460,7 +1476,7 @@ function renderHome(){
 
   var by = {'현기':0,'장미':0,'공동':0};
   txnsOf(ym).forEach(function(t){
-    if (t.kind === 'income') return;
+    if (t.kind === 'income' || isTransfer(t)) return;
     var o = OWNERS.indexOf(t.owner) >= 0 ? t.owner : '공동';
     by[o] += (+t.amount || 0);
   });
@@ -1549,13 +1565,24 @@ function cardRowHTML(b, ym){
 var LOCK_SVG = '<svg class="plock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6"/><path d="M8.2 10.5V7.6a3.8 3.8 0 0 1 7.6 0v2.9"/></svg>';
 
 function txnRowHTML(t){
-  var inc = t.kind === 'income';
+  var inc = t.kind === 'income', tr = isTransfer(t);
   if (isMasked(t)){
+    var lbl = tr ? '이체' : (inc ? '수입' : '지출');
     return '<button class="txn masked" data-act="masked">' +
       '<span class="tcat">🔒</span>' +
-      '<span class="tmain"><span class="tname">비공개 ' + (inc ? '수입' : '지출') + '</span>' +
+      '<span class="tmain"><span class="tname">비공개 ' + lbl + '</span>' +
         '<span class="tsub">' + esc(t.owner || '공동') + ' · 상세 비공개</span></span>' +
-      '<span class="tamt' + (inc ? ' inc' : '') + '">' + (inc ? '+' : '-') + fmt(t.amount) + '</span>' +
+      '<span class="tamt' + (tr ? ' tr' : (inc ? ' inc' : '')) + '">' +
+        (tr ? '' : (inc ? '+' : '-')) + fmt(t.amount) + '</span>' +
+    '</button>';
+  }
+  /* 부부 이체: 집계에서 빠지는 기록이라 금액을 흐리게, 배지로 알려 준다 */
+  if (tr){
+    return '<button class="txn tr" data-act="txn" data-id="' + t.id + '">' +
+      '<span class="tcat">🔄</span>' +
+      '<span class="tmain"><span class="tname">' + esc(t.memo || '부부 이체') + '</span>' +
+        '<span class="tsub"><span class="tbadge">부부 이체</span>집계 제외 · ' + esc(t.owner || '공동') + '</span></span>' +
+      '<span class="tamt tr">' + fmt(t.amount) + '</span>' +
     '</button>';
   }
   return '<button class="txn" data-act="txn" data-id="' + t.id + '">' +
@@ -1597,7 +1624,7 @@ function renderList(){
   var sums = {}, counts = {};
   tx.forEach(function(t){
     var k = t.date;
-    sums[k] = (sums[k] || 0) + (t.kind === 'income' ? 0 : (+t.amount || 0));
+    sums[k] = (sums[k] || 0) + ((t.kind === 'income' || isTransfer(t)) ? 0 : (+t.amount || 0));
     counts[k] = (counts[k] || 0) + 1;
   });
 
@@ -1767,16 +1794,27 @@ function renderSettingsStatus(){
   }
   $('sDisconnect').hidden = !fb.connected;
   var hook = $('sHook');
-  if (hook) hook.textContent = hookUrl();
+  if (hook) hook.textContent = hookUrl() || '주소를 넣으면 두 폰의 문자·알림이 여기로 모여요';
 }
 
+/* 폰(MacroDroid)이 보내는 웹훅 주소. 설정에 저장해 두고 두 폰이 같은 값을 쓴다 */
 function hookUrl(){
-  var cfg = parseCfg(state.settings.fbRaw) || {};
-  var proj = cfg.projectId || '프로젝트ID';
-  var house = state.settings.houseId || '가계부ID';
-  var pin = state.settings.pin || 'PIN';
-  return 'https://asia-northeast3-' + proj + '.cloudfunctions.net/cardAlert?house=' +
-    encodeURIComponent(house) + '&key=' + encodeURIComponent(pin);
+  var s = (state && state.settings) || {};
+  return String(s.webhookUrl || '').trim();
+}
+
+function saveHookUrl(){
+  var el = $('sHookUrl');
+  var v = String((el && el.value) || '').trim();
+  if (v && !/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/.test(v)){
+    toast('Apps Script 웹 앱 주소(…/exec)를 넣어 주세요');
+    if (el) el.focus();
+    return;
+  }
+  state.settings.webhookUrl = v;
+  save();
+  renderSettingsStatus();
+  toast(v ? '웹훅 주소를 저장했어요' : '웹훅 주소를 지웠어요');
 }
 
 /* ---------------- 화면/시트 ---------------- */
@@ -1870,12 +1908,14 @@ function openQuick(txn){
   renderQuickCats();
   renderSeg('qKind', 'kind', q.kind);
   renderSeg('qOwner', 'qowner', q.owner);
+  $('qCatField').hidden = q.kind === 'transfer';
+  $('qTrHint').hidden = q.kind !== 'transfer';
   openSheet('shQuick');
   if (!txn) setTimeout(function(){ $('qAmount').focus(); }, 260);
 }
 
 function renderQuickCats(){
-  var list = q.kind === 'income' ? CATS_INC : CATS_EXP;
+  var list = q.kind === 'transfer' ? CATS_TRANSFER : (q.kind === 'income' ? CATS_INC : CATS_EXP);
   var ok = list.some(function(c){ return c[0] === q.cat; });
   if (!ok) q.cat = list[0][0];
   $('qCats').innerHTML = list.map(function(c){
@@ -1896,6 +1936,10 @@ function saveQuick(){
   var ds = $('qDate').value || todayStr();
   if (!amt){ toast('금액을 입력해 주세요'); $('qAmount').focus(); return; }
   var owner = q.owner;
+  if (q.kind === 'transfer'){
+    q.cat = '이체';
+    if (owner === '공동') owner = me();   /* 이체는 보낸 사람 기준으로 남긴다 */
+  }
   if (q.private && owner === '공동') owner = me();
   if (q.id){
     var t = state.txns.filter(function(x){ return x.id === q.id; })[0];
@@ -2149,7 +2193,11 @@ function parseCardMsg(raw){
       .replace(/\d{1,2}[\/.]\d{1,2}(\s+\d{1,2}:\d{2})?/g, ' ')
       .replace(/\s+/g, ' ').trim();
   }
-  return { brand: brand, amount: amount, merchant: merchant, cancel: cancel };
+  /* 부부끼리 오간 이체인지: 상대 이름 + 이체/송금 표현이 같이 있을 때만 */
+  var spouse = /(반현기|현기|장미)/.test(t);
+  var moved = /이체|송금|보냈|보냄|보내|받았|받음|입금|출금/.test(t);
+  var transfer = spouse && moved && !(/승인|일시불|할부/.test(t) && !/이체|송금/.test(t));
+  return { brand: brand, amount: amount, merchant: merchant, cancel: cancel, transfer: transfer };
 }
 
 function openCard(){
@@ -2171,13 +2219,15 @@ function renderCardPreview(){
   }
   if (!cardCatTouched) cardCat = guessCat(p.merchant);
   var rows =
-    '<div class="prow"><span>가맹점</span><b>' + esc(p.merchant || '—') + '</b></div>' +
+    '<div class="prow"><span>가맹점</span><b>' + esc(p.transfer ? '부부 이체' : (p.merchant || '—')) + '</b></div>' +
     '<div class="prow"><span>금액</span><b>' + won(p.amount) + '</b></div>' +
     '<div class="prow"><span>카드</span><b>' + esc(p.brand || '—') + '</b></div>' +
     '<div class="prow"><span>날짜</span><b>' + dateLabel(todayStr()) + '</b></div>';
-  var note = p.cancel ? '<div class="hint" style="color:var(--red);margin:8px 0 0">취소 알림이라 기록하지 않아요.</div>' : '';
+  var note = p.cancel ? '<div class="hint" style="color:var(--red);margin:8px 0 0">취소 알림이라 기록하지 않아요.</div>'
+    : (p.transfer ? '<div class="hint" style="margin:8px 0 0">현기↔장미 이체라 <b>부부 이체</b>로 기록하고 수입·지출 집계에서 빼요.</div>' : '');
   $('cdPrev').innerHTML = '<div class="preview">' + rows + '</div>' + note;
   $('cdAdd').disabled = !!p.cancel;
+  if ($('cdCatField')) $('cdCatField').hidden = !!p.transfer || !!p.cancel;
   renderCdCats();
 }
 
@@ -2191,15 +2241,18 @@ function renderCdCats(){
 function addCardTxn(){
   var p = cardParsed || parseCardMsg($('cdText').value);
   if (!p || !p.amount || p.cancel) return;
+  var tr = !!p.transfer;
   state.txns.push({
-    id: uid(), date: todayStr(), amount: p.amount, kind: 'expense',
-    cat: cardCat, owner: me(), memo: p.merchant || '카드 결제',
+    id: uid(), date: todayStr(), amount: p.amount, kind: tr ? 'transfer' : 'expense',
+    cat: tr ? '이체' : cardCat, owner: me(),
+    memo: tr ? (me() + ' ↔ ' + (me() === '장미' ? '현기' : '장미')) : (p.merchant || '카드 결제'),
     private: $('cdPrivate').checked
   });
   state.viewMonth = curYM();
   save();
   closeSheet('shCard');
-  toast('카드 알림을 기록했어요 · ' + won(p.amount));
+  toast(tr ? ('부부 이체로 기록했어요 · 집계 제외 · ' + won(p.amount))
+    : ('카드 알림을 기록했어요 · ' + won(p.amount)));
 }
 
 /* ---------------- 캡처 사진 자동 입력 (거래·고정비·예적금) ---------------- */
@@ -3655,7 +3708,7 @@ function coachSummary(ym){
   txnsOf(ym).forEach(function(t){
     var a = Math.round(+t.amount || 0);
     var w = dowOf(t.date);
-    if (t.kind === 'income' || t.billId) return;   /* 고정비 납부 기록은 위 요약에 이미 있음 */
+    if (t.kind === 'income' || isTransfer(t) || t.billId) return;   /* 고정비 납부 기록은 위 요약에 이미 있음 */
     var k = t.cat || '기타';
     cats[k] = (cats[k] || 0) + a;
     if (!t.private){                                /* 나만 보기 기록은 금액만 보내고 내용은 뺀다 */
@@ -4102,6 +4155,7 @@ function openSettings(){
   $('sAuth').value = cfg && cfg.authDomain ? cfg.authDomain : '';
   $('sAppId').value = cfg && cfg.appId ? cfg.appId : '';
   $('sGem').value = state.settings.geminiKey || '';
+  $('sHookUrl').value = state.settings.webhookUrl || '';
   renderGemStatus();
   renderSettingsStatus();
   openSheet('shSet');
@@ -4317,6 +4371,7 @@ function importJSON(file){
 
 function copyHook(){
   var txt = hookUrl();
+  if (!txt){ toast('웹훅 주소를 먼저 저장해 주세요'); return; }
   try {
     if (navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(txt).then(function(){ toast('수신 주소를 복사했어요'); },
@@ -4446,6 +4501,8 @@ function bind(){
         q.kind = t.getAttribute('data-kind');
         renderQuickCats();
         renderSeg('qKind', 'kind', q.kind);
+        $('qCatField').hidden = q.kind === 'transfer';
+        $('qTrHint').hidden = q.kind !== 'transfer';
         break;
       case 'cat':
         q.cat = t.getAttribute('data-cat');
@@ -4607,6 +4664,7 @@ function bind(){
   $('sDisconnect').addEventListener('click', disconnectFirebase);
   $('sExport').addEventListener('click', exportJSON);
   $('sCopy').addEventListener('click', copyHook);
+  $('sHookSave').addEventListener('click', saveHookUrl);
   $('sShare').addEventListener('click', copyShareInfo);
   $('sCardTest').addEventListener('click', openCard);
   $('sImportBtn').addEventListener('click', function(){ $('sImport').click(); });
