@@ -19,6 +19,10 @@ globalThis.__T = {
   render: render, normalize: normalize, sampleState: sampleState, blankState: blankState,
   isCardBill: isCardBill, billAmountFor: billAmountFor, setCardMonth: setCardMonth,
   fixedBills: fixedBills, cardBills: cardBills, fixedBillTotal: fixedBillTotal,
+  isLoanFixed: isLoanFixed, loanBills: loanBills, livingBills: livingBills,
+  loanBillTotal: loanBillTotal, livingBillTotal: livingBillTotal, loanBalanceTotal: loanBalanceTotal,
+  openBill: openBill, saveBill: saveBill, syncBillBalField: syncBillBalField,
+  planBillRowHTML: planBillRowHTML,
   cardBillTotal: cardBillTotal, stats: stats, payBill: payBill, isPaid: isPaid,
   curYM: curYM, dday: dday, dayDiff: dayDiff, billDateStr: billDateStr,
   actualBillDate: actualBillDate, baseBillDate: baseBillDate, isFixedHoliday: isFixedHoliday,
@@ -214,10 +218,13 @@ except Exception as e:
 
 print('\n[8] 고정비/카드 분리 렌더 결과')
 try:
-    html_bills = ev("(function(){__T.renderPlan(); return document.getElementById('billList').innerHTML;})()")
+    html_loans = ev("(function(){__T.renderPlan(); return document.getElementById('loanList').innerHTML;})()")
+    html_living = ev("(function(){__T.renderPlan(); return document.getElementById('livingList').innerHTML;})()")
+    html_bills = html_loans + html_living
     html_cards = ev("(function(){__T.renderPlan(); return document.getElementById('cardList').innerHTML;})()")
+    check('대출 목록에 대출 있음', '주택담보대출' in html_loans, html_loans[:200])
+    check('보험·생활 목록에 대출 없음', '주택담보대출' not in html_living, html_living[:200])
     check('고정비 목록에 신한카드 없음', '신한카드' not in html_bills, html_bills[:120])
-    check('고정비 목록에 대출 있음', '주택담보대출' in html_bills)
     check('카드 목록에 신한카드 있음', '신한카드' in html_cards)
     check('카드 목록에 대출 없음', '주택담보대출' not in html_cards)
     check('카드 목록에 금액 표시', '1,340,000' in html_cards, html_cards[:200])
@@ -399,6 +406,139 @@ check('밀리는 날은 "주말·공휴일이라 이번 달은" 으로 안내',
         }
         return false;
       })()''') == True)
+
+print('\n[17] 고정비 3단 분리 (대출 / 보험·생활 / 카드)')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.bills = [
+    {id:'L1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true, balance:268000000},
+    {id:'L2', name:'자동차 할부', cat:'대출', amount:420000, day:28, owner:'현기', active:true, balance:8400000},
+    {id:'L3', name:'전세자금대출', cat:'대출', amount:300000, day:10, owner:'공동', active:true, balance:50000000},
+    {id:'I1', name:'실손보험', cat:'보험', amount:92000, day:20, owner:'공동', active:true},
+    {id:'I2', name:'자동차보험', cat:'보험', amount:118000, day:5, owner:'장미', active:true},
+    {id:'I3', name:'KT 인터넷·TV', cat:'통신', amount:55000, day:27, owner:'공동', active:true},
+    {id:'I4', name:'아파트 관리비', cat:'주거', amount:210000, day:27, owner:'공동', active:true},
+    {id:'C1', name:'신한카드', cat:'카드', amount:0, day:14, owner:'공동', active:true, byMonth:{'2026-11':1340000}},
+    {id:'Z1', name:'정수기 렌탈', cat:'기타', amount:32900, day:20, owner:'공동', active:true, active:true}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+check('대출 3건만 대출 목록', ev("__T.loanBills().length") == 3,
+      str(ev("JSON.stringify(__T.loanBills().map(function(b){return b.id;}))")))
+check('보험·생활 5건 (보험2·통신·주거·기타)', ev("__T.livingBills().length") == 5,
+      str(ev("JSON.stringify(__T.livingBills().map(function(b){return b.id;}))")))
+check('카드는 어느 쪽에도 안 섞임',
+      ev("__T.loanBills().concat(__T.livingBills()).filter(function(b){return b.cat==='카드';}).length") == 0)
+check('대출 월 상환 합계 = 1,840,000', ev("__T.loanBillTotal()") == 1840000)
+check('보험·생활 월 합계 = 507,900', ev("__T.livingBillTotal()") == 507900,
+      str(ev("__T.livingBillTotal()")))
+check('월 고정비 = 대출 + 보험·생활',
+      ev("__T.fixedBillTotal()") == ev("__T.loanBillTotal() + __T.livingBillTotal()"))
+check('대출 총 잔액 = 326,400,000', ev("__T.loanBalanceTotal()") == 326400000,
+      str(ev("__T.loanBalanceTotal()")))
+check('카드 청구액은 고정비 합계에 안 들어감', ev("__T.fixedBillTotal()") == 2347900)
+check('stats 에 loan/living/loanBalance 가 따로',
+      ev("JSON.stringify((function(){var s=__T.stats('2026-11');return [s.loan,s.living,s.loanBalance,s.fixed,s.card];})())") == '[1840000,507900,326400000,2347900,1340000]',
+      str(ev("JSON.stringify((function(){var s=__T.stats('2026-11');return [s.loan,s.living,s.loanBalance,s.fixed,s.card];})())")))
+
+print('\n[18] 렌더: 세 구역이 서로 안 섞임')
+try:
+    loans_html = ev("(function(){__T.renderPlan(); return document.getElementById('loanList').innerHTML;})()")
+    living_html = ev("(function(){__T.renderPlan(); return document.getElementById('livingList').innerHTML;})()")
+    cards_html = ev("(function(){__T.renderPlan(); return document.getElementById('cardList').innerHTML;})()")
+    check('대출 구역: 대출 3건', all(n in loans_html for n in ['주택담보대출', '자동차 할부', '전세자금대출']), loans_html[:300])
+    check('대출 구역: 보험·통신 없음', '실손보험' not in loans_html and 'KT 인터넷·TV' not in loans_html)
+    check('대출 구역: 월 상환 합계', '월 상환 합계' in loans_html and '1,840,000원' in loans_html, loans_html[-400:])
+    check('대출 구역: 대출 총 잔액', '대출 총 잔액' in loans_html and '326,400,000원' in loans_html, loans_html[-400:])
+    check('대출 구역: 잔액 한 줄도 표시', '남은 잔액 268,000,000원' in loans_html, loans_html[:400])
+    check('대출 구역: + 대출 추가 버튼', '+ 대출 추가' in loans_html)
+    check('보험·생활 구역: 5건 모두', all(n in living_html for n in ['실손보험', '자동차보험', 'KT 인터넷·TV', '아파트 관리비', '정수기 렌탈']), living_html[:400])
+    check('보험·생활 구역: 대출 없음', '주택담보대출' not in living_html)
+    check('보험·생활 구역: 월 합계', '월 합계' in living_html and '507,900원' in living_html, living_html[-400:])
+    check('보험·생활 구역: + 보험·고정비 추가 버튼', '+ 보험·고정비 추가' in living_html)
+    check('보험·생활 구역: 캡처 버튼', '고정비·대출 캡처로 불러오기' in living_html)
+    check('카드 구역: 카드만', '신한카드' in cards_html and '주택담보대출' not in cards_html and '실손보험' not in cards_html)
+    check('카드 구역: 대출·보험 추가 버튼 없음', '대출 추가' not in cards_html and '보험·고정비 추가' not in cards_html)
+    check('요약: 대출 금액', ev("document.getElementById('sumLoan').textContent") == '1,840,000원', str(ev("document.getElementById('sumLoan').textContent")))
+    check('요약: 보험·생활 금액', ev("document.getElementById('sumLiving').textContent") == '507,900원', str(ev("document.getElementById('sumLiving').textContent")))
+    check('요약: 월 고정비 = 대출+보험·생활', ev("document.getElementById('sumFixed').textContent") == '2,347,900원', str(ev("document.getElementById('sumFixed').textContent")))
+    check('요약: 카드는 따로 표시', ev("document.getElementById('sumCard').textContent") == '1,340,000원', str(ev("document.getElementById('sumCard').textContent")))
+    check('재무설계: 고정비 내역 줄', '대출 1,840,000원 + 보험·생활 507,900원' == ev("document.getElementById('plFixedBreak').textContent"), str(ev("document.getElementById('plFixedBreak').textContent")))
+    check('재무설계: 월 고정비 합계는 카드 제외', ev("document.getElementById('plFixed').textContent") == '2,347,900원', str(ev("document.getElementById('plFixed').textContent")))
+except Exception as e:
+    check('3단 렌더 검사', False, str(e))
+
+print('\n[19] 추가 시트 기본 분류 · 대출 잔액 입력')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  st.bills = [
+    {id:'L1', name:'주택담보대출', cat:'대출', amount:1120000, day:25, owner:'공동', active:true, balance:268000000},
+    {id:'I1', name:'실손보험', cat:'보험', amount:92000, day:20, owner:'공동', active:true}
+  ];
+  __T.state = __T.normalize(st);
+})();
+''')
+try:
+    ev("__T.openBill(null, '대출')")
+    check('대출 추가: 제목', ev("document.getElementById('bTitle').textContent") == '대출 추가', str(ev("document.getElementById('bTitle').textContent")))
+    check('대출 추가: 분류 기본 대출', ev("document.getElementById('bCat').value") == '대출')
+    check('대출 추가: 잔액 칸 보임', ev("document.getElementById('bBalField').hidden") == False)
+    ev("document.getElementById('bName').value = '신용대출'")
+    ev("document.getElementById('bAmount').value = '350,000'")
+    ev("document.getElementById('bDay').value = '17'")
+    ev("document.getElementById('bBal').value = '12,000,000'")
+    ev("__T.saveBill()")
+    check('대출 저장: 새 대출이 대출 목록으로',
+          ev("__T.loanBills().filter(function(b){return b.name==='신용대출';}).length") == 1)
+    check('대출 저장: 잔액도 함께 저장', ev("__T.loanBalanceTotal()") == 268000000 + 12000000, str(ev("__T.loanBalanceTotal()")))
+    check('대출 저장: 월 상환 합계 1,470,000', ev("__T.loanBillTotal()") == 1470000)
+
+    ev("__T.openBill(null, '보험')")
+    check('보험 추가: 제목', ev("document.getElementById('bTitle').textContent") == '보험·고정비 추가', str(ev("document.getElementById('bTitle').textContent")))
+    check('보험 추가: 분류 기본 보험', ev("document.getElementById('bCat').value") == '보험')
+    check('보험 추가: 잔액 칸 숨김', ev("document.getElementById('bBalField').hidden") == True)
+    ev("document.getElementById('bName').value = '암보험'")
+    ev("document.getElementById('bAmount').value = '63,000'")
+    ev("document.getElementById('bDay').value = '12'")
+    ev("__T.saveBill()")
+    check('보험 저장: 보험·생활로 들어감',
+          ev("__T.livingBills().filter(function(b){return b.name==='암보험';}).length") == 1)
+    check('보험 저장: 대출 총 잔액은 그대로', ev("__T.loanBalanceTotal()") == 280000000)
+    check('보험 저장: 보험·생활 합계 155,000', ev("__T.livingBillTotal()") == 155000)
+
+    # 분류를 대출 → 보험으로 바꾸면 잔액은 지운다
+    ev("__T.openBill(__T.state.bills.filter(function(b){return b.name==='신용대출';})[0])")
+    ev("document.getElementById('bCat').value = '보험'; __T.syncBillBalField()")
+    ev("__T.saveBill()")
+    check('대출→보험으로 바꾸면 잔액 0',
+          ev("Math.round(+__T.state.bills.filter(function(b){return b.name==='신용대출';})[0].balance || 0)") == 0)
+    check('바뀐 항목은 보험·생활로 이동',
+          ev("__T.livingBills().filter(function(b){return b.name==='신용대출';}).length") == 1)
+    check('대출 잔액에서도 빠짐', ev("__T.loanBalanceTotal()") == 268000000, str(ev("__T.loanBalanceTotal()")))
+except Exception as e:
+    check('시트 기본값/잔액', False, str(e))
+
+print('\n[20] 기존 데이터 호환 (bills 스키마 그대로)')
+ev(r'''
+(function(){
+  var st = __T.blankState();
+  __T.state = __T.normalize(st);
+})();
+''')
+check('정규화가 고정비에 새 키를 만들지 않음',
+      ev("JSON.stringify((function(){var st=__T.blankState(); st.bills=[{id:'x',name:'주담대',cat:'대출',amount:1000000,day:25,owner:'공동',active:true,balance:100000000}]; __T.state=__T.normalize(st); return Object.keys(__T.state.bills[0]).sort();})())") == '["active","amount","balance","cat","day","id","name","owner"]',
+      str(ev("JSON.stringify(Object.keys(__T.state.bills[0]))")))
+check('잔액 없는 예전 대출도 대출로 분류 (cat 기준)',
+      ev("__T.isLoanFixed({id:'y',name:'신용대출',cat:'대출',amount:300000,day:10,owner:'공동',active:true})") == True)
+check('카드 항목은 대출로 분류 안 됨',
+      ev("__T.isLoanFixed({id:'z',name:'카드',cat:'카드',amount:0,day:14,owner:'공동',active:true,balance:5})") == False)
+check('잔액만 있고 분류가 기타인 예전 캡처도 대출로',
+      ev("__T.isLoanFixed({id:'w',name:'은행대출',cat:'기타',amount:100,day:1,owner:'공동',active:true,balance:1000})") == True)
+check('잔액 0 인 보험은 대출이 아니라 보험·생활',
+      ev("__T.isLoanFixed({id:'v',name:'암보험',cat:'보험',amount:63000,day:12,owner:'공동',active:true,balance:0})") == False)
 
 print('\n==== %s ====' % ('ALL PASS' if not fails else ('FAILED: ' + ', '.join(fails))))
 sys.exit(1 if fails else 0)
