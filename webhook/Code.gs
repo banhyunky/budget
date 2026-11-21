@@ -182,9 +182,7 @@ function ingest(p) {
       if (pi >= 0) {
         var mate = js[pi];
         if (mate.kind === 'transfer') {
-          /* 두 폰 모두 이미 '이체'로 읽힌 같은 부부 이체 — 새 줄을 만들지 않는다 */
-          var st = (cand.kind === 'transfer') ? 'merged' : 'duplicate';
-          return { ok: true, status: st, id: mate.id, kind: 'transfer', amount: mate.amount };
+          var st = (cand.kind === 'transfer') ? 'merged' : 'duplicate'; return { ok: true, status: st, id: mate.id, kind: 'transfer', amount: mate.amount };
         }
         mate.kind = 'transfer';
         mate.cat = TRANSFER_CAT;
@@ -387,10 +385,7 @@ function findPair(txns, cand) {
     if (normOwner(t.owner) === cand.owner) continue;
     if (Math.abs(+t.at - cand.at) > CFG.PAIR_WINDOW_MS) continue;
     if (!cand.mv || !t.mv) continue;              /* 카드 승인처럼 돈이 '이체'로 움직인 문구만 */
-    if (kindOf(t) === kindOf(cand)) {
-      if (cand.kind === 'transfer' && kindOf(t) === 'transfer') return i;  /* 같은 부부 이체 */
-      continue;                                   /* 그 밖에는 방향이 반대여야 함 */
-    }
+    if (kindOf(t) === kindOf(cand)) { if (cand.kind === 'transfer' && kindOf(t) === 'transfer') return i; continue; }  /* 둘 다 '이체'면 같은 부부 이체 */
     return i;
   }
   return -1;
